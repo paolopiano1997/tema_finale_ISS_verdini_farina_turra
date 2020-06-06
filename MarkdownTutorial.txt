@@ -1,0 +1,117 @@
+MARKDOWN TUTORIAL FOR CHI NON LO CONOSCE MAREMMAAAAA
+
+Titoli: 
+	# Titolo1 (il più grande)
+	## Titolo2 (Un po' più piccolo) 
+	ecc fino a titolo 6
+
+Per separare paragrafi, utilizzare almeno una linea vuota tra i due, altrimenti potrebbe
+non riconoscerli correttamente.
+
+Tipo così:
+
+"Questo è un paragrafo"
+
+"Questo un altro paragrafo".
+
+Non iniziate un paragrafo con tabulazioni o spazi, altrimenti son cazzi vostri.
+
+Per effettuare un "line break" (tipo br di HTML) finire una riga con almeno DUE spazi e un "a capo" (carraige return).
+
+Per creare enfasi è possibile utilizzare caratteri speciali, per esempio:
+
+**bold text**
+
+(è possibile usare __bold text__ ma è sconsigliatissimo, madò)
+
+Italico:
+
+*italic text* 
+(è possibile usare _italic text_, ma sconsigliatissimo anche questo, stramado)
+
+sia bold che italico:
+
+***bold and italic text***
+
+(sempre possibiltà di usare i trattini bassi, ma evitiamo...)
+
+Per creare un "blockquote" è possibile fare così:
+
+> testo con blockquote
+
+Oppure anche multilinea:
+
+> Testo con blockquote
+> 
+> Multilinea
+
+è anche possibile innestare blockquote tipo così:
+
+> testo di primo livello
+>
+>> testo di secondo livello
+
+
+Ovviamente possiao inserire l'estetica ovunque, anche dentro ai blockquote
+> **bold text**
+>> *italic text*
+ecc...
+
+Per creare liste ordinate basta fare così:
+
+1. Primo
+2. Secondo
+ecc...
+
+Liste NON ordinate basta mettere il trattino:
+
+- primo
+- secondo
+ecc...
+ 
+Possiamo anche innestare roba del tipo:
+
+- primo
+- secondo
+	> blockquote innestato dentro al secondo item
+- terzo
+ecc...
+
+COSA MOLTO CARINA CHE AVEVO SCOPERTO:
+
+Per creare un blocco visivo di codice in modo carino,
+basta "isolarlo" con due tab, per esempio: (ricordate, sempre almeno una riga bianca tra un paragrafo e l'altro)
+
+Il seguente è il codice che ha scritto zakka per la grafica:
+
+		codisce mado
+		super codisce mado
+		
+Questo sopra era un codice( due tab da sinistra e linee vuote sopra e sotto)
+
+
+E' possibile anche linkare immagini, tipo:
+
+![immascine mado, qui ci va il testo alternativo](path immagine, esempio /opt/images/lonza.png)
+
+è anche possibile mettere link:
+
+[Google](https://www.google.com)
+
+Righe orizzontali di separazione:
+
+---
+
+Sfondo di codice per una frase o testo:
+
+Utilizzare le backtick, `questo viene codicizzato, provare per credere`
+(Ricordo che le backtick, almeno che non sia presente un tasto, su Windows, 
+possono essere fatte mediante Alt+96)
+
+Carattere di escape il solito:
+
+\
+
+Ultima cosa,
+Markdown dovrebbe supportare anche tutti i tag HTML, quindi anche creazioni di tabelle ecc...
+
