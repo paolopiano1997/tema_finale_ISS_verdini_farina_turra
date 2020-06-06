@@ -1,0 +1,40 @@
+System tearoom
+
+Request enter : enter(ID)
+
+Context ctxwaiter ip [ host="localhost" port=8068 ]
+
+QActor waiter context ctxwaiter {
+	
+//[#
+//	//Coordinates of the entrance door
+//	var XEntranceDoor = "0"
+//	var YEntranceDoor = "6"
+//	//Coordinates of the exit door
+//	var XExitDoor = "6"
+//	var YExitDoor = "6"
+//	//Coordinates Tables
+//	var X_teatable1     = "2"
+//	var Y_teatable1     = "3"
+//
+//	var X_teatable2     = "4"
+//	var Y_teatable2     = "3"
+//	//Time for serving a client
+//	var servicetime = 1000L 
+//#]
+	State s0 initial {
+		run itunibo.planner.plannerUtil.initAI()
+	}
+	Goto reachHome
+	
+	State reachHome{
+		println("Reaching home...")
+		delay 1000
+//		run itunibo.planner.plannerUtil.planForGoal("0","0")
+	}
+	Transition t0 whenRequest enter -> accept
+	
+	State accept {
+//		ascscetta tutto
+	}
+}
