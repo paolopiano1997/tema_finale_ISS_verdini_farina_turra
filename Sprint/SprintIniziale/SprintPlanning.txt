@@ -1,0 +1,11 @@
+Durante lo sprint planning relativo al primo Sprint, è emersa la necessità di dover analizzare
+una piccola parte dei requisiti proposti dal committente, in modo tale da riuscire a gestire incrementalmente
+i requisiti più complessi.
+Lo scopo di questo primo Sprint sarà quello di analizzare i requisiti "base", ovvero i requisiti
+che fanno da pilastro al sistema, in modo tale da poter effettuare un'analisi accurata ed approfondita di *** fondamentali.
+Un primo prototipo dovrà essere un sistema in cui predominano solo gli spostamenti
+del robot, in particolare raggiungere il cliente, accompagnarlo ad un tavolo, scortarlo verso l'uscita e restare
+nella posizione home in caso di nessuna operazione disponibile, utilizzando la semplificazione
+di 1 solo cliente per volta presente.
+Per ottenere il primo prototipo funzionante, lavoreremo utilizzando il linguaggio di modellazione
+"qak" e ottimizzeremo, eventualmente, il codice generato dallo stesso.
