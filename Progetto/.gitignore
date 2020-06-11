@@ -27,3 +27,8 @@ gradlew.bat
 docker/
 /.metadata/
 /src-gen/
+/.gitignore
+/build_ctxwaiter.gradle
+/settings.gradle
+/sysRules.pl
+/tearoom.pl
