@@ -19,7 +19,6 @@ class Waiter ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, sco
 		return { //this:ActionBasciFsm
 				state("s0") { //this:State
 					action { //it:State
-						itunibo.planner.plannerUtil.initAI(  )
 					}
 					 transition( edgeName="goto",targetState="reachHome", cond=doswitch() )
 				}	 

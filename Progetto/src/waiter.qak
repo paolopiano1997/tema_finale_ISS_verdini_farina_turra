@@ -23,7 +23,7 @@ QActor waiter context ctxwaiter {
 //	var servicetime = 1000L 
 //#]
 	State s0 initial {
-		run itunibo.planner.plannerUtil.initAI()
+//		run itunibo.planner.plannerUtil.initAI()
 	}
 	Goto reachHome
 	
