@@ -12,6 +12,8 @@ import kotlinx.coroutines.launch
 import it.unibo.kactor.ActorBasic
 import it.unibo.kactor.MsgUtil
 import it.unibo.kactor.MqttUtils
+import it.unibo.kactor.ApplMessage
+import it.unibo.kactor.ApplMessageType
 
 class TestWaiter {
 	var waiter            : ActorBasic? = null
@@ -65,13 +67,20 @@ class TestWaiter {
 				waiter = it.unibo.kactor.sysUtil.getActor("waiter")
  			}
 			
-			
- 			checkReachEntranceDoor( "reachingEntranceDoor" )
- 			checkReachTable( "reachingTable" )
+		
+			MsgUtil.sendMsg(MsgUtil.buildRequest("waiter","enter","enter","waiter"),waiter!!)
+ 			delay(7000)
+			checkReachEntranceDoor( "reachingEntranceDoor" )
+			MsgUtil.sendMsg("ready","ready","ready",waiter!!)
+ 			delay(7000)
+			checkReachTable( "reachingTable" )
+			MsgUtil.sendMsg("ready","ready","ready",waiter!!)
+ 			delay(7000)
  			checkWait( "home" )
-			
+			delay(2000)
+			MsgUtil.sendMsg("end","end","end",waiter!!)
  			if( waiter != null ) waiter!!.waitTermination()
   		}
-	 	println("testRobotboundary BYE  ")  
+	 	println("testWaiter BYE  ")  
 	}
 }

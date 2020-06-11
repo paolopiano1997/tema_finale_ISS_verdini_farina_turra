@@ -30,32 +30,36 @@ class Waiter ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, sco
 						)
 					}
 					 transition(edgeName="t00",targetState="accept",cond=whenRequest("enter"))
+					transition(edgeName="t01",targetState="endwork",cond=whenDispatch("end"))
 				}	 
 				state("accept") { //this:State
 					action { //it:State
-						answer("enter", "accept", "accept("IDClient")"   )  
+						println("waiter    |||   accept")
 						delay(1000) 
 					}
 					 transition( edgeName="goto",targetState="reachEntranceDoor", cond=doswitch() )
 				}	 
 				state("reachEntranceDoor") { //this:State
 					action { //it:State
+						println("waiter    |||   reachEntranceDoor")
 						updateResourceRep( "reachingEntranceDoor"  
 						)
 						delay(2000) 
 					}
-					 transition(edgeName="t01",targetState="reachTable",cond=whenDispatch("ready"))
+					 transition(edgeName="t02",targetState="reachTable",cond=whenDispatch("ready"))
 				}	 
 				state("reachTable") { //this:State
 					action { //it:State
+						println("waiter    |||   reachTable")
 						updateResourceRep( "reachingTable"  
 						)
 						delay(3000) 
 					}
-					 transition(edgeName="t02",targetState="reachExitDoor",cond=whenDispatch("ready"))
+					 transition(edgeName="t03",targetState="reachExitDoor",cond=whenDispatch("ready"))
 				}	 
 				state("reachExitDoor") { //this:State
 					action { //it:State
+						println("waiter    |||   reachExitDoor")
 						updateResourceRep( "reachingExitDoor"  
 						)
 						delay(2000) 
@@ -64,11 +68,17 @@ class Waiter ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, sco
 				}	 
 				state("reachHome") { //this:State
 					action { //it:State
+						println("waiter    |||   reachHome")
 						updateResourceRep( "reachingHome"  
 						)
 						delay(4000) 
 					}
 					 transition( edgeName="goto",targetState="wait", cond=doswitch() )
+				}	 
+				state("endwork") { //this:State
+					action { //it:State
+						terminate(0)
+					}
 				}	 
 			}
 		}

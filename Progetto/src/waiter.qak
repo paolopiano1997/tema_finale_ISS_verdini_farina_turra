@@ -4,11 +4,12 @@ Request enter : enter(ID)
 Reply accept : accept(C)
 
 Dispatch ready : ready(V)
+Dispatch end : end (V)
 
 Context ctxwaiter ip [ host="localhost" port=8068 ]
-Context ctxBasicrobot ip [host="127.0.0.1" port=8020] 
+//Context ctxBasicrobot ip [host="127.0.0.1" port=8020] 
 
-ExternalQActor basicrobot context ctxBasicrobot 
+//ExternalQActor basicrobot context ctxBasicrobot 
 
 QActor waiter context ctxwaiter {
 //[#
@@ -46,52 +47,63 @@ QActor waiter context ctxwaiter {
 //		run itunibo.planner.plannerUtil.planForGoal("0","0")
 	}
 	Transition t0 whenRequest enter -> accept
+				  whenMsg end -> endwork
+	
 	
 	State accept {
-		replyTo enter with accept : accept("IDClient")
+		println("waiter    |||   accept")
+		//replyTo enter with accept : accept(idclient)
 		delay 1000
 	}
 	Goto reachEntranceDoor
 	
 	State reachEntranceDoor {
+		println("waiter    |||   reachEntranceDoor")
 		updateResource[# "reachingEntranceDoor" #]
 		delay 2000
 	}
 	Transition t0 whenMsg ready -> reachTable
 	
 	State reachTable{
+		println("waiter    |||   reachTable")
 		updateResource [# "reachingTable" #]
 		delay 3000
 	}
 	Transition t0 whenMsg ready -> reachExitDoor
 	
 	State reachExitDoor{
+		println("waiter    |||   reachExitDoor")
 		updateResource [# "reachingExitDoor" #]
 		delay 2000
 	}
 	Goto reachHome
 	
 	State reachHome {
+		println("waiter    |||   reachHome")
 		updateResource[# "reachingHome" #]
 		delay 4000
 	}
 	Goto wait
-}
-
-
-QActor client context ctxwaiter {
-	State s0 initial{
-		println("client   |||   init")
-	}
-	Goto req
 	
-	State req{
-		delay 2000
-		request waiter -m enter : enter(idclient)
-		delay 5000
-		forward waiter -m ready : ready(ready)
-		delay 5000
-		forward waiter -m ready : ready(ready)
-		delay 5000
+	State endwork{
+		terminate 0
 	}
 }
+
+
+//QActor client context ctxwaiter {
+//	State s0 initial{
+//		println("client   |||   init")
+//	}
+//	Goto req
+//	
+//	State req{
+//		delay 2000
+//		request waiter -m enter : enter(idclient)
+//		delay 5000
+//		forward waiter -m ready : ready(ready)
+//		delay 5000
+//		forward waiter -m ready : ready(ready)
+//		delay 5000
+//	}
+//}
