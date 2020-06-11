@@ -19,19 +19,56 @@ class Waiter ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, sco
 		return { //this:ActionBasciFsm
 				state("s0") { //this:State
 					action { //it:State
+						println("Waiter    |||   init")
 					}
-					 transition( edgeName="goto",targetState="reachHome", cond=doswitch() )
+					 transition( edgeName="goto",targetState="wait", cond=doswitch() )
 				}	 
-				state("reachHome") { //this:State
+				state("wait") { //this:State
 					action { //it:State
-						println("Reaching home...")
-						delay(1000) 
+						println("waiter    |||   wait")
+						updateResourceRep( "home"  
+						)
 					}
 					 transition(edgeName="t00",targetState="accept",cond=whenRequest("enter"))
 				}	 
 				state("accept") { //this:State
 					action { //it:State
+						answer("enter", "accept", "accept("IDClient")"   )  
+						delay(1000) 
 					}
+					 transition( edgeName="goto",targetState="reachEntranceDoor", cond=doswitch() )
+				}	 
+				state("reachEntranceDoor") { //this:State
+					action { //it:State
+						updateResourceRep( "reachingEntranceDoor"  
+						)
+						delay(2000) 
+					}
+					 transition(edgeName="t01",targetState="reachTable",cond=whenDispatch("ready"))
+				}	 
+				state("reachTable") { //this:State
+					action { //it:State
+						updateResourceRep( "reachingTable"  
+						)
+						delay(3000) 
+					}
+					 transition(edgeName="t02",targetState="reachExitDoor",cond=whenDispatch("ready"))
+				}	 
+				state("reachExitDoor") { //this:State
+					action { //it:State
+						updateResourceRep( "reachingExitDoor"  
+						)
+						delay(2000) 
+					}
+					 transition( edgeName="goto",targetState="reachHome", cond=doswitch() )
+				}	 
+				state("reachHome") { //this:State
+					action { //it:State
+						updateResourceRep( "reachingHome"  
+						)
+						delay(4000) 
+					}
+					 transition( edgeName="goto",targetState="wait", cond=doswitch() )
 				}	 
 			}
 		}
