@@ -1,0 +1,163 @@
+Consigli del prof:
+Prima cosa: ogni frase che viene in mente, metterla nella sezione giusta.
+Analisi dei requisiti, metodo: idea di fondo è trovare delle opportune caratteristiche delle entità in gioco
+indiipendentemente dalle tecnologie. Chiarire tra di noi cosa intende il committente per "tavolo" o altre entità. Questo intende
+anche delineare un modello, non è detto che dovremmo scrivere del codice, ma capire quali tipologie di entità ci saranno in gioco,
+tipo oggetti, attori ecc. Solitamente chiariamo la natura delle entità. 
+
+Il tavolo può avere vari stati: dai requisiti si capisce che un tavolo può essere in diversi stati (clean, dirty ecc...) queste proprieà
+le leghiamo ai resquisiti. Dopo ci chiediamo: il tavolo, per la fase di test plan, mi conviene modellarlo come un oggetto o come un attore?
+Se lo modello come oggetto, a chi appartiene questo oggetto? Se ho un paradigma, posso dire che ogni ente è un'entità di quel paradigma,
+per esmepio se ho approccio ad attori, ogni ente è un attore. Se facciamo un approccio misto possiamo scegliere uno o l'altro
+Ma se lavoro sol ocon attori, ogni entità è un attore (potrei lavorarci a scambio di messaggi). ANAL-REQ
+
+Fase analisi del problema: stato delle varie entità dove è? Globale o locale a ogni entità?
+L'analista può trovare motivazioni pro o contro per l'una o l'altra di queste strategie.
+In analisi non ci dovrebbero essere scelte.
+Il waiter è dotato di comportamente autonomo (attore quindi). Ma i tavoli?
+Hanno delle proprietà dai requisiti, come le esprimiamo formalmente? All'inizio potremmo pensare che siano espresse
+da una lista di valori, ma una volta che ho capito (modellazione del dominio) queste cose, come le esprimo
+in modo che una macchina possa capirle? Allora uno può dire, come strategia, all'inizio modello le proprietà del tavolo
+seguendo il modello ad oggetti, ma potrei dire che i "table" sono due oggetti istanza di una classe table con certe proprietà, che sono quelle
+dei tavoli. Se facciamo così non ci siamo legati ad un modello di oggetti, perchè potremmo inglobare l'oggetto in un attore (facciamo un layer più di alto livello)
+così che io possa utilizzare i messaggi. Poi se facciamo per esempio programmazione in Java, potremmo pensare che il tavolo abbia uno stato e lo stato assume
+diversi valori di un enumerativo (che possono essere anche stringhe). Voglio fare un sistema eterogeneo, quindi non è detto che ci arrivi con tecnologia Java
+alla fine del progetto. Potrei quindi avere una forma di stringa per le proprietà, in modo da poterci accedere da un modello ad un altro, ma non è detto
+che se modello il tavolo come oggetto all'inizio, esso sia legato a tale modello. ANAL-PROB
+
+Potremmo fare un altro ragionamento: 
+passiamo da analisi requisiti ad analisi problema: devo rappresentare lo stato delle risorse, io mi chiedo:
+Lo stato delle varie risorse deve essere distribuito o concentrato? 
+Distribuito: c'è un ente che è l'unico che conosce il suo stato.
+Concentrato: c'è una risorsa che conosce lo stato delle varie entità che compongono il dominio.
+Se modello con risorsa unica: struttura che rappresenta lo stato del tavolo1, stato del tavolo2, ecc.
+Ma quindi deve essere modellato in maniera diversa a seconda di questa scelta.
+Come analista del problema: meglio sistame distr, conc o misto?
+Distribuito: se posso li evito, perchè è difficile mantenere la coerenza e consistenza.
+Come analista infatti propendo di solito ad un approccio misto, in cui potrei pensare
+(salvo problemi di colli di bottiglia) di rappresentare lo stato del mondo con una risorse "world"
+in cui dico che il sistema è fatto da due entità fondamentali, waiter e world intorno a lui.
+Ma il world fa parte dello stato interno del waiter o è una risorsa a parte. (sempre come analista del problema).
+Se ho due entità diverse, il waiter deve interrogare l'altra entità per sapere lo stato del "world".
+Però ho onere computazionale ogni volta che interrogo. Se metto il world dentro il waiter ho una chiamata diretta allo stato, riduco traffico di comunicazione
+e riduco interazioni. Ma cosa comporta questa cosa? Se accade qualcosa che non comporta direttamente il waiter ma il "world" è necessario 
+cambiare stato al "world" e comunicare con esso senza dover accedere al waiter per forza. D'altro canto, con questi requisiti,
+abbiamo che il waiter è l'entità che viene informata di ogni cosa che accade all'interno del sistema.
+Quindi questio requisiti si sposano con un modello di "world" interno al waiter.
+Ma il waiter è un'unica entità? I messaggi che possono arrivare arrivano ad un'unica entità o no?
+Se fosse un'unica entità, sarebbe sequenziale. ANAL-PROB
+
+Come analista del problema, se sto pulendo il tavolo per esempio e mi arriva una richiesta dal tavolo o un'indicazione del barman cosa succede?
+Il waiter è un'entità che nel momento in cui fa un task, potrebbe dover sentire dei messaggi che gli arrivano dal mondo esterno.
+Se zoommiamo dentro al waiter è giusto che ci siano entità separate e specifiche, magari una serie di attori (all'inizio possiamo provare con un attore che 
+è attento al mondo esterno, uno che è attento ai lavori).
+Waiter deve essere proattiva ma anche reattiva.
+Proattiva: deve fare cose per conto proprio, tipo, sto pulendo il tavolo o sto accompagnando il cliente.
+Reattiva: potrebbe perdere delle informazioni sul mondo se NON lo fosse, ovvero deve essere consapevole di eventuali informazioni in arrivo dal mondo esterno.
+Per esempio se abbiamo una coda di messaggi in ingresso, possiamo dire come analista che siamo sicuri che se l'informazione gli arriva nella coda, lui può tranquillamente finire di pulire il tavolo
+sicuro che non siano perdute tali informazioni arrivate (messe eventualmente in coda).
+Ma ora salta fuori un problema ulteriore, sono nella parte proattiva: può essere opportuno che io interrompa quello che sto facendo
+per fare qualcos'altro? Dobbiamo analizzare i task per poter rispondere.
+Quando uno comincia un task deve per forza portarlo a termine o può essere interrotto?
+Devo prendere uno per uno tutti i task, analizzarli e dire qualcosa in merito per poter capire se e quali sono i task interrompibili.
+Per esempio:
+Accept: è un task leggero e veloce, si tratta di un'accettazione di richiesta, quindi la sua durata potrebbe essere messa tra le durate "minime" 
+	di tutti i task presenti nel sistema, durata breve (stimiamo sui 5 secondi). Per finire questo task non ci mettiamo molto,
+	quindi potremmo pensare che non abbia senso di interromperlo.
+Inform: task leggero e veloce, durata breve (5 secondi anche qui) -> non interrompibile.
+Reach and Convoy: task in media più duraturi di tutti quelli presenti nel sistema. Stimiamo con il committente che possa volerci
+	nel caso peggiore circa 80 secondi per effettuare il reach verso la entrance door (da servicedesk caso peggiore).
+	Se devo fare Convoy verso exitdoor il caso peggiore è dal tavolino più lontano, stimiamo con il committente che questo possa esse minore come tempo,
+	circa 50 secondi. Convoy deve solo andare dalla porta di ingresso ad uno dei tavoli, caso peggiore tavolo più lontano, circa 50secondi.
+	Reach and convoy possono essere interrompibili.
+Clean: task da considerare con il committente per la durata, circa 60 secondi -> interrompibile.
+Collect payment: durata medio/breve, sui 50 secondi.
+Dobbiamo capire adesso se è opportuno che questi task siano interrompibili: cosa dovrò fare come task per interrompere quello che stavo facendo?
+Per il manager, se è in arrivo un nuovo cliente potrei interrompere un task interrompibile. Nel primo prototipo
+posso mettere che mentre sto andando verso l'entrance door non sono interrompibile, così che semplifico un po'.
+Mentre io sto facendo clean è opportuno che io interrompa? Se per un cliente è pronto del cibo o il cliente è pronto a pagare, potrebbe
+essere il caso di interrompere e proseguire dopo aver completato l'altro task (prioritario).
+Ma adesso sorge un altro problema: se ho effettuato da tanto tempo il clean e mi manca poco a finire, è giusto interrompere?
+Potrebbe essere necessario concordare un limite entro il quale un task è interrompibile o no. Dobbiamo concordare con il committente
+se per lui può andare bene oppure se il task deve essere interrotto comunque. ANAL-PROB
+
+Come gestisco il "maxstaytime"?
+Potrei pensarla come una cosa del tipo, porto il cliente al tavolo e io faccio partire il tempo,
+se il cliente non fa mai un ordine, la colpa è del cliente, non mia, quindi il tempo scorre.
+Ma dopo che ha fatto l'ordine lo faccio andare avanti il tempo del maxstaytime?
+Potrei pensare di no, perchè dipende dal barman e waiter, non più del cliente la colpa e lo scorrere del tempo.
+Quindi potrei pensare che il tempo di permanenza è in realtà il tempo che ci mette il cliente a ordinare, a mangiare e a pagare.
+Il tempo scorre quando è responsabilità del cliente. ANAL-REQ
+
+CONSIGLIO: Nei prototipi, dopo aver fatto tutte queste considerazioni, posso fare delle assunzioni in cui
+non considero dei problemi, problematiche o particolari requisiti. Questo è fondamentale davanti ogni Sprint per effettuare 
+il lavoro in modo incrementale.
+
+Adesso pensiamo a qualche test plan.
+Test plan banali e test plan significativi dal punto di vista dell'applicazione.
+Un test significativo per questo sistema: sto facendo un task interrompibile, avviene qualcosa che me lo fa interrompere,
+io smetto, interrompo, faccio l'altro task e riprendo da dove ero arrivato nel primo task.
+Altro problema, pulisco il tavolo, arriva la richiesta di ordine, interrompo e vado là, poi magari l'ordine è pronto
+oppure succedono due eventi contemporaneamente. Devo gestire questa cosa.
+Cosa succede se ho un tavolo occupato e sto pulendo e mi arriva una richiesta di un cliente? Devo dirgli di no, perchè non ho 
+più tavoli, e informarlo del tempo di attesa rimanente. Ma se il barman ha già preparato la consumazione mentre sto pulendo, devo
+interrompere il task e tornare lì. I test devono coprire queste cose fondamentali. ANAL-PROB/TEST PLAN
+
+Una volta che abbiamo delineato le casistiche, delineamo quale sia lo sprint 1.
+Solitamente andiamo dal semplice al complicato, in modo incrementale, senza correre il rischio di buttarsi subito
+nella cosa più complicata. Delineo dei requisiti con assunzioni su quali non considero, in modo tale da riuscire a fare un prototipo
+funzionante, anche se nella sua versione più semplice.
+
+Sprint 1: Delineo le assunzioni e le scrivo, assumo che:
+1. Ci sia un solo cliente e mentre sto servendo questo cliente non capiti nient'altro. Faccio una catena computazionale completa,
+	in cui sto in home, qualcuno suona, lo porto al tavolo, accetto l'ordine, lo servo, prendo il pagamento e lo porto all'uscita.
+	Se riesco a mettere in campo questo tipo di software, lo sprint 2 sarà questo prototipo PIU' le assunzioni che avevo tolto prima.
+	Piano piano inizio a introdurre problematiche maggiori.
+Per fare lo Sprint, passo da una descrizione informale, ad una descrizione formale
+che chiamo modello, perchè non può essere il sistema, il sistema spunterà fuori solo alla fine di tutti gli sprint, questo modello
+sarà solo un prototipo di passaggio, in cui catturo le caratteristiche principali e base del sistema, quando però vado ad incrementare
+avrò come supporto gli sprint precedenti funzionanti.
+
+SIAMO IL PIU' POSSIBILE OBIETTIVI MA MOTIVARE LA MODELLAZIONE SU QUALCHE CARATTERISTICA DEL PROBLEMA.
+
+Caso più complicato: mentre sto facendo il task clean, mi arriva il fatto di dover portare una consumazione all'altro tavolo.
+Voglio modellarlo: cosa dobbiamo fare per modellarlo? Devo modellare il funzionamento del Waiter, quindi il waiter deve essere consapevole
+di fare questo task. Se non ne fosse consapevole, come fa a gestire tale cosa?
+Il "codice" che fa clean, dovrà simulare la pulizia del tavolo non facendo solo uno sleep per un tot di tempo,
+ma cercare di simulare delle fasi per gestire lo stato del tavolo (sporco, pulito, sanitizzato, libero, ecc...).
+Ma se ho individuato queste sotto-attività sarebbe bene avere una rappresentazione escplicita di stato, che passa da "dirty" a "clean" passando
+da delle fasi intermedie. Sento questa esigenza perchè dobbiamo sapere quale sia lo stato del tavolo, perchè se interrompo
+questo task, devo riprendere dallo stato in cui ero arrivato, non ripartire da capo.
+COSA è rappresentare lo stato del tavolo?
+Dopo mi chiedo, COME lo faccio? Ma questo è un passaggio dall'analisi alla progettazione.
+
+Primo passaggio dal cosa al come, lo faccio nel modo più smeplice possibile nell'ambito di uno sprint.
+più semplici sono più le controllo.
+
+Potrei pensare, come ipotesi, di modellare lo stato del tavolo nella mente del waiter.
+Cosa è la mente del waiter? E' un qualcosa che il waiter ha e che rappresenta lo stato del tavolo, lo memorizza,
+come farebbe un cameriere. Per me è più facile perchè non introduco altre entità, ma uso solo il waiter.
+Come faccio a modellarlo? Potrei iniziare con una stringa che rappresenta lo stato del tavolo (poi successivamente potrebbe essere
+implementato con un enumerativo o altro, ma sono in fase di analisi ancora quindi non mi fregaaaa!!).
+Stato="dirty", (sporco)
+"undirty",(ho tolto la roba)
+"sanitized",(ho pulito per bene, sanitizzato)
+"cleaned"(ho pulito e aggiunto altra tovaglia e posate ecc)
+Dopo aver pensato a qusto modello, potrei pensare a modellare questo con i QActor. ANAl-PROB
+
+il waiter comincia a fare "clean", mentre lo fa lo stato del tavolo cambierà, per esempio ora passa da 4 stati ecc.
+Ora se non succede niente, lui riesce a passare tutti i 4 stati e a completare il task. 
+Il test plan consiste però nel simulare l'arrivo di un altro messaggio o qualche altra cosa, tipo che il barman
+dice che è pronta la consumazione per il cliente. A quel punto il waiter non fa più quello che deve fare, va a servire l'ordine e 
+riprende successivamente la pulizia.
+INTERROMPERE UN TASK E RIPRENDERLO DALLO STATO IN CUI ERO ARRIVATO CONCETTO FONDAMENTALE.
+
+Manager:
+	Current state della tearoom per esempio: il committente cosa intende?
+	Voglio sapere la situazione totale di tutta la stanza, per esempio, dove è il waiter, lo stato dei tavoli, se il barman è occupato o no ecc ecc..
+
+Compito di natali:
+Se siamo bravi, prima della fine della settimana, raccogliere queste considerazioni in un file HTML. Poi questo file html lo impostiamo
+come il template workflow.
+
+Almeno due pezzi: il waiter e il website
