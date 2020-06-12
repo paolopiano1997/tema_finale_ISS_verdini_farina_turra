@@ -200,9 +200,9 @@ associated to the application.
 The <em>waiter</em> should perform the following tasks:
 <ul>
  
-<li><em>accept</em> the request of a client to enter in the tearoom if there is at least one teatable in the state <em>table<em>clean</em></em>, i.e.
-the table is free and has been properly <em>clean</em>ed; </li>
-<li><em>inform</em> the client about the maximum waiting time if there is no <em>table<em>clean</em></em>;</li> 
+<li><em>accept</em> the request of a client to enter in the tearoom if there is at least one teatable in the state <em>tablelean</em>, i.e.
+the table is free and has been properly cleaned; </li>
+<li><em>inform</em> the client about the maximum waiting time if there is no <em>tableclean</em>;</li> 
 <li><em>reach</em> the <em>entrance door</em> and <em>convoy</em> the accepted client to the selected teatable;</li>
 <li><em>take</em> the order of the client and transmit it (using a wifi-device) to the <em>barman</em>; </li>
 <li><em>serve</em>  the client when the <em>barman</em> says that the requested drink is ready;</li>
@@ -258,7 +258,12 @@ Quindi il tempo scorre solo quando è responsabilità del cliente.
 Con il committente è stato chiarito anche il concetto di "current state" della tearoom.
 Essa identifica lo stato di tutte le entità e componenti all'interno del sistema, per esempio
 la posizione e il task attuale del <em>waiter</em>, lo stato dei tavoli o l'occupazione del <em>barman</em>.
-	
+</br>
+I messaggi che circolano nel sistema sono i seguenti:
+<ul>
+<li>Request/Response per la richiesta di un cliente per entrare e la relativa risposta, positiva o negativa, data dal <em>waiter</em></li>
+<li>Dispatch per i messaggi di ordine pronto, trasmissione ordine al <em>barman</em> e per la richiesta di pagamento del cliente.</li>
+</ul>
 </div>
 
 <h2>Problem analysis</h2>
@@ -274,10 +279,11 @@ il modello a oggetti in un attore di livello superiore, così da interoperare ut
 di messaggi.
 
 </br>
+</br>
 Un'altra problematica che sorge è come gestire lo stato delle risorse: distribuito o concentrato.
 Nel distribuito c'è un ente che è l'unico che conosce il suo stato, nel 
-concentrato c'è una risorsa che conosce lo stato delle varie entità che compongono il dominio.
-Partendo dal presuppposto che la modellazione delle risorse in modo distribuito è da evitare 
+concentrato una risorsa conosce lo stato delle varie entità che compongono il dominio.
+Partendo dal presupposto che la modellazione delle risorse in modo distribuito è da evitare 
 perchè è difficile mantenere coerenza e consistenza, in questa problematica è opportuno utilizzare
 un approccio misto in cui rappresentiamo lo stato del mondo con una risorsa "world"
 in cui il sistema è fatto da due entità fondamentali, <em>waiter</em> e "world" intorno a lui.
@@ -286,10 +292,10 @@ gestirle indipendentemente oppure inserire il "world" all'interno del <em>waiter
 Nel caso in questione, i requisiti ci indicano una via: ogni tipologia di richiesta/messaggio viene fatta
 verso il <em>waiter</em>, il quale deve avere la possibilità di accedere velocemente allo stato del "world". 
 Infatti, se facessi due entità separate, il <em>waiter</em> dovrebbe continuamente interagire con l'entità
-esterna, comportanto un onere computazionale e un traffico non indifferente di comunicazione.
+esterna, comportando un onere computazionale e un traffico non indifferente di comunicazione.
 Quindi la problematica dovrebbe essere modellata introducendo un'unica entità <em>waiter</em> il quale
 contiene al suo interno lo stato "world".
-
+</br>
 </br>
 Il <em>waiter</em> è un'entità che nel momento in cui fa un task, potrebbe dover sentire dei messaggi che gli arrivano dal mondo esterno.
 Se zoommiamo dentro al <em>waiter</em> è opportuno che ci siano entità separate e specifiche, magari una serie di attori. In una fase 
@@ -301,7 +307,7 @@ l'informazione gli arriva nella coda, il <em>waiter</em> può finire di effettua
 sicuro che non siano perdute tali informazioni arrivate.
 
 </br>
-
+</br>
 Una problematica cruciale che viene direttamente dall'analisi appena effettuata se sono nella parte proattiva è se
 può essere opportuno che il <em>waiter</em> interrompa il task che sta facendo per farne un altro più prioritario. E' necessario 
 prendere uno per uno tutti i task, analizzarli e capire se e quali sono i task interrompibili. 
@@ -337,8 +343,12 @@ prendere uno per uno tutti i task, analizzarli e capire se e quali sono i task i
     <td>sì</td>
 	<td>task in media più duraturi di tutti quelli presenti nel sistema. Stimiamo con il committente che possa volerci
 	nel caso peggiore circa 80 secondi per effettuare il reach verso la entrance door (da servicedesk caso peggiore).
+	</br><b>Nasce una problematica</b>: nel caso in cui il <em>waiter</em> stia accompagnando un cliente ad un tavolo, non è stato ancora aggiornato
+	lo stato del tavolo stesso. Questo vuol dire che se nel mentre arriva una richiesta di un altro cliente per entrare, è opportuno
+	non interrompere il task attuale, per non entrare in una inconsistenza di stati (se accettassimo quel cliente, potrebb
+	instaurarsi una catena infinita di accettazioni di clienti, non aggiornando mai lo stato del tavolo).
 	
-	Reach and convoy possono essere interrompibili.</td>
+	Reach and convoy possono quindi essere interrompibili solo per richieste che NON siano nuovi clienti in arrivo.</td>
     <td>ricezione richieste: serve, collect payment, take o convoy</td>
   </tr>
   <tr>
@@ -366,8 +376,8 @@ prendere uno per uno tutti i task, analizzarli e capire se e quali sono i task i
     <td>Convoy</td>
     <td>50</td>
     <td>no</td>
-	<td>Se il <em>waiter</em> deve fare Convoy verso exitdoor il caso peggiore è dal tavolino più lontano, stimiamo con il committente che questo possa esse minore come tempo,
-	circa 50 secondi. Nel convoy il <em>waiter</em> deve solo andare dalla porta di ingresso ad uno dei tavoli, caso peggiore tavolo più lontano, circa 50 secondi.
+	<td>Se il <em>waiter</em> deve fare Convoy verso exitdoor il caso peggiore è dal tavolino più lontano, stimiamo con il committente che questo possa essere minore come tempo,
+	circa 50 secondi. <!--Nel convoy il <em>waiter</em> deve solo andare dalla porta di ingresso ad uno dei tavoli, caso peggiore tavolo più lontano, circa 50 secondi.-->
 	Con il committente è stato deciso che convoy non è interrompibile</td>
     <td>-</td>
   </tr>
@@ -375,8 +385,10 @@ prendere uno per uno tutti i task, analizzarli e capire se e quali sono i task i
     <td><em>clean</em></td>
     <td>60</td>
     <td>sì</td>
-	<td>task da considerare con il committente per la durata, circa 60 secondi, quindi interrompibile</td>
-    <td>Ricezione di ogni richiesta. Se lo stato del <em>clean</em> è a sanitizzazione allora non interrompibile.</td>
+	<td>task da considerare con il committente per la durata, circa 60 secondi, quindi interrompibile. Con il committente è necessario
+	stabilire se ci sia un limite entro cui interrompere questo task, per esempio un limite a livello di "stato" in cui si trova,
+oppure, se è opportuno che il task venga interrotto in ogni momento</td>
+    <td>ricezione di qualunque richiesta</td>
   </tr>
   <tr>
     <td>Rest</td>
@@ -393,6 +405,7 @@ Ma se ho effettuato da tanto tempo il <em>clean</em> e mi manca poco a finire, p
 il quale un task è interrompibile o no. Dobbiamo concordare con il committente
 se per lui può andare bene oppure che il task venga interrotto comunque.
 </br>
+</br>
 E' opportuno modellare lo stato del tavolo all'interno della "mente" del <em>waiter</em>, ovvero una componente che memorizza un determinato stato
 e riesce a far orientare il <em>waiter</em>, soprattutto per task interrotti, per poterli ripristinare da dove era arrivato a farli. In questo modo, inoltre,
 semplifichiamo il modello in quanto non introduciamo altre entità riguardanti il tavolo. Per modellarlo, è opportuno utilizzare una stringa
@@ -401,9 +414,9 @@ che rappresenta lo stato, il quale può essere:
 <li>"dirty": tavolo sporco, è appena andato via il cliente.</li>
 <li>"undirty": tavolo pulito dai residui del cliente precedente, quali stoviglie e tovaglia.</li>
 <li>"sanitized": tavolo pulito con prodotti disinfettanti e tavolo sanitizzato.</li>
-<li>"<em>clean</em>ed": tavolo rimesso in sesto con tovaglia e stoviglie nuove, pronto per accettare un nuovo cliente.</li>
+<li>"cleaned": tavolo rimesso in sesto con tovaglia e stoviglie nuove, pronto per accettare un nuovo cliente.</li>
 </ul>
-Quindi abbiamo una rappresentazione esplicita di stato, che passa da "dirty" a "<em>clean</em>" passando
+Quindi abbiamo una rappresentazione esplicita di stato, che passa da "dirty" a "cleaned" passando
 da delle fasi intermedie. Questa esigenza è dovuta dal fatto che dobbiamo sapere quale sia lo stato del tavolo, perchè se il <em>waiter</em> interrompe
 questo task, deve riprendere dallo stato in cui era arrivato e non ripartire da capo.
 Il <em>waiter</em> comincia a fare "<em>clean</em>" e, mentre lo fa, lo stato del tavolo cambia, passando, se non succede niente, da tutti i quattro stati.
@@ -426,6 +439,7 @@ Nel caso in cui ho un tavolo occupato, il <em>waiter</em> sta pulendo un tavolo 
 perchè non ho più tavoli, e informarlo del tempo di attesa rimanente. Ma se il <em>barman</em> ha già preparato la consumazione mentre sto pulendo, devo
 interrompere il task e tornare lì.
 </br>
+</br>
 Il test plan consiste nel simulare l'arrivo di un altro messaggio o richiesta, per esempio il <em>barman</em> informa che l'ordine richiesto 
 è pronto per la consumazione del cliente. A quel punto il <em>waiter</em> non fa più il task che stava facendo, va a servire l'ordine e 
 riprende successivamente il task precedente.
@@ -433,33 +447,6 @@ Per poter modellare questi test, è necessario aver modellato il funzionamento d
 di fare quei determinati task.
 </div>
 
-<h2>Project</h2> 
-<div class="remark">
-<ks>GOAL</ks>: define the concrete architecture of the system and the behavior of each component  .
-</div>
-
-<h2>Testing</h2> 
-<div class="remark">
-<ks>GOAL</ks>: complete the <k>functional TestPlans</k> according to the project code and execute them.
-</div>
-
-<h2>Deployment</h2> 
-
-<div class="remark">
-<ks>GOAL</ks>: prepare a software application to run and operate in a specific environment. 
-It involves installation, configuration, testing and making changes to optimize the performance of the software. 
-It can either be carried out manually or (hopefully) through automated systems.
-</div>
-
-
-
-<h2>Maintenance</h2> 
-<div class="remark">
-<ks>GOAL</ks>: modify the software product after delivery to correct faults, 
-to improve performance or other attributes. 
-A common perception of maintenance is that it merely involves fixing defects. 
-However, one study indicated that over 80% of maintenance effort is used for non-corrective actions.
-</div>
 
 
 <table style="width:100%" border="1">
@@ -474,8 +461,16 @@ However, one study indicated that over 80% of maintenance effort is used for non
 </div>  
 
 <div style="background-color:rgba(86, 56, 253, 0.9); width:60%;text-align:left;color:white">
-By Paolo Verdini email: paolo.verdini@studio.unibo.it  
-<img src="./Foto.jpg" alt="mbot" width="15%" height="15%">
+
+<img src="../Foto.jpg" alt="mbot" width="20%" height="15%">
+<img src="../angelo.jpeg" alt="mbot" width="20%" height="15%">
+<img src="../lonza.jpeg" alt="mbot" width="20%" height="15%">
+<hr>
+Paolo Verdini, 	Angelo Farina, 	Riccardo Turra
+<hr>
+paolo.verdini@studio.unibo.it, angelo.farina@studio.unibo.it, riccardo.turra@studio.unibo.it
+
+
 </div> 
 
 </body></html>
