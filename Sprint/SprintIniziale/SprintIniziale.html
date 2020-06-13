@@ -148,11 +148,8 @@ table, th, td {
 <title>Sprint Iniziale</title></head>
     
 <body>
-<div class="body">Remember our motto: <k>there is no code without a project, no project without problem analysis and no problem without requirements</k>.
-
-<h2>Tea-room COVID-19</h2> 
-
-The <em>manager</em> of a <em>tearoom</em> intends to regulate the access to the service by means of a ddr robot (<em>waiter</em>).
+<h2>Introduction</h2>
+ The <em>manager</em> of a <em>tearoom</em> intends to regulate the access to the service by means of a ddr robot (<em>waiter</em>).
 <br/><br/>
 The <em>tearoom</em> is a rectangular room that includes:
 
@@ -166,7 +163,7 @@ a person (or some other entity) in it.</li>
 
 The <em>waiter</em> can freely move along the borders of the tearoom, since there are no obstacles there. 
 
-<center><img src="../../tearoom20.png" alt="tearoom20.png" width="75%" height="32%"/></center>
+<center><img src="tearoom20.png" alt="tearoom20.png" width="75%" height="32%"/></center>
 
 
 <h3>User stories</h3>
@@ -175,7 +172,7 @@ As a <em>client</em>,:
 <li>I intend to <em>notify</em> my interest in <em>entering</em> in a <em>safe tearoom</em>, <em>sitting</em> at a free teatable,  <em>ordering</em> 
 some tea,  <em>consuming</em> it  (within a limited amount of time <em>maxstaytime</em>)  <em>paying</em> the service
 with my credit card and finally <em>leaving</em> the room.</li>
-<li>For <em>safe tearoom</em>, I intend a tearoom with clean tea-tables posed at a proper distance; the room is populated by human clients 
+<li>For <em>safe tearoom</em>, I intend a tearoom with <em>clean</em> tea-tables posed at a proper distance; the room is populated by human clients 
 whose body temperature is less than <tt>37.5</tt> degrees. </li>
 <li>I can submit my notification of interest by hitting the <em>smartbell</em> located near the  <em>entrancedoor</em> 
 that will automatically measure my body temperature and send a request message to the <em>waiter</em>, by giving to me an unique <em>clientidentifier</em>.
@@ -191,21 +188,31 @@ associated to the application.
 </li>
 </ul>
 
+ 
 <h2>Requirements</h2>
+ 
 <div class="remark">
 The <em>waiter</em> should perform the following tasks:
 <ul>
  
-<li><em>accept</em> the request of a client to enter in the tearoom </li>
-<li><em>reach</em> the <em>entrance door</em> and <em>convoy</em> the accepted client to a table</li>
-
+<li><em>accept</em> the request of a client to enter in the tearoom if there is at least one teatable in the state <em>tablelean</em>, i.e.
+the table is free and has been properly cleaned; </li>
+<li><em>inform</em> the client about the maximum waiting time if there is no <em>tableclean</em>;</li> 
+<li><em>reach</em> the <em>entrance door</em> and <em>convoy</em> the accepted client to the selected teatable;</li>
+<li><em>take</em> the order of the client and transmit it (using a wifi-device) to the <em>barman</em>; </li>
+<li><em>serve</em>  the client when the <em>barman</em> says that the requested drink is ready;</li>
+<li><em>collect</em> the payment from the client when he/she has finished to consume or when the <em>maxstaytime</em> is expired;</li>
 <li><em>convoy</em> the client to the <em>exitdoor</em>;</li>
+<li><em>clean</em> the tea-table just freed  by the client;</li>
 <li><em>rest</em> at my <em>home</em> when there is nothing to do.</li>
-
 </ul>
 
-Initially consider one client per time.
+Since the room could contain <tt>N</tt> clients at the time, the <em>waiter</em> should reduce as much as possible the waiting time
+of the requests coming from each client.
    
+<h3>Optional: one client in the hall</h3>
+The <em>waiter</em> must open the <em>exitdoor</em> only when the hall is free, i.e. it must
+not open that door if the hall is already engaged by a client waiting to enter at the <em>entrancedoor</em>.   
 
 <h2>Non functional requirements</h2>  
 <ol>
@@ -214,10 +221,142 @@ Initially consider one client per time.
 including some significant <bc>TestPlan</bc>.</li>
 <li>The team must present the sequence of SPRINT performed, with appropriate motivations.</li>
 <li>The team must present (in synthetic, schematic way) the specific activity of each team-component.</li>
-</ol>	</div>	    
+</ol>	
 
+
+</div>
 <h2>Requirement analysis</h2>
 <div class="remark">
+Con riferimento alle problematiche analizzate in <a href="./ConsiderazioniIniziali.html"><b>riflessioni</b></a>, iniziamo ad analizzare
+il sistema considerando questa assunzione:
+ <ul>
+	<li>Ci sia un solo cliente nel sistema e mentre sto servendo questo cliente non capiti nient'altro. Simuliamo una catena computazionale completa, in cui
+	si parte da un cliente che richiede l'accesso, fino alla sua uscita e relativa <em>clean</em> del tavolo.</li>
+</ul>
+A seguito di questa assunzione, le considerazioni fatte precedentemente rimangono invariate.
+Poichè il <em>barman</em> deve interagire con il <em>waiter</em>, ricevere e preparare gli ordini, è opportuno
+modellarlo in un primo momento come un attore esterno. Il cliente è per ora simulato mediante la ricezione della request per entrare nella <em>tearoom</em>
+</br>
+Di seguito è stato modellato un primo sistema seguendo i requisiti e l'assunzione.
+E' opportuno considerare che il task <em>inform</em> non è da modellare, in quanto per l'assunzione fatta non potrà
+mai verificarsi. E' stato predisposto un oggetto "Table" che rappresenta lo stato di ciascun tavolo presente nella stanza.
+E' stato opportuno creare dei dispatch che modellano:
+<ul>
+<li>Intenzione del cliente a ordinare: clientready</li>
+<li>Drink pronto dal barman: drinkready</li>
+<li>Cliente pronto a pagare: paymentready</li>
+<li>Ordine trasmesso al <em>barman</em>: order</li>
+</ul>
+La richiesta e risposta del cliente e del <em>waiter</em> per entrare nella <em>tearoom</em> sono state modellate, in QAK, come 
+una Request/Reply.
+
+<pre>
+System tearoom
+
+Request enter : enter(ID)
+Reply accept : accept(C)
+
+Dispatch drinkready : drinkready(V)
+Dispatch clientready : clientready(C)
+Dispatch paymentready : paymentready(P)
+Dispatch order : order(O)
+Dispatch end : end (V)
+
+Context ctxwaiter ip [ host="localhost" port=8068 ] 
+
+ExternalQActor barman context ctxwaiter
+
+QActor waiter context ctxwaiter {
+[#
+	val	Cleantime = 10000L
+	data class Table(var state: String ="cleaned") {
+		
+	}
+	val table1 = Table()
+	val table2 = Table()
+#]
+	State s0 initial {
+		discardMsg Off
+		println("Waiter    |||   init")
+	}
+	Goto home
+	
+	State home{
+		println("waiter    |||   home")
+		updateResource [# "home" #]
+	}
+	Transition t0 whenRequest enter -> accept
+				  whenMsg clientready -> take
+				  whenMsg drinkready -> serve
+				  whenMsg paymentready -> collect
+				  whenMsg end -> endwork
+	
+	
+	State accept {
+		println("waiter    |||   accept")
+		replyTo enter with accept : accept(idclient)
+	}
+	Goto reachEntranceDoor
+	
+	State reachEntranceDoor {
+		println("waiter    |||   reachEntranceDoor")
+		updateResource[# "reachEntranceDoor" #]
+		delay 2000
+	}
+	Goto convoyToTable
+	
+	State convoyToTable{
+		println("waiter    |||   convoyToTable")
+		updateResource [# "convoyToTable" #]
+		delay 3000
+	}
+	Goto home
+	
+	State take{
+		println("waiter   |||   take")
+		updateResource [# "take" #]
+		onMsg ( clientready : clientready(C)) {
+			forward barman -m order : order(payloadArg(0))
+		}
+		delay 2000
+	}
+	Goto home
+	
+	State serve{
+		println("waiter   |||   serve")
+		updateResource[# "serve" #]
+		delay 3000
+	}
+	Goto home
+	
+	State collect {
+		println("waiter   |||   collect")
+		updateResource[# "collect" #]
+		delay 4000
+	}
+	Goto convoyToExitDoor
+	
+	State convoyToExitDoor{
+		println("waiter   |||   convoyToExitDoor")
+		updateResource[# "convoyToExitDoor" #]
+		[# table1.state = "dirty" #]
+		delay 5000
+	}
+	Goto clean
+	
+	State clean{
+		println("waiter   |||   clean")
+		updateResource[# "clean" #]
+		delayVar Cleantime
+		[# table1.state = "cleaned" #]
+	}
+	Goto home
+	
+	State endwork{
+		terminate 0
+	}
+}
+</pre>
 
 
 </div>
@@ -225,7 +364,27 @@ including some significant <bc>TestPlan</bc>.</li>
 
 <h2>Problem analysis</h2> 
 <div class="remark">
+Sempre con riferimento all'assunzione effettuata e alle <a href="./ConsiderazioniIniziali.html">riflessioni</a>, è opportuno 
+modellare i tavoli come stato interno al <em>waiter</em>. Dopo avere identificato gli stati in cui un tavolo può trovarsi,
+ovvero "occupied", "dirty", "undirty", "sanitized" e "cleaned", è necessario analizzare come questi stati vengono cambiati nel tempo.
+Un tavolo è nello stato "cleaned" in partenza, il che significa pronto per accogliere un nuovo cliente; lo stato "occupied" è dovuto ad una problematica
+relativa al fatto che il <em>waiter</em> deve sapere anche quando un tavolo è occupato attualmente da un cliente, non solo se il tavolo sia sporco o meno; lo stato "dirty" viene raggiunto
+alla fine del pagamento e uscita di un cliente da quel tavolo; gli altri stati rimangono invariati dall'analisi precedente.
+</br>
+</br>
+Una problematica fondamentale risiede nelle operazioni da svolgere, oltre che alla gestione dei messaggi da parte del <em>waiter</em>.
+Infatti, parliamo della parte proattiva e della parte reattiva; tale problematica induce la fattorizzazione del <em>waiter</em> in due principali entità:
+<ul>
+<li>Motore</li>
+<li>Mente</li>
+</ul>
+Il motore è l'entità che si occupa del movimento, una delle principali caratteristiche del <em>waiter</em>. Il movimento è un concetto chiave in questo sistema,
+considerando per esempio i task <em>reach and convoy</em>, ma anche <em>serve</em>. Tutti questi task vengono effettivamente portati a termine grazie al movimento.
+Ecco che la problematica del movimento diventa rilevante: è opportuno modellarlo come entità a sè stante, in quanto non ha niente a che vedere con interazioni e messaggi.
+In tale contesto è opportuno introdurre l'entità <em>planner</em>, che identifica un pianificatore di movimento, ovvero un'entità la quale viene informata
+riguardo a un punto da raggiungere, viene innescata e ha come scopo andare nel punto prefissato.
 
+	
 </div>	
 
 </div>  

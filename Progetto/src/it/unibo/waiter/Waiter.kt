@@ -16,67 +16,165 @@ class Waiter ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, sco
 	@kotlinx.coroutines.ObsoleteCoroutinesApi
 	@kotlinx.coroutines.ExperimentalCoroutinesApi			
 	override fun getBody() : (ActorBasicFsm.() -> Unit){
+		
+		//	//Coordinates of the entrance door
+			val XEntranceDoor = "0"
+			val YEntranceDoor = "6"
+		
+		//	//Coordinates of the exit door
+			val XExitDoor = "6"
+			val YExitDoor = "6"
+		
+		//	//Coordinates Tables
+			val X_teatable1     = "2"
+			val Y_teatable1     = "3"
+		
+			val X_teatable2     = "4"
+			val Y_teatable2     = "3"
+		
+			//Coordinates of the home
+		    val X_home			= "0"
+			val Y_home 			= "0"
+		
+			//Time for serving a client
+		//	val servicetime = 1000L 
+		
+		
+			val	Cleantime = 2000L
+			val Servicetime = 5000L
+		//	data class Table(var state: String ="cleaned") {
+		//		
+		//	}
+		//	val table1 = Table()
+		//	val table2 = Table()
+			var stateTable1 = "cleaned"
+			var stateTable2 = "cleaned"
 		return { //this:ActionBasciFsm
 				state("s0") { //this:State
 					action { //it:State
+						discardMessages = false
 						println("Waiter    |||   init")
+						itunibo.planner.plannerUtil.initAI(  )
 					}
-					 transition( edgeName="goto",targetState="wait", cond=doswitch() )
+					 transition( edgeName="goto",targetState="home", cond=doswitch() )
 				}	 
-				state("wait") { //this:State
+				state("home") { //this:State
 					action { //it:State
-						println("waiter    |||   wait")
+						println("waiter    |||   home")
 						updateResourceRep( "home"  
 						)
+						itunibo.planner.plannerUtil.planForGoal( X_home, Y_home  )
 					}
 					 transition(edgeName="t00",targetState="accept",cond=whenRequest("enter"))
-					transition(edgeName="t01",targetState="endwork",cond=whenDispatch("end"))
+					transition(edgeName="t01",targetState="take",cond=whenDispatch("clientready"))
+					transition(edgeName="t02",targetState="serve",cond=whenDispatch("drinkready"))
+					transition(edgeName="t03",targetState="collect",cond=whenDispatch("paymentready"))
+					transition(edgeName="t04",targetState="endwork",cond=whenDispatch("end"))
 				}	 
 				state("accept") { //this:State
 					action { //it:State
 						println("waiter    |||   accept")
-						delay(1000) 
+						answer("enter", "accept", "accept(idclient)"   )  
 					}
 					 transition( edgeName="goto",targetState="reachEntranceDoor", cond=doswitch() )
 				}	 
 				state("reachEntranceDoor") { //this:State
 					action { //it:State
 						println("waiter    |||   reachEntranceDoor")
-						updateResourceRep( "reachingEntranceDoor"  
+						updateResourceRep( "reachEntranceDoor"  
 						)
 						delay(2000) 
 					}
-					 transition(edgeName="t02",targetState="reachTable",cond=whenDispatch("ready"))
+					 transition( edgeName="goto",targetState="convoyToTable", cond=doswitch() )
 				}	 
-				state("reachTable") { //this:State
+				state("convoyToTable") { //this:State
 					action { //it:State
-						println("waiter    |||   reachTable")
-						updateResourceRep( "reachingTable"  
+						println("waiter    |||   convoyToTable")
+						 table1.state= "occupied"  
+						println("waiter   |||   table state occupied")
+						updateResourceRep( "convoyToTable"  
 						)
 						delay(3000) 
 					}
-					 transition(edgeName="t03",targetState="reachExitDoor",cond=whenDispatch("ready"))
+					 transition( edgeName="goto",targetState="home", cond=doswitch() )
 				}	 
-				state("reachExitDoor") { //this:State
+				state("take") { //this:State
 					action { //it:State
-						println("waiter    |||   reachExitDoor")
-						updateResourceRep( "reachingExitDoor"  
+						println("waiter   |||   take")
+						updateResourceRep( "take"  
 						)
+						if( checkMsgContent( Term.createTerm("clientready(C)"), Term.createTerm("clientready(C)"), 
+						                        currentMsg.msgContent()) ) { //set msgArgList
+						}
 						delay(2000) 
 					}
-					 transition( edgeName="goto",targetState="reachHome", cond=doswitch() )
+					 transition( edgeName="goto",targetState="home", cond=doswitch() )
 				}	 
-				state("reachHome") { //this:State
+				state("serve") { //this:State
 					action { //it:State
-						println("waiter    |||   reachHome")
-						updateResourceRep( "reachingHome"  
+						println("waiter   |||   serve")
+						updateResourceRep( "serve"  
+						)
+						delay(3000) 
+					}
+					 transition( edgeName="goto",targetState="home", cond=doswitch() )
+				}	 
+				state("collect") { //this:State
+					action { //it:State
+						println("waiter   |||   collect")
+						updateResourceRep( "collect"  
 						)
 						delay(4000) 
 					}
-					 transition( edgeName="goto",targetState="wait", cond=doswitch() )
+					 transition( edgeName="goto",targetState="convoyToExitDoor", cond=doswitch() )
+				}	 
+				state("convoyToExitDoor") { //this:State
+					action { //it:State
+						println("waiter   |||   convoyToExitDoor")
+						updateResourceRep( "convoyToExitDoor"  
+						)
+						 table1.state = "dirty"  
+						println("waiter   |||   table state dirty")
+						delay(5000) 
+					}
+					 transition( edgeName="goto",targetState="clean", cond=doswitch() )
+				}	 
+				state("clean") { //this:State
+					action { //it:State
+						println("waiter   |||   clean")
+						updateResourceRep( "clean1"  
+						)
+						delay(Cleantime)
+						 table1.state = "undirty"  
+						println("waiter   |||   table state undirty")
+					}
+					 transition( edgeName="goto",targetState="clean2", cond=doswitch() )
+				}	 
+				state("clean2") { //this:State
+					action { //it:State
+						println("waiter   |||   clean2")
+						updateResourceRep( "clean2"  
+						)
+						delay(Cleantime)
+						 table1.state = "sanitized"  
+						println("waiter   |||   table state sanitized")
+					}
+					 transition( edgeName="goto",targetState="clean3", cond=doswitch() )
+				}	 
+				state("clean3") { //this:State
+					action { //it:State
+						println("waiter   |||   clean3")
+						updateResourceRep( "clean3"  
+						)
+						delay(Cleantime)
+						 table1.state = "cleaned"  
+						println("waiter   |||   table state cleaned")
+					}
+					 transition( edgeName="goto",targetState="home", cond=doswitch() )
 				}	 
 				state("endwork") { //this:State
 					action { //it:State
+						println("waiter   |||   end")
 						terminate(0)
 					}
 				}	 
