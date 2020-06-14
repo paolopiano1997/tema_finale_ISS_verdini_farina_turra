@@ -21,7 +21,7 @@ QActor waiterengine context ctxsubtearoom {
 		var XP = "0"
 		var YP = "0"
 		var CurMove = ""
-		val inmapname  = "teaRoomExplored" 
+		val inmapname  = "teaRoomExplored"
 		var StepTime    	   = 348L
 		val BackTime           = 2 * StepTime / 3
 	#]
@@ -89,7 +89,6 @@ QActor waiterengine context ctxsubtearoom {
 	Goto execPlanMove if [# CurMove.length > 0 #] else endSuccess
 	
 	State execMove{
-//		println("waiterengine   |||   execMove, curpos=($XP,$YP)")
 		forward basicrobot -m cmd : cmd($CurMove)
  		run itunibo.planner.plannerUtil.updateMap( "$CurMove" )
 	}
@@ -101,6 +100,4 @@ QActor waiterengine context ctxsubtearoom {
 		replyTo moveto with done : done($XP,$YP)
 	}
 	Goto wait
-	
-	
 } 

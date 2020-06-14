@@ -20,7 +20,7 @@ class Waiterengine ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( nam
 				var XP = "0"
 				var YP = "0"
 				var CurMove = ""
-				val inmapname  = "teaRoomExplored" 
+				val inmapname  = "teaRoomExplored"
 				var StepTime    	   = 348L
 				val BackTime           = 2 * StepTime / 3
 		return { //this:ActionBasciFsm

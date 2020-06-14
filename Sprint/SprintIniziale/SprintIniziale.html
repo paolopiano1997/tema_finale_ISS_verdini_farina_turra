@@ -413,6 +413,320 @@ Risulta quindi necessario introdurre dei messaggi aggiuntivi, al fine di coordin
 Poichè il <em>planner</em> lavora su una mappa, ovvero le varie celle che identificano la <em>tearoom</em>, è necessario ragionare, al posto di "movimento" in sè, in termini
 di "step", ovvero il movimento unitario del <em>waiter</em> diventa uno step di una cella. E' necessario gestire quindi eventuali "step" falliti in concomitanza di ostacoli (per esempio le pareti della <em>tearoom</em>).
 
+<pre>
+</br>
+<em>waitermind.qak</em>
+</br>
+</br>
+System tearoom
+
+//Movements messages
+Request moveto : moveto(X,Y)
+Reply done : done(X,Y)
+
+//Init messages
+Request start : start(S)
+Reply ready : ready(V)
+
+//Client and tearoom messages
+Request enter : enter(ID)
+Reply accept : accept(C)
+Dispatch drinkready : drinkready(V)
+Dispatch clientready : clientready(C)
+Dispatch paymentready : paymentready(P)
+Dispatch order : order(O)
+Dispatch end : end (E)
+
+Context ctxbasicrobot     ip [host="localhost"   port=8020] 
+Context ctxtearoom ip [ host="127.0.0.1" port=8068 ]
+
+ExternalQActor basicrobot  context ctxbasicrobot
+CodedQActor waiterengine context ctxtearoom className "it.unibo.waiterengine.Waiterengine"
+
+QActor waitermind context ctxtearoom{
+[#
+//	//Coordinates of the entrance door
+	val X_Entrancedoor = "0"
+	val Y_Entrancedoor = "4"
+
+//	//Coordinates of the exit door
+	val X_Exitdoor = "6"
+	val Y_Exitdoor = "4"
+	
+//  //Coordinates of the barman
+	val X_servicedesk = "6"
+	val Y_servicedesk = "0"	
+
+//	//Coordinates Tables
+	val X_teatable1     = "2"
+	val Y_teatable1     = "2"
+
+	val X_teatable2     = "4"
+	val Y_teatable2     = "2"
+
+	//Coordinates of the home
+    val X_home			= "0"
+	val Y_home 			= "0"
+
+	val	Cleantime = 2000L
+	val Servicetime = 5000L
+	val CollectTime = 4000L
+	data class Table(var state: String ="cleaned") {
+		
+	}
+	val table1 = Table()
+	val table2 = Table()
+	var stateTable1 = "cleaned"
+	var stateTable2 = "cleaned"
+#]
+	State s0 initial {
+		discardMsg Off
+		println("waitermind   |||   init")
+		request waiterengine -m start : start(id)
+	}
+	Transition t0 whenReply ready -> home
+	
+	State reachhome{
+		println("waitermind   |||   reachhome")
+		request waiterengine -m moveto : moveto($X_home,$Y_home)
+	}
+	Transition t0 whenReply done -> home
+	
+	State home{
+		println("waitermind   |||   home")
+		updateResource [# "home" #]
+	}
+	Transition t0 whenRequest enter -> accept
+				  whenMsg clientready -> take
+				  whenMsg drinkready -> reachBarman
+				  whenMsg paymentready -> reachTableCollect
+				  whenMsg end -> endwork
+	
+	State accept {
+		println("waitermind   |||   accept")
+		replyTo enter with accept : accept(idclient)
+	}
+	Goto reachEntranceDoor
+	
+	State reachEntranceDoor {
+		println("waitermind   |||   reachEntranceDoor")
+		updateResource[# "reachEntranceDoor" #]
+		request waiterengine -m moveto : moveto($X_Entrancedoor, $Y_Entrancedoor)
+	}
+	Transition t0 whenReply done -> convoyToTable
+	
+	State convoyToTable{
+		println("waitermind   |||   convoyToTable")
+		request waiterengine -m moveto : moveto ($X_teatable1,$Y_teatable1)
+		[# table1.state= "occupied" #]
+		println("waitermind   |||   table state occupied")
+		updateResource [# "convoyToTable" #]
+		delay 5000
+	}
+	Transition t0 whenReply done -> reachhome
+	
+	State take{
+		println("waitermind   |||   take")
+		updateResource [# "take" #]
+		request waiterengine -m moveto : moveto ($X_teatable1,$Y_teatable1)
+	}
+	Transition t0 whenReply done -> transmit
+	
+	State transmit{
+		println("waitermind   |||   transmit")
+		updateResource [# "transmit" #]
+		//forward barman -m order : order(payloadArg(0))
+	}
+	Goto reachhome
+	
+	State reachBarman{
+		println("waitermind   |||   reachBarman")
+		updateResource[# "reachBarman" #]
+		request waiterengine -m moveto: moveto($X_servicedesk,$Y_servicedesk)
+	}
+	Transition t0 whenReply done -> serve
+	
+	State serve{
+		println("waitermind   |||   serve")
+		updateResource[# "serve" #]
+		request waiterengine -m moveto : moveto ($X_teatable1,$Y_teatable1)
+	}
+	Transition t0 whenReply done -> reachhome
+	
+	State reachTableCollect {
+		println("waitermind   |||   reachTable")
+		updateResource[# "reachTable" #]
+		request waiterengine -m moveto : moveto ($X_teatable1,$Y_teatable1)
+	}
+	Transition t0 whenReply done -> collect
+	
+	State reachTableClean {
+		println("waitermind   |||   reachTable")
+		updateResource[# "reachTable" #]
+		request waiterengine -m moveto : moveto ($X_teatable1,$Y_teatable1)
+	}
+	Transition t0 whenReply done -> clean
+	
+	State collect {
+		println("waitermind   |||   collect")
+		updateResource[# "collect" #]
+		delayVar CollectTime
+	}
+	Goto convoyToExitDoor
+	
+	State convoyToExitDoor{
+		println("waitermind   |||   convoyToExitDoor")
+		updateResource[# "convoyToExitDoor" #]
+		request waiterengine -m moveto : moveto($X_Exitdoor,$Y_Exitdoor)
+		[# table1.state = "dirty" #]
+		println("waitermind   |||   table state dirty")
+		delay 5000
+	}
+	Transition t0 whenReply done -> reachTableClean
+	
+	State clean{
+		println("waitermind   |||   clean")
+		updateResource[# "clean1" #]
+		delayVar Cleantime
+		[# table1.state = "undirty" #]
+		println("waitermind   |||   table state undirty")
+	}
+	Goto clean2
+	
+	State clean2{
+		println("waitermind   |||   clean2")
+		updateResource[# "clean2" #]
+		delayVar Cleantime
+		[# table1.state = "sanitized" #]
+		println("waitermind   |||   table state sanitized")
+	}
+	Goto clean3
+	
+	State clean3{
+		println("waitermind   |||   clean3")
+		updateResource[# "clean3" #]
+		delayVar Cleantime
+		[# table1.state = "cleaned" #]
+		println("waitermind   |||   table state cleaned")
+	}
+	Goto reachhome
+	
+	State endwork{
+		println("waitermind   |||   end")
+		terminate 0
+	}
+}
+
+</br>
+</br>
+<em>waiterengine.qak</em>
+</br>
+</br>
+System  -msglog  subtearoom 
+
+Request moveto : moveto(X,Y)
+Reply done : done(X,Y)
+
+Request start : start(S)
+Reply ready : ready(V)
+
+Request step       : step( TIME )
+Reply   stepdone   : stepdone(V)
+Dispatch cmd       : cmd(MOVE)
+Reply   stepfail   : stepfail(DURATION, CAUSE)
+
+Context ctxsubtearoom ip [ host="127.0.0.1" port=8068 ]
+Context ctxbasicrobot     ip [host="localhost"   port=8020] 
+
+ExternalQActor basicrobot  context ctxbasicrobot
+
+QActor waiterengine context ctxsubtearoom {
+	[#
+		var XP = "0"
+		var YP = "0"
+		var CurMove = ""
+		val inmapname  = "teaRoomExplored" 
+		var StepTime    	   = 348L
+		val BackTime           = 2 * StepTime / 3
+	#]
+	State s0 initial{
+		discardMsg On
+		run itunibo.planner.plannerUtil.initAI() //init planner entity
+		run itunibo.planner.plannerUtil.loadRoomMap( inmapname ) 		
+		run itunibo.planner.plannerUtil.showCurrentRobotState()	
+		println("waiterengine   |||   init")
+	}
+	Transition t0 whenRequest start -> started
+	
+	State started{
+		println("waiterengine   |||   started")
+		replyTo start with ready : ready(waiterengine)
+	}
+	Goto wait
+	
+	State wait{
+		println("waiterengine   |||   wait")
+		
+	}
+	Transition t0 whenRequest moveto -> planmove
+	
+	State planmove{
+		onMsg( moveto : moveto(X,Y) ){
+			[# XP = payloadArg(0)
+			   YP = payloadArg(1)			  
+			 #]
+			println("waiterengine   |||   moveto ($XP,$YP)")
+			run itunibo.planner.plannerUtil.planForGoal("$XP","$YP")
+		}
+	}
+	Goto execPlanMove
+	
+	State execPlanMove{
+		[#  CurMove = itunibo.planner.plannerUtil.getNextPlannedMove() #]
+	}
+	Goto execStep if [# CurMove == "w" #] else execMove
+	
+	State execStep {
+		request basicrobot -m step : step( $StepTime  )
+	}
+	Transition t0   whenReply stepdone   -> stepDone
+					whenReply stepfail   -> stepFailed 
+	
+	State stepDone{
+		updateResource [# itunibo.planner.plannerUtil.getMapOneLine() #]
+		run itunibo.planner.plannerUtil.updateMap(  "w" )
+  	}
+	Goto execPlanMove if [# CurMove.length > 0 #] else endSuccess
+	
+	State stepFailed{
+ 		println("waiterengine | stepFailed")
+		onMsg(stepfail : stepfail(DURATION, CAUSE) ){
+			[# val D = payloadArg(0).toLong()  ; val Dt = Math.abs(StepTime-D); val BackT = D/2 #] 
+			println("waiterengine stepFail D= $D, BackTime = ${BackTime}")
+			if [# D > BackTime #] {    
+				forward basicrobot -m cmd : cmd( s )
+				delayVar BackTime
+				forward basicrobot -m cmd : cmd( h )
+			}	
+ 		}
+ 	}   
+	Goto execPlanMove if [# CurMove.length > 0 #] else endSuccess
+	
+	State execMove{
+		forward basicrobot -m cmd : cmd($CurMove)
+ 		run itunibo.planner.plannerUtil.updateMap( "$CurMove" )
+	}
+	Goto execPlanMove if [# CurMove.length > 0 #] else endSuccess
+	
+	State endSuccess{
+		println("waiterengine   |||   endSuccess, curpos=($XP,$YP)")
+		run itunibo.planner.plannerUtil.showCurrentRobotState()
+		replyTo moveto with done : done($XP,$YP)
+	}
+	Goto wait
+} 
+
+</pre>
 
 </ul>
 	

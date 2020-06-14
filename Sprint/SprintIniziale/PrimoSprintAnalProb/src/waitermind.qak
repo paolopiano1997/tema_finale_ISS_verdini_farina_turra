@@ -51,10 +51,6 @@ QActor waitermind context ctxtearoom{
     val X_home			= "0"
 	val Y_home 			= "0"
 
-	//Time for serving a client
-//	val servicetime = 1000L 
-
-
 	val	Cleantime = 2000L
 	val Servicetime = 5000L
 	val CollectTime = 4000L
