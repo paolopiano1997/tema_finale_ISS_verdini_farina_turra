@@ -24,12 +24,12 @@ ExternalQActor waiterengine context ctxtearoom
 QActor waitermind context ctxtearoom{
 [#
 //	//Coordinates of the entrance door
-	val X_EntranceDoor = "0"
-	val Y_EntranceDoor = "4"
+	val X_Entrancedoor = "0"
+	val Y_Entrancedoor = "4"
 
 //	//Coordinates of the exit door
-	val X_ExitDoor = "6"
-	val Y_ExitDoor = "4"
+	val X_Exitdoor = "6"
+	val Y_Exitdoor = "4"
 	
 //  //Coordinates of the barman
 	val X_servicedesk = "6"
@@ -80,7 +80,7 @@ QActor waitermind context ctxtearoom{
 	}
 	Transition t0 whenRequest enter -> accept
 				  whenMsg clientready -> take
-				  whenMsg drinkready -> serve
+				  whenMsg drinkready -> reachBarman
 				  whenMsg paymentready -> reachTableCollect
 				  whenMsg end -> endwork
 	
@@ -93,7 +93,7 @@ QActor waitermind context ctxtearoom{
 	State reachEntranceDoor {
 		println("waiter   |||   reachEntranceDoor")
 		updateResource[# "reachEntranceDoor" #]
-		request waiterengine -m moveto : moveto($X_entrancedoor, $Y_entrancedoor)
+		request waiterengine -m moveto : moveto($X_Entrancedoor, $Y_Entrancedoor)
 	}
 	Transition t0 whenReply done -> convoyToTable
 	
@@ -159,7 +159,7 @@ QActor waitermind context ctxtearoom{
 	State convoyToExitDoor{
 		println("waiter   |||   convoyToExitDoor")
 		updateResource[# "convoyToExitDoor" #]
-		request waiterengine -m moveto : moveto($X_exitdoor,$Y_exitdoor)
+		request waiterengine -m moveto : moveto($X_Exitdoor,$Y_Exitdoor)
 		[# table1.state = "dirty" #]
 		println("waiter   |||   table state dirty")
 		delay 5000
@@ -196,5 +196,34 @@ QActor waitermind context ctxtearoom{
 	State endwork{
 		println("waiter   |||   end")
 		terminate 0
+	}
+}
+
+
+QActor client context ctxtearoom {
+	State s0 initial{
+		println("client   |||   init")
+	}
+	Goto doSomething
+	
+	State doSomething{
+		println("client   |||   sending enter request")
+		request waitermind -m enter : enter(id)
+	}
+	Transition t0 whenReply accept -> ok
+	
+	State ok{
+		println("client   |||   accepted")
+		delay 15000
+		println("client   |||   ready")
+		forward waitermind -m clientready : clientready(id)
+		delay 15000
+		println("barman   |||   ready")
+		delay 15000
+		forward waitermind -m drinkready : drinkready(id)
+		delay 15000
+		forward waitermind -m paymentready : paymentready(id)
+		delay 20000
+		forward waitermind -m end : end(end)
 	}
 }

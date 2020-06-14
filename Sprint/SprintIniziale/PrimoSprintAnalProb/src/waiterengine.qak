@@ -4,8 +4,7 @@ Request moveto : moveto(X,Y)
 Reply done : done(X,Y)
 
 Request start : start(S)
-Reply ready : ready(V)
-
+Reply ready : ready(V) 
 Request step       : step( TIME )	
 Reply   stepdone   : stepdone(V)  
 Reply   stepfail   : stepfail(DURATION, CAUSE)
@@ -14,9 +13,14 @@ Dispatch cmd       : cmd(MOVE)
 Context ctxsubtearoom ip [ host="localhost" port=8068 ]
 Context ctxbasicrobot     ip [host="127.0.0.1"   port=8020]   
 
-ExternalQActor basicrobot    context ctxbasicrobot
+ExternalQActor basicrobot   context ctxbasicrobot
 
 QActor waiterengine context ctxsubtearoom {
+	[#
+		var XP = "0"
+		var YP = "0"
+		var CurMove = ""
+	#]
 	State s0 initial{
 		run itunibo.planner.plannerUtil.initAI() //init planner entity
 		println("waiterengine   |||   init")
@@ -46,7 +50,7 @@ QActor waiterengine context ctxsubtearoom {
 	Goto execMove
 	
 	State execMove{
-		println("waiterengine   |||   execMo, curpos=($XP,$YP)")
+		println("waiterengine   |||   execMove, curpos=($XP,$YP)")
 		[#  CurMove = itunibo.planner.plannerUtil.getNextPlannedMove() #]
 		forward basicrobot -m cmd : cmd($CurMove)
  		run itunibo.planner.plannerUtil.updateMap( "$CurMove" )
