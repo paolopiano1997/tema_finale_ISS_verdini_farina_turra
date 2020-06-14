@@ -58,6 +58,7 @@ QActor waiterengine context ctxsubtearoom {
 		run itunibo.planner.plannerUtil.showCurrentRobotState()
 		replyTo moveto with done : done($XP,$YP)
 	}
+	Goto wait
 	
 	
 } 
