@@ -409,6 +409,10 @@ Risulta quindi necessario introdurre dei messaggi aggiuntivi, al fine di coordin
 <li>done(X,Y): messaggio che l'engine manda alla mente in risposta al moveto, in cui afferma di essere arrivato alla cella di posizione X,Y. Opportunamente modellato come Reply.</li>
 <li>start: è necessario che la mente "inizializzi" l'engine, il quale dovrà dare un feedback su quando è pronto per effettuare operazioni. Quindi tale messaggio è modellato come Request, a cui corrisponderà la seguente Reply</li>
 <li>ready: messaggio Reply che l'engine manda alla mente per affermare che è pronto all'opera.</li>
+</br>
+Poichè il <em>planner</em> lavora su una mappa, ovvero le varie celle che identificano la <em>tearoom</em>, è necessario ragionare, al posto di "movimento" in sè, in termini
+di "step", ovvero il movimento unitario del <em>waiter</em> diventa uno step di una cella. E' necessario gestire quindi eventuali "step" falliti in concomitanza di ostacoli (per esempio le pareti della <em>tearoom</em>).
+
 
 </ul>
 	
