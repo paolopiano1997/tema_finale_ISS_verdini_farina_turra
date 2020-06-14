@@ -27,3 +27,6 @@ gradlew.bat
 docker/
 /.metadata/
 /src-gen/
+/subtearoom.pl
+/sysRules.pl
+/tearoom.pl

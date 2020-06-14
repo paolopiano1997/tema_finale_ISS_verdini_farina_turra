@@ -268,7 +268,7 @@ ExternalQActor barman context ctxwaiter
 
 QActor waiter context ctxwaiter {
 [#
-	val	Cleantime = 10000L
+	val	Cleantime = 3000L
 	data class Table(var state: String ="cleaned") {
 		
 	}
@@ -346,9 +346,28 @@ QActor waiter context ctxwaiter {
 	
 	State clean{
 		println("waiter   |||   clean")
-		updateResource[# "clean" #]
+		updateResource[# "clean1" #]
+		delayVar Cleantime
+		[# table1.state = "undirty" #]
+		println("waiter   |||   table state undirty")
+	}
+	Goto clean2
+	
+	State clean2{
+		println("waiter   |||   clean2")
+		updateResource[# "clean2" #]
+		delayVar Cleantime
+		[# table1.state = "sanitized" #]
+		println("waiter   |||   table state sanitized")
+	}
+	Goto clean3
+	
+	State clean3{
+		println("waiter   |||   clean3")
+		updateResource[# "clean3" #]
 		delayVar Cleantime
 		[# table1.state = "cleaned" #]
+		println("waiter   |||   table state cleaned")
 	}
 	Goto home
 	
@@ -381,9 +400,17 @@ Infatti, parliamo della parte proattiva e della parte reattiva; tale problematic
 Il motore è l'entità che si occupa del movimento, una delle principali caratteristiche del <em>waiter</em>. Il movimento è un concetto chiave in questo sistema,
 considerando per esempio i task <em>reach and convoy</em>, ma anche <em>serve</em>. Tutti questi task vengono effettivamente portati a termine grazie al movimento.
 Ecco che la problematica del movimento diventa rilevante: è opportuno modellarlo come entità a sè stante, in quanto non ha niente a che vedere con interazioni e messaggi.
-In tale contesto è opportuno introdurre l'entità <em>planner</em>, che identifica un pianificatore di movimento, ovvero un'entità la quale viene informata
-riguardo a un punto da raggiungere, viene innescata e ha come scopo andare nel punto prefissato.
+In tale contesto è opportuno introdurre un'entità <em>planner</em>, che identifica un pianificatore di movimento, ovvero un'entità la quale viene informata
+riguardo a un punto da raggiungere, viene innescata e ha come scopo andare nel punto prefissato. A tal fine, questo <em>planner</em> identifica la <em>tearoom</em> come un insieme
+di celle con una determinata posizione X e Y.
+Risulta quindi necessario introdurre dei messaggi aggiuntivi, al fine di coordinare mente e motore:
+<ul>
+<li>moveto(X,Y): messaggio che la mente manda all'engine per spostarti alla cella in posizione X,Y. Opportunamente modellato come Request, affinchè la mente riceva una Reply di quando e se l'engine ha raggiunto tale posizione.</li>
+<li>done(X,Y): messaggio che l'engine manda alla mente in risposta al moveto, in cui afferma di essere arrivato alla cella di posizione X,Y. Opportunamente modellato come Reply.</li>
+<li>start: è necessario che la mente "inizializzi" l'engine, il quale dovrà dare un feedback su quando è pronto per effettuare operazioni. Quindi tale messaggio è modellato come Request, a cui corrisponderà la seguente Reply</li>
+<li>ready: messaggio Reply che l'engine manda alla mente per affermare che è pronto all'opera.</li>
 
+</ul>
 	
 </div>	
 

@@ -1,0 +1,200 @@
+System tearoom
+
+//Movements messages
+Request moveto : moveto(X,Y)
+Reply done : done(X,Y)
+
+//Init messages
+Request start : start(S)
+Reply ready : ready(V)
+
+//Client and tearoom messages
+Request enter : enter(ID)
+Reply accept : accept(C)
+Dispatch drinkready : drinkready(V)
+Dispatch clientready : clientready(C)
+Dispatch paymentready : paymentready(P)
+Dispatch order : order(O)
+Dispatch end : end (E)
+
+
+Context ctxtearoom ip [ host="localhost" port=8068 ]
+ExternalQActor waiterengine context ctxtearoom
+
+QActor waitermind context ctxtearoom{
+[#
+//	//Coordinates of the entrance door
+	val X_EntranceDoor = "0"
+	val Y_EntranceDoor = "4"
+
+//	//Coordinates of the exit door
+	val X_ExitDoor = "6"
+	val Y_ExitDoor = "4"
+	
+//  //Coordinates of the barman
+	val X_servicedesk = "6"
+	val Y_servicedesk = "0"	
+
+//	//Coordinates Tables
+	val X_teatable1     = "2"
+	val Y_teatable1     = "3"
+
+	val X_teatable2     = "5"
+	val Y_teatable2     = "3"
+
+	//Coordinates of the home
+    val X_home			= "0"
+	val Y_home 			= "0"
+
+	//Time for serving a client
+//	val servicetime = 1000L 
+
+
+	val	Cleantime = 2000L
+	val Servicetime = 5000L
+	val CollectTime = 4000L
+	data class Table(var state: String ="cleaned") {
+		
+	}
+	val table1 = Table()
+	val table2 = Table()
+	var stateTable1 = "cleaned"
+	var stateTable2 = "cleaned"
+#]
+	State s0 initial {
+		discardMsg Off
+		println("waiter   |||   init")
+		
+	}
+	Goto reachhome
+	
+	State reachhome{
+		println("waiter   |||   reachhome")
+		request waiterengine -m moveto : moveto($X_home,$Y_home)
+	}
+	Transition t0 whenReply done -> home
+	
+	State home{
+		println("waiter   |||   home")
+		updateResource [# "home" #]
+	}
+	Transition t0 whenRequest enter -> accept
+				  whenMsg clientready -> take
+				  whenMsg drinkready -> serve
+				  whenMsg paymentready -> reachTableCollect
+				  whenMsg end -> endwork
+	
+	State accept {
+		println("waiter   |||   accept")
+		replyTo enter with accept : accept(idclient)
+	}
+	Goto reachEntranceDoor
+	
+	State reachEntranceDoor {
+		println("waiter   |||   reachEntranceDoor")
+		updateResource[# "reachEntranceDoor" #]
+		request waiterengine -m moveto : moveto($X_entrancedoor, $Y_entrancedoor)
+	}
+	Transition t0 whenReply done -> convoyToTable
+	
+	State convoyToTable{
+		println("waiter   |||   convoyToTable")
+		request waiterengine -m moveto : moveto ($X_teatable1,$Y_teatable1)
+		[# table1.state= "occupied" #]
+		println("waiter   |||   table state occupied")
+		updateResource [# "convoyToTable" #]
+		
+	}
+	Transition t0 whenReply done -> reachhome
+	
+	State take{
+		println("waiter   |||   take")
+		updateResource [# "take" #]
+		request waiterengine -m moveto : moveto ($X_teatable1,$Y_teatable1)
+	}
+	Transition t0 whenReply done -> transmit
+	
+	State transmit{
+		println("waiter   |||   transmit")
+		updateResource [# "transmit" #]
+		//forward barman -m order : order(payloadArg(0))
+	}
+	Goto reachhome
+	
+	State reachBarman{
+		println("waiter   |||   reachBarman")
+		updateResource[# "reachBarman" #]
+		request waiterengine -m moveto: moveto($X_servicedesk,$Y_servicedesk)
+	}
+	Transition t0 whenReply done -> serve
+	
+	State serve{
+		println("waiter   |||   serve")
+		updateResource[# "serve" #]
+		request waiterengine -m moveto : moveto ($X_teatable1,$Y_teatable1)
+	}
+	Transition t0 whenReply done -> reachhome
+	
+	State reachTableCollect {
+		println("waiter   |||   reachTable")
+		updateResource[# "reachTable" #]
+		request waiterengine -m moveto : moveto ($X_teatable1,$Y_teatable1)
+	}
+	Transition t0 whenReply done -> collect
+	
+	State reachTableClean {
+		println("waiter   |||   reachTable")
+		updateResource[# "reachTable" #]
+		request waiterengine -m moveto : moveto ($X_teatable1,$Y_teatable1)
+	}
+	Transition t0 whenReply done -> clean
+	
+	State collect {
+		println("waiter   |||   collect")
+		updateResource[# "collect" #]
+		delayVar CollectTime
+	}
+	Goto convoyToExitDoor
+	
+	State convoyToExitDoor{
+		println("waiter   |||   convoyToExitDoor")
+		updateResource[# "convoyToExitDoor" #]
+		request waiterengine -m moveto : moveto($X_exitdoor,$Y_exitdoor)
+		[# table1.state = "dirty" #]
+		println("waiter   |||   table state dirty")
+		delay 5000
+	}
+	Transition t0 whenReply done -> reachTableClean
+	
+	State clean{
+		println("waiter   |||   clean")
+		updateResource[# "clean1" #]
+		delayVar Cleantime
+		[# table1.state = "undirty" #]
+		println("waiter   |||   table state undirty")
+	}
+	Goto clean2
+	
+	State clean2{
+		println("waiter   |||   clean2")
+		updateResource[# "clean2" #]
+		delayVar Cleantime
+		[# table1.state = "sanitized" #]
+		println("waiter   |||   table state sanitized")
+	}
+	Goto clean3
+	
+	State clean3{
+		println("waiter   |||   clean3")
+		updateResource[# "clean3" #]
+		delayVar Cleantime
+		[# table1.state = "cleaned" #]
+		println("waiter   |||   table state cleaned")
+	}
+	Goto reachhome
+	
+	State endwork{
+		println("waiter   |||   end")
+		terminate 0
+	}
+}

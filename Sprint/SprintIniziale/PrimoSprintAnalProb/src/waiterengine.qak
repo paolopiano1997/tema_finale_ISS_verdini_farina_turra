@@ -1,0 +1,63 @@
+System subtearoom
+
+Request moveto : moveto(X,Y)
+Reply done : done(X,Y)
+
+Request start : start(S)
+Reply ready : ready(V)
+
+Request step       : step( TIME )	
+Reply   stepdone   : stepdone(V)  
+Reply   stepfail   : stepfail(DURATION, CAUSE)
+Dispatch cmd       : cmd(MOVE)
+
+Context ctxsubtearoom ip [ host="localhost" port=8068 ]
+Context ctxbasicrobot     ip [host="127.0.0.1"   port=8020]   
+
+ExternalQActor basicrobot    context ctxbasicrobot
+
+QActor waiterengine context ctxsubtearoom {
+	State s0 initial{
+		run itunibo.planner.plannerUtil.initAI() //init planner entity
+		println("waiterengine   |||   init")
+	}
+	Transition t0 whenRequest start -> started
+	
+	State started{
+		replyTo start with ready : ready(waiterengine)
+	}
+	Goto wait
+	
+	State wait{
+		println("waiterengine   |||   wait")
+		
+	}
+	Transition t0 whenRequest moveto -> planmove
+	
+	State planmove{
+		onMsg( moveto : moveto(X,Y) ){
+			[# XP = payloadArg(0)
+			   YP = payloadArg(1)			  
+			 #]
+			println("waiterengine   |||   moveto ($XP,$YP)")
+			run itunibo.planner.plannerUtil.planForGoal("$XP","$YP")
+		}
+	}
+	Goto execMove
+	
+	State execMove{
+		println("waiterengine   |||   execMo, curpos=($XP,$YP)")
+		[#  CurMove = itunibo.planner.plannerUtil.getNextPlannedMove() #]
+		forward basicrobot -m cmd : cmd($CurMove)
+ 		run itunibo.planner.plannerUtil.updateMap( "$CurMove" )
+	}
+	Goto execMove if [# CurMove.length > 0 #] else endSuccess
+	
+	State endSuccess{
+		println("waiterengine   |||   endSuccess, curpos=($XP,$YP)")
+		run itunibo.planner.plannerUtil.showCurrentRobotState()
+		replyTo moveto with done : done($XP,$YP)
+	}
+	
+	
+} 

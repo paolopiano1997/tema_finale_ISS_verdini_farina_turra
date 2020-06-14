@@ -20,17 +20,17 @@ QActor waiter context ctxwaiter {
 [#
 //	//Coordinates of the entrance door
 	val XEntranceDoor = "0"
-	val YEntranceDoor = "6"
+	val YEntranceDoor = "4"
 
 //	//Coordinates of the exit door
 	val XExitDoor = "6"
-	val YExitDoor = "6"
+	val YExitDoor = "4"
 
 //	//Coordinates Tables
 	val X_teatable1     = "2"
 	val Y_teatable1     = "3"
 
-	val X_teatable2     = "4"
+	val X_teatable2     = "5"
 	val Y_teatable2     = "3"
 
 	//Coordinates of the home
@@ -43,11 +43,11 @@ QActor waiter context ctxwaiter {
 
 	val	Cleantime = 2000L
 	val Servicetime = 5000L
-//	data class Table(var state: String ="cleaned") {
-//		
-//	}
-//	val table1 = Table()
-//	val table2 = Table()
+	data class Table(var state: String ="cleaned") {
+		
+	}
+	val table1 = Table()
+	val table2 = Table()
 	var stateTable1 = "cleaned"
 	var stateTable2 = "cleaned"
 #]
@@ -61,7 +61,7 @@ QActor waiter context ctxwaiter {
 	State home{
 		println("waiter    |||   home")
 		updateResource [# "home" #]
-		run itunibo.planner.plannerUtil.planForGoal(X_home,Y_home)
+//		run itunibo.planner.plannerUtil.planForGoal(X_home,Y_home)
 	}
 	Transition t0 whenRequest enter -> accept
 				  whenMsg clientready -> take
