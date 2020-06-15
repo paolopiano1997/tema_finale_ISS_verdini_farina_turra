@@ -1,0 +1,4 @@
+Test plan
+- controllo stato del tavolo ad ogni operazione
+- controllare che la posizione corrente del waiter sia correto
+    (xp,yp)=(x_teatable1,y_teatable1)

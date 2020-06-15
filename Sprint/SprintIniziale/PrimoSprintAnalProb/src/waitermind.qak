@@ -22,8 +22,6 @@ Context ctxtearoom ip [ host="127.0.0.1" port=8068 ]
 
 ExternalQActor basicrobot  context ctxbasicrobot
 
-
-
 CodedQActor waiterengine context ctxtearoom className "it.unibo.waiterengine.Waiterengine"
 
 QActor waitermind context ctxtearoom{
