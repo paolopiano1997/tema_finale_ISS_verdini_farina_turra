@@ -91,6 +91,7 @@ QActor waiterengine context ctxsubtearoom {
 	State execMove{
 		forward basicrobot -m cmd : cmd($CurMove)
  		run itunibo.planner.plannerUtil.updateMap( "$CurMove" )
+ 		delay 200
 	}
 	Goto execPlanMove if [# CurMove.length > 0 #] else endSuccess
 	

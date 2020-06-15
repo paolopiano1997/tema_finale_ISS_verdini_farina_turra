@@ -109,6 +109,7 @@ class Waiterengine ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( nam
 					action { //it:State
 						forward("cmd", "cmd($CurMove)" ,"basicrobot" ) 
 						itunibo.planner.plannerUtil.updateMap( "$CurMove"  )
+						delay(200) 
 					}
 					 transition( edgeName="goto",targetState="execPlanMove", cond=doswitchGuarded({ CurMove.length > 0  
 					}) )

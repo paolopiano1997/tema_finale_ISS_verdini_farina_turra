@@ -28,7 +28,7 @@ class Client ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, sco
 						println("client   |||   sending enter request")
 						request("enter", "enter(id)" ,"waitermind" )  
 					}
-					 transition(edgeName="t014",targetState="ok",cond=whenReply("accept"))
+					 transition(edgeName="t015",targetState="ok",cond=whenReply("accept"))
 				}	 
 				state("ok") { //this:State
 					action { //it:State
@@ -38,7 +38,6 @@ class Client ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, sco
 						forward("clientready", "clientready(id)" ,"waitermind" ) 
 						delay(15000) 
 						println("barman   |||   ready")
-						delay(15000) 
 						forward("drinkready", "drinkready(id)" ,"waitermind" ) 
 						delay(15000) 
 						forward("paymentready", "paymentready(id)" ,"waitermind" ) 
