@@ -95,6 +95,7 @@ QActor waiterengine context ctxsubtearoom {
 	Goto execPlanMove if [# CurMove.length > 0 #] else endSuccess
 	
 	State endSuccess{
+		updateResource [# "($XP,$YP)" #]
 		println("waiterengine   |||   endSuccess, curpos=($XP,$YP)")
 		run itunibo.planner.plannerUtil.showCurrentRobotState()
 		replyTo moveto with done : done($XP,$YP)

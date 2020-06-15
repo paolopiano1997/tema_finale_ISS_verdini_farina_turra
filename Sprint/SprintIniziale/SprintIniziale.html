@@ -377,6 +377,76 @@ QActor waiter context ctxwaiter {
 }
 </pre>
 
+Come testplan è stato effettuato un controllo sullo stato del <em>waiter</em> in risposta alle richieste ed operazioni che deve svolgere,
+per esempio controllando che quando accetta una richiesta si rechi alla porta di ingresso, oppure quando accompagna il cliente al tavolo stia effettivamente andando verso il tavolo.
+
+<pre>
+class TestWaiter {
+	var waiter            : ActorBasic? = null
+	//val mqttTest   	      = MqttUtils("test") 
+	val initDelayTime     = 1000L
+	
+	@kotlinx.coroutines.ObsoleteCoroutinesApi
+	@kotlinx.coroutines.ExperimentalCoroutinesApi
+	@Before
+	fun systemSetUp() {
+   		kotlin.concurrent.thread(start = true) {
+			it.unibo.ctxwaiter.main()
+		}
+	}
+
+	@After
+	fun terminate() {
+		println("%%%  TestWaiter terminate ")
+	}
+	
+	fun checkReachEntranceDoor(value: String){		
+		if( waiter != null ){
+			println(" --- checkReachEntranceDoor --- ${waiter!!.geResourceRep()}")
+			assertTrue( waiter!!.geResourceRep() == value)
+		}  
+	}
+	
+	fun checkReachTable(value: String){		
+		if( waiter != null ){
+			println(" --- checkReachTable --- ${waiter!!.geResourceRep()}")
+			assertTrue( waiter!!.geResourceRep() == value)
+		}  
+	}
+	
+	fun checkWait(value: String){		
+		if( waiter != null ){
+			println(" --- checkWait --- ${waiter!!.geResourceRep()}")
+			assertTrue( waiter!!.geResourceRep() == value)
+		}  
+	}
+	
+	@Test
+	fun testRobotboundary(){
+	 	runBlocking{
+ 			while( waiter == null ){
+				println("testWaiter wait for waiter ... ")
+				delay(initDelayTime)  //time for robot to start
+				waiter = it.unibo.kactor.sysUtil.getActor("waiter")
+ 			}
+			
+			MsgUtil.sendMsg(MsgUtil.buildRequest("waiter","enter","enter","waiter"),waiter!!)
+ 			delay(7000)
+			checkReachEntranceDoor( "reachingEntranceDoor" )
+			MsgUtil.sendMsg("ready","ready","ready",waiter!!)
+ 			delay(7000)
+			checkReachTable( "reachingTable" )
+			MsgUtil.sendMsg("ready","ready","ready",waiter!!)
+ 			delay(7000)
+ 			checkWait( "home" )
+			delay(2000)
+			MsgUtil.sendMsg("end","end","end",waiter!!)
+ 			if( waiter != null ) waiter!!.waitTermination()
+  		}
+	 	println("testWaiter BYE  ")  
+	}
+}
+</pre>
 
 </div>
 
@@ -409,6 +479,7 @@ Risulta quindi necessario introdurre dei messaggi aggiuntivi, al fine di coordin
 <li>done(X,Y): messaggio che l'engine manda alla mente in risposta al moveto, in cui afferma di essere arrivato alla cella di posizione X,Y. Opportunamente modellato come Reply.</li>
 <li>start: è necessario che la mente "inizializzi" l'engine, il quale dovrà dare un feedback su quando è pronto per effettuare operazioni. Quindi tale messaggio è modellato come Request, a cui corrisponderà la seguente Reply</li>
 <li>ready: messaggio Reply che l'engine manda alla mente per affermare che è pronto all'opera.</li>
+</ul>
 </br>
 Poichè il <em>planner</em> lavora su una mappa, ovvero le varie celle che identificano la <em>tearoom</em>, è necessario ragionare, al posto di "movimento" in sè, in termini
 di "step", ovvero il movimento unitario del <em>waiter</em> diventa uno step di una cella. E' necessario gestire quindi eventuali "step" falliti in concomitanza di ostacoli (per esempio le pareti della <em>tearoom</em>).
@@ -728,7 +799,79 @@ QActor waiterengine context ctxsubtearoom {
 
 </pre>
 
-</ul>
+</br>
+</br>
+Per effettuare un test plan è stato necessario introdurre degli stati intermedi e dei messaggi, in modo da "bloccare" il <em>waiter</em> in determinate posizioni. Come
+primo test è stato effettuato un controllo sulle posizioni raggiunte dal <em>waiter</em>, in modo tale che coincidessero
+con quelle aspettate (per esempio, quando il <em>waiter</em> prende l'ordine dal <em>barman</em>, deve trovarsi nella posizione del servicedesk).
+In questo caso il messaggio Dispatch "gohome" sblocca il <em>waiter</em> dalla posizione attuale.
+<pre>
+class TestWaiterPosition {
+	var waitermind            : ActorBasic? = null
+	var waiterengine		  : ActorBasic? = null
+	//val mqttTest   	      = MqttUtils("test") 
+	val initDelayTime     = 1000L
+	
+	@kotlinx.coroutines.ObsoleteCoroutinesApi
+	@kotlinx.coroutines.ExperimentalCoroutinesApi
+	@Before
+	fun systemSetUp() {
+   		kotlin.concurrent.thread(start = true) {
+			it.unibo.ctxtearoom.main()
+		}
+	}
+
+	@After
+	fun terminate() {
+		println("%%%  TestWaiter terminate ")
+	}
+	
+	fun checkPosition(x: String, y: String){		
+		if( waiterengine != null ){
+			println(" --- checkHome --- ${waiterengine!!.geResourceRep()}")
+			assertTrue( waiterengine!!.geResourceRep() == "($x,$y)")
+		}  
+	}
+	
+	@Test
+	fun testRobotboundary(){
+	 	runBlocking{
+ 			while( waitermind == null ){
+				println("testWaiterPosition waits for waiterengine ... ")
+				delay(initDelayTime)  //time for robot to start
+				waitermind = it.unibo.kactor.sysUtil.getActor("waitermind")
+ 			}
+			while(waiterengine == null){
+				println("testWaiterPosition waits for waiterengine...")
+				delay(initDelayTime)
+				waiterengine = it.unibo.kactor.sysUtil.getActor("waiterengine")
+			}
+			
+			MsgUtil.sendMsg(MsgUtil.buildRequest("waitermind","enter","enter","waitermind"),waitermind!!)
+ 			delay(15000)
+			checkPosition("0","0")
+			MsgUtil.sendMsg(MsgUtil.buildDispatch("waitermind","clientready","clientready","waitermind"),waitermind!!)
+			delay(15000)
+			checkPosition("2","2")
+			MsgUtil.sendMsg(MsgUtil.buildDispatch("waitermind","gohome","gohome","waitermind"),waitermind!!)
+			delay(8000)
+			MsgUtil.sendMsg(MsgUtil.buildDispatch("waitermind","drinkready","drinkready","waitermind"),waitermind!!)
+			delay(10000)
+			checkPosition("6","0")
+			MsgUtil.sendMsg(MsgUtil.buildDispatch("waitermind","gohome","gohome","waitermind"),waitermind!!)
+			delay(15000)
+			MsgUtil.sendMsg(MsgUtil.buildDispatch("waitermind","paymentready","paymentready","waitermind"),waitermind!!)
+			delay(15000)
+			checkPosition("6","4")
+			MsgUtil.sendMsg(MsgUtil.buildDispatch("waitermind","gohome","gohome","waitermind"),waitermind!!)
+			delay(20000)
+			MsgUtil.sendMsg("end","end","end",waitermind!!)
+ 			if( waitermind != null ) waitermind!!.waitTermination()
+  		}
+	 	println("testWaiterPosition BYE  ")  
+	}
+}
+</pre>
 	
 </div>	
 

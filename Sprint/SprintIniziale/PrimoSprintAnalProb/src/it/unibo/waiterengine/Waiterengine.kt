@@ -117,6 +117,8 @@ class Waiterengine ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( nam
 				}	 
 				state("endSuccess") { //this:State
 					action { //it:State
+						updateResourceRep( "($XP,$YP)"  
+						)
 						println("waiterengine   |||   endSuccess, curpos=($XP,$YP)")
 						itunibo.planner.plannerUtil.showCurrentRobotState(  )
 						answer("moveto", "done", "done($XP,$YP)"   )  

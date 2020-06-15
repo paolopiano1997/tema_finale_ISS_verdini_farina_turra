@@ -17,6 +17,9 @@ Dispatch paymentready : paymentready(P)
 Dispatch order : order(O)
 Dispatch end : end (E)
 
+//test
+Dispatch gohome : gohome(G)
+
 Context ctxbasicrobot     ip [host="localhost"   port=8020] 
 Context ctxtearoom ip [ host="127.0.0.1" port=8068 ]
 
@@ -118,14 +121,24 @@ QActor waitermind context ctxtearoom{
 		updateResource [# "transmit" #]
 		//forward barman -m order : order(payloadArg(0))
 	}
-	Goto reachhome
+	Goto test
+	
+	State test{
+		//For test
+	}
+	Transition t0 whenMsg gohome -> reachhome
 	
 	State reachBarman{
 		println("waitermind   |||   reachBarman")
 		updateResource[# "reachBarman" #]
 		request waiterengine -m moveto: moveto($X_servicedesk,$Y_servicedesk)
 	}
-	Transition t0 whenReply done -> serve
+	Transition t0 whenReply done -> test3
+	
+	State test3{
+		
+	}
+	Transition t0 whenMsg gohome -> serve
 	
 	State serve{
 		println("waitermind   |||   serve")
@@ -163,7 +176,12 @@ QActor waitermind context ctxtearoom{
 		println("waitermind   |||   table state dirty")
 		delay 5000
 	}
-	Transition t0 whenReply done -> reachTableClean
+	Transition t0 whenReply done -> test2
+	
+	State test2{
+		//test exit
+	}
+	Transition t0 whenMsg gohome -> reachTableClean
 	
 	State clean{
 		println("waitermind   |||   clean")
@@ -199,30 +217,29 @@ QActor waitermind context ctxtearoom{
 }
 
 
-QActor client context ctxtearoom {
-	State s0 initial{
-		println("client   |||   init")
-	}
-	Goto doSomething
-	
-	State doSomething{
-		println("client   |||   sending enter request")
-		request waitermind -m enter : enter(id)
-	}
-	Transition t0 whenReply accept -> ok
-	
-	State ok{
-		println("client   |||   accepted")
-		delay 15000
-		println("client   |||   ready")
-		forward waitermind -m clientready : clientready(id)
-		delay 15000
-		println("barman   |||   ready")
-		delay 15000
-		forward waitermind -m drinkready : drinkready(id)
-		delay 15000
-		forward waitermind -m paymentready : paymentready(id)
-		delay 20000
-		forward waitermind -m end : end(end)
-	}
-}
+//QActor client context ctxtearoom {
+//	State s0 initial{
+//		println("client   |||   init")
+//	}
+//	Goto doSomething
+//	
+//	State doSomething{
+//		println("client   |||   sending enter request")
+//		request waitermind -m enter : enter(id)
+//	}
+//	Transition t0 whenReply accept -> ok
+//	
+//	State ok{
+//		println("client   |||   accepted")
+//		delay 15000
+//		println("client   |||   ready")
+//		forward waitermind -m clientready : clientready(id)
+//		delay 15000
+//		println("barman   |||   ready")
+//		forward waitermind -m drinkready : drinkready(id)
+//		delay 15000
+//		forward waitermind -m paymentready : paymentready(id)
+//		delay 20000
+//		forward waitermind -m end : end(end)
+//	}
+//}

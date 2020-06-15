@@ -24,11 +24,8 @@ class TestWaiter {
 	@kotlinx.coroutines.ExperimentalCoroutinesApi
 	@Before
 	fun systemSetUp() {
-//		println("%%%  boudaryTest prepare the result map expected ")
-//  		println( mapRoomKotlin.mapUtil.refMapForTesting )
-   		//activate the application: SEE boundaryTest
    		kotlin.concurrent.thread(start = true) {
-			it.unibo.ctxwaiter.main()  //WARNING: elininate the autostart
+			it.unibo.ctxwaiter.main()
 		}
 	}
 
@@ -67,7 +64,6 @@ class TestWaiter {
 				waiter = it.unibo.kactor.sysUtil.getActor("waiter")
  			}
 			
-		
 			MsgUtil.sendMsg(MsgUtil.buildRequest("waiter","enter","enter","waiter"),waiter!!)
  			delay(7000)
 			checkReachEntranceDoor( "reachingEntranceDoor" )
