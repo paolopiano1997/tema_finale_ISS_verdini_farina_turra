@@ -121,12 +121,7 @@ class Waitermind ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name,
 						updateResourceRep( "transmit"  
 						)
 					}
-					 transition( edgeName="goto",targetState="test", cond=doswitch() )
-				}	 
-				state("test") { //this:State
-					action { //it:State
-					}
-					 transition(edgeName="t010",targetState="reachhome",cond=whenDispatch("gohome"))
+					 transition( edgeName="goto",targetState="reachhome", cond=doswitch() )
 				}	 
 				state("reachBarman") { //this:State
 					action { //it:State
@@ -135,12 +130,7 @@ class Waitermind ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name,
 						)
 						request("moveto", "moveto($X_servicedesk,$Y_servicedesk)" ,"waiterengine" )  
 					}
-					 transition(edgeName="t011",targetState="test3",cond=whenReply("done"))
-				}	 
-				state("test3") { //this:State
-					action { //it:State
-					}
-					 transition(edgeName="t012",targetState="serve",cond=whenDispatch("gohome"))
+					 transition(edgeName="t010",targetState="serve",cond=whenReply("done"))
 				}	 
 				state("serve") { //this:State
 					action { //it:State
@@ -149,7 +139,7 @@ class Waitermind ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name,
 						)
 						request("moveto", "moveto($X_teatable1,$Y_teatable1)" ,"waiterengine" )  
 					}
-					 transition(edgeName="t013",targetState="reachhome",cond=whenReply("done"))
+					 transition(edgeName="t011",targetState="reachhome",cond=whenReply("done"))
 				}	 
 				state("reachTableCollect") { //this:State
 					action { //it:State
@@ -158,7 +148,7 @@ class Waitermind ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name,
 						)
 						request("moveto", "moveto($X_teatable1,$Y_teatable1)" ,"waiterengine" )  
 					}
-					 transition(edgeName="t014",targetState="collect",cond=whenReply("done"))
+					 transition(edgeName="t012",targetState="collect",cond=whenReply("done"))
 				}	 
 				state("reachTableClean") { //this:State
 					action { //it:State
@@ -167,7 +157,7 @@ class Waitermind ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name,
 						)
 						request("moveto", "moveto($X_teatable1,$Y_teatable1)" ,"waiterengine" )  
 					}
-					 transition(edgeName="t015",targetState="clean",cond=whenReply("done"))
+					 transition(edgeName="t013",targetState="clean",cond=whenReply("done"))
 				}	 
 				state("collect") { //this:State
 					action { //it:State
@@ -188,17 +178,12 @@ class Waitermind ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name,
 						println("waitermind   |||   table state dirty")
 						delay(5000) 
 					}
-					 transition(edgeName="t016",targetState="test2",cond=whenReply("done"))
-				}	 
-				state("test2") { //this:State
-					action { //it:State
-					}
-					 transition(edgeName="t017",targetState="reachTableClean",cond=whenDispatch("gohome"))
+					 transition(edgeName="t014",targetState="reachTableClean",cond=whenReply("done"))
 				}	 
 				state("clean") { //this:State
 					action { //it:State
 						println("waitermind   |||   clean")
-						updateResourceRep( "clean1"  
+						updateResourceRep( "undirty"  
 						)
 						delay(Cleantime)
 						 table1.state = "undirty"  
@@ -209,7 +194,7 @@ class Waitermind ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name,
 				state("clean2") { //this:State
 					action { //it:State
 						println("waitermind   |||   clean2")
-						updateResourceRep( "clean2"  
+						updateResourceRep( "sanitized"  
 						)
 						delay(Cleantime)
 						 table1.state = "sanitized"  
@@ -220,7 +205,7 @@ class Waitermind ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name,
 				state("clean3") { //this:State
 					action { //it:State
 						println("waitermind   |||   clean3")
-						updateResourceRep( "clean3"  
+						updateResourceRep( "cleaned"  
 						)
 						delay(Cleantime)
 						 table1.state = "cleaned"  

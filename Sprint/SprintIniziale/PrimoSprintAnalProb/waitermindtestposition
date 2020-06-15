@@ -17,6 +17,8 @@ Dispatch paymentready : paymentready(P)
 Dispatch order : order(O)
 Dispatch end : end (E)
 
+//test
+Dispatch gohome : gohome(G)
 
 Context ctxbasicrobot     ip [host="localhost"   port=8020] 
 Context ctxtearoom ip [ host="127.0.0.1" port=8068 ]
@@ -119,14 +121,24 @@ QActor waitermind context ctxtearoom{
 		updateResource [# "transmit" #]
 		//forward barman -m order : order(payloadArg(0))
 	}
-	Goto reachhome
+	Goto test
+	
+	State test{
+		//For test
+	}
+	Transition t0 whenMsg gohome -> reachhome
 	
 	State reachBarman{
 		println("waitermind   |||   reachBarman")
 		updateResource[# "reachBarman" #]
 		request waiterengine -m moveto: moveto($X_servicedesk,$Y_servicedesk)
 	}
-	Transition t0 whenReply done -> serve
+	Transition t0 whenReply done -> test3
+	
+	State test3{
+		
+	}
+	Transition t0 whenMsg gohome -> serve
 	
 	State serve{
 		println("waitermind   |||   serve")
@@ -164,11 +176,16 @@ QActor waitermind context ctxtearoom{
 		println("waitermind   |||   table state dirty")
 		delay 5000
 	}
-	Transition t0 whenReply done -> reachTableClean
+	Transition t0 whenReply done -> test2
+	
+	State test2{
+		//test exit
+	}
+	Transition t0 whenMsg gohome -> reachTableClean
 	
 	State clean{
 		println("waitermind   |||   clean")
-		updateResource[# "undirty" #]
+		updateResource[# "clean1" #]
 		delayVar Cleantime
 		[# table1.state = "undirty" #]
 		println("waitermind   |||   table state undirty")
@@ -177,7 +194,7 @@ QActor waitermind context ctxtearoom{
 	
 	State clean2{
 		println("waitermind   |||   clean2")
-		updateResource[# "sanitized" #]
+		updateResource[# "clean2" #]
 		delayVar Cleantime
 		[# table1.state = "sanitized" #]
 		println("waitermind   |||   table state sanitized")
@@ -186,7 +203,7 @@ QActor waitermind context ctxtearoom{
 	
 	State clean3{
 		println("waitermind   |||   clean3")
-		updateResource[# "cleaned" #]
+		updateResource[# "clean3" #]
 		delayVar Cleantime
 		[# table1.state = "cleaned" #]
 		println("waitermind   |||   table state cleaned")

@@ -17,6 +17,8 @@ Dispatch paymentready : paymentready(P)
 Dispatch order : order(O)
 Dispatch end : end (E)
 
+//Test
+Dispatch ok : ok(O)
 
 Context ctxbasicrobot     ip [host="localhost"   port=8020] 
 Context ctxtearoom ip [ host="127.0.0.1" port=8068 ]
@@ -147,7 +149,12 @@ QActor waitermind context ctxtearoom{
 		updateResource[# "reachTable" #]
 		request waiterengine -m moveto : moveto ($X_teatable1,$Y_teatable1)
 	}
-	Transition t0 whenReply done -> clean
+	Transition t0 whenReply done -> startclean
+	
+	State startclean{
+		updateResource [# "dirty" #]
+	}
+	Transition t0 whenMsg ok -> clean
 	
 	State collect {
 		println("waitermind   |||   collect")
@@ -173,7 +180,7 @@ QActor waitermind context ctxtearoom{
 		[# table1.state = "undirty" #]
 		println("waitermind   |||   table state undirty")
 	}
-	Goto clean2
+	Transition t0 whenMsg ok -> clean2
 	
 	State clean2{
 		println("waitermind   |||   clean2")
@@ -182,7 +189,7 @@ QActor waitermind context ctxtearoom{
 		[# table1.state = "sanitized" #]
 		println("waitermind   |||   table state sanitized")
 	}
-	Goto clean3
+	Transition t0 whenMsg ok -> clean3
 	
 	State clean3{
 		println("waitermind   |||   clean3")
@@ -191,7 +198,7 @@ QActor waitermind context ctxtearoom{
 		[# table1.state = "cleaned" #]
 		println("waitermind   |||   table state cleaned")
 	}
-	Goto reachhome
+	Transition t0 whenMsg ok -> reachhome
 	
 	State endwork{
 		println("waitermind   |||   end")
