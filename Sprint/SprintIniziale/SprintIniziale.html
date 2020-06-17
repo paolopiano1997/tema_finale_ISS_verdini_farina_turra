@@ -940,7 +940,49 @@ class TestWaiterTableStates {
 </pre>
 </div>	
 
-</div>  
+<h2>Sprint review</h2> 
+<div class="remark">
+Problemi riscontrati:<br>
+<b>Documentazione poco chiara.</b>
+Sono state date per scontate alcune scelte, ad esempio quella di utilizzare il meta-modello qak.<br>
+Il fatto di aver scelto questa tecnologia per modellare il nostro problema doveva essere meglio motivata.<br>
+Le entità in gioco (cliente,barman e waiter) hanno bisogno di interagire in qualche modo per potersi scambiare dei messaggi, nella nostra analisi dei requisiti abbiamo dato per scontato che lo scambio di messaggi tra waiter e barman 
+avvenga tramite dispatch. In realtà nel mondo reale potrebbe benissimo essere un evento. Nel prossimo sprint è necessario 
+rifinire questo passaggio e fare una scelta concettuale più corretta o giustificare meglio quella già adottata.<br><br>
+
+dal fatto che per rappresentare il sistema dato servissero delle FSM (finite-state-machine) che lavorassero
+come delle entità autonome, gli attori.<br><br>
+
+<b>Tests</b>
+Il test, mettere appena prima una frase in cui si spiega cosa fa il test e come è strutturato in modo da far 
+capire meglio a chi legge che cosa fa il codice successivo.
+Cercare di astrarre il più possibile i check di tutti i test.<br><br>
+Bisognava specificare meglio la "natura" del test, ad esempio è stato dato per scontato che il test andasse a prendere lo stato
+del waiter. Ma nella Documentazione non è mai stato specificato come fosse incapsulato quest'ultimo.
+Durante lo sviluppo dell'applicazione potrebbe cambiare il modo in cui lo stato viene salvato, ad esempio potrebbe essere su DB
+o su un file di testo o json. In questa maniera i test progettati non funzionerebbero più e andrebbero riprogettati.<br><br>
+usare una "string" oppure una classe singleton con costanti che corrispondono al risultato atteso dal testo??????????????<br><br>
+
+<b>mappa</b><br>
+È stata data per scontata una <b>ASSUNZIONE</b> molto importante, il fatto che la mappa utilizzata dal sistema fosse precaricata e 
+immutabile.
+Quando init il sistema si lancia il waiter affinchè esplori la stanza e si crei una mappa virtuale che descriva dove 
+sono gli ostacoli. Nel caso in cui pareti o tavoli siamo mobili è necessario inizializzare la mappa ad ogni modifica.<br>
+<br><br>
+<b>semantiche di req/resp</b><br>
+???done - reply for request ?????????<br><br>
+</div>
+
+<h2>Sprint retrospective</h2> 
+<div class="remark">
+Nel prossimo sprint dovranno essere rifiniti gli aspetti descritti nello sprint review.
+Gli incrementi considerati nello sprint successivo saranno quelli di aggiungere un cliente al sistema. 
+Simulare uno o più task interrompibili.
+</div>
+
+</div>
+
+
 
 <div style="background-color:rgba(86, 56, 253, 0.9); width:60%;text-align:left;color:white">
 
