@@ -1,0 +1,475 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<!-- saved from url=(0129)http://htmlpreview.github.io/?https://github.com/anatali/iss2020LabBo/blob/master/it.unibo.issLabStart/userDocs/template2020.html -->
+<html><!--
+<link rel="stylesheet" type="text/css" href="../css/issStyle1.css">
+<script type="text/htmlpreview" src="../css/issStyle.js"></script>
+--><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><style type="text/css">
+<!--
+body
+{
+    margin-left:  30px;
+    margin-right: 30px;
+};
+
+P
+{
+    font-family: Tahoma;
+    font-size: 10pt;
+};
+
+a, a:visited, a:active, a:link, a:hover {
+    text-decoration: underline;
+    color: #545454;
+    background-color: transparent;
+}
+
+a:hover {
+    background-color: #cccccc;
+}
+
+
+hr {
+    clear: both;
+    height: 1px;
+    color: #242424;
+    background-color: transparent;
+}
+
+h1, h2, h3 {
+    color: #242424;
+    clear: left;
+    font: 100% Tahoma, Helvetica, Arial, sans-serif;
+    margin: 10;
+    margin-right: 15px;
+    margin-bottom: 0.5em;
+    padding-top: 0.5em;
+    border-bottom: 1px solid #242424;
+}
+
+h1 {
+    font-size: 150%;
+    background-color: #b2c0ff;
+}
+
+h2 {
+    background-color: #d9fbff;
+    font-size: 110%;
+}
+
+h3 {
+	background-color: #e6ccff;
+    font-size: 80%;
+}
+h4 {
+    background-color: #99ffcc;
+    font-size: 100%;
+	width: 750px;
+}
+#i {
+    color: #ff1010;
+}
+tt{
+	font-family: "Arial";
+    font-size: 80%;
+	color: #006600;
+}
+em{
+	font-family: "Arial";
+    font-size: 80%;
+	font-weight: bold;
+	border-style:solid;
+	border-color: #ccffff;
+    color: #0033cc;
+}
+bc{
+	font-family: "Arial";
+	font-size: 80%;
+	font-weight: bold;
+    color: #990000;
+	background-color: #fcf8c7;
+}
+k{
+	font-family: "Arial";
+	font-weight: bold;
+    color: #990000;
+	 
+}
+ks{
+	font-family: "Arial";
+	font-weight: bold;
+    color: #0000CD	;
+	 
+}
+kc{
+	font-family: "Arial";
+	font-weight: bold;
+    color: #008000	;
+	 
+}
+pre{
+	font-family: "Helvetica";
+	font-size: 60%;
+	background-color: #fcf8c7;
+	border: 1px solid blue;
+}
+m{
+	font-family: "Helvetica";
+	line-height: 100%;
+ 	font-size: 75%;
+}
+div.body{
+	width: 800px;
+    font-size: 18px;
+}    
+div.req{
+	background-color: #d9ffb3;
+    font-size: 18px;
+	width: 700px;
+    border: 3px solid green;
+    padding: 15px;
+    margin: 10px;
+}       
+div.remark{
+	background-color: #FFFC33;     
+    border: 3px solid green;
+    padding: 15px;
+    margin: 10px;
+}  
+table, th, td {
+  border: 1px solid black;
+  border-collapse: collapse;
+}         
+    
+  -->
+</style>
+    
+<!--<base href="https://raw.githubusercontent.com/anatali/iss2020LabBo/master/it.unibo.issLabStart/userDocs/template2020.html">--><base href=".">
+   
+<title>Considerazioni Iniziali</title></head>
+    
+<body>
+<div id="top">
+<h1>LABORATORIO DI SISTEMI SOFTWARE <font size="5"></font> </h1>
+</div>  
+
+<div class="body"> 
+<h2>Introduction</h2>
+ The <em>manager</em> of a <em>tearoom</em> intends to regulate the access to the service by means of a ddr robot (<em>waiter</em>).
+<br/><br/>
+The <em>tearoom</em> is a rectangular room that includes:
+
+<ul>
+<li>an <em>entrancedoor</em> to enter in the room and an <em>exitdoor</em> to exit form it;</li>
+<li>a number <tt>N (N=2)</tt> of <em>teatable</em>;</li>
+<li>a <em>serviceare</em> including a <em>servicedesk</em> at which works a <em>barman</em>;</li>
+<li>a <em>hall</em> equipped with a <em>presencedetector</em>, i.e. a device (e.g. a sonar) that can detect the presence of 
+a person (or some other entity) in it.</li>
+</ul>
+
+The <em>waiter</em> can freely move along the borders of the tearoom, since there are no obstacles there. 
+
+<center><img src="tearoom20.png" alt="tearoom20.png" width="75%" height="32%"/></center>
+
+
+<h3>User stories</h3>
+As a <em>client</em>,:
+<ul>
+<li>I intend to <em>notify</em> my interest in <em>entering</em> in a <em>safe tearoom</em>, <em>sitting</em> at a free teatable,  <em>ordering</em> 
+some tea,  <em>consuming</em> it  (within a limited amount of time <em>maxstaytime</em>)  <em>paying</em> the service
+with my credit card and finally <em>leaving</em> the room.</li>
+<li>For <em>safe tearoom</em>, I intend a tearoom with <em>clean</em> tea-tables posed at a proper distance; the room is populated by human clients 
+whose body temperature is less than <tt>37.5</tt> degrees. </li>
+<li>I can submit my notification of interest by hitting the <em>smartbell</em> located near the  <em>entrancedoor</em> 
+that will automatically measure my body temperature and send a request message to the <em>waiter</em>, by giving to me an unique <em>clientidentifier</em>.
+</li>
+<li>I my body temperature is ok, but my request cannot be immediately satisfied (since the room is full), I will be <em>informed</em> by the <em>waiter</em> 
+aabout the maximum waiting time.</li>
+</ul>
+
+As a <em>manager</em>:
+<ul>
+<li>I intend to be able to see the <em>current state</em> of the <em>tearoom</em> by using  a browser connected to a web-server 
+associated to the application.
+</li>
+</ul>
+
+ 
+<h2>Requirements</h2>
+ 
+<div class="remark">
+The <em>waiter</em> should perform the following tasks:
+<ul>
+ 
+<li><em>accept</em> the request of a client to enter in the tearoom if there is at least one teatable in the state <em>tablelean</em>, i.e.
+the table is free and has been properly cleaned; </li>
+<li><em>inform</em> the client about the maximum waiting time if there is no <em>tableclean</em>;</li> 
+<li><em>reach</em> the <em>entrance door</em> and <em>convoy</em> the accepted client to the selected teatable;</li>
+<li><em>take</em> the order of the client and transmit it (using a wifi-device) to the <em>barman</em>; </li>
+<li><em>serve</em>  the client when the <em>barman</em> says that the requested drink is ready;</li>
+<li><em>collect</em> the payment from the client when he/she has finished to consume or when the <em>maxstaytime</em> is expired;</li>
+<li><em>convoy</em> the client to the <em>exitdoor</em>;</li>
+<li><em>clean</em> the tea-table just freed  by the client;</li>
+<li><em>rest</em> at my <em>home</em> when there is nothing to do.</li>
+</ul>
+
+Since the room could contain <tt>N</tt> clients at the time, the <em>waiter</em> should reduce as much as possible the waiting time
+of the requests coming from each client.
+   
+<h3>Optional: one client in the hall</h3>
+The <em>waiter</em> must open the <em>exitdoor</em> only when the hall is free, i.e. it must
+not open that door if the hall is already engaged by a client waiting to enter at the <em>entrancedoor</em>.   
+
+<h2>Non functional requirements</h2>  
+<ol>
+<li>The ideal work team is composed of 3 persons. Teams of 1 or 2 persons (<bc>NOT</bc> 4 or more) are also allowed. </li>
+<li>The team must present a workplan as the result of the requirement/problem analysis,
+including some significant <bc>TestPlan</bc>.</li>
+<li>The team must present the sequence of SPRINT performed, with appropriate motivations.</li>
+<li>The team must present (in synthetic, schematic way) the specific activity of each team-component.</li>
+</ol>	
+
+</div>
+
+ 
+
+<h2>Requirement analysis</h2>
+<div class="remark">
+
+Dai requisiti si evince che il <em>waiter</em> deve effettuare una serie di task diversi.
+Ogni tavolo può essere in diversi stati, per esempio sporco o pulito. Per 
+una fase iniziale è opportuno modellarlo come oggetto, in quanto facilita la 
+gestione dei test e non impone vincoli implementativi o progettuali. Infatti,
+potrebbe essere comunque sviluppato come una qualunque
+altra entità, nel caso in cui venisse successivamente creato un layer superiore. 
+
+</br>
+
+Dopo aver interpellato il committente, la gestione del "<em>maxstaytime</em>" è la seguente:
+dopo aver portato il cliente al tavolo, faccio partire il tempo. Da quel momento in avanti,
+la misurazione viene fatta solamente quando è responsabilità del cliente il fatto di
+"perdere" tempo. Per esempio, se il cliente non fa mai un ordine, la colpa è del 
+cliente stesso, non del <em>waiter</em> o del <em>barman</em>.
+Dopo aver fatto l'ordine, il tempo non viene fatto scorrere in quanto quello che passa
+non è più "colpa" del cliente ma del <em>barman</em>.
+Quindi il tempo scorre solo quando è responsabilità del cliente.
+
+</br>
+Con il committente è stato chiarito anche il concetto di "current state" della tearoom.
+Essa identifica lo stato di tutte le entità e componenti all'interno del sistema, per esempio
+la posizione e il task attuale del <em>waiter</em>, lo stato dei tavoli o l'occupazione del <em>barman</em>.
+</br>
+I messaggi che circolano nel sistema sono i seguenti:
+<ul>
+<li>Request/Response per la richiesta di un cliente per entrare e la relativa risposta, positiva o negativa, data dal <em>waiter</em></li>
+<li>Dispatch per i messaggi di ordine pronto, trasmissione ordine al <em>barman</em> e per la richiesta di pagamento del cliente.</li>
+</ul>
+</div>
+
+<h2>Problem analysis</h2>
+<div class="remark">
+Dall'analisi dei requisiti nasce il problema della gestione delle entità e dei loro stati.
+Il <em>waiter</em>, per esempio, è un'entità con comportamento autonomo: è quindi opportuno modellarlo
+come un attore. Diversa considerazione deve essere fatta per i tavoli. Essi hanno uno stato, come 
+espresso dai requisiti, ma è necessario esprimerlo formalmente. Modelliamo il tavolo come un oggetto,
+così che i tavoli siano istanze di tale oggetto, che contiene una proprietà che fa da "stato" del tavolo, 
+utilizzando una stringa, per rendere eterogeneo il sistema. Nel caso in cui, in sprint successivi,
+venisse fuori una problematica che induce di modellare il tavolo come attore, basterebbe inglobare
+il modello a oggetti in un attore di livello superiore, così da interoperare utilizzando uno scambio
+di messaggi.
+
+</br>
+</br>
+Un'altra problematica che sorge è come gestire lo stato delle risorse: distribuito o concentrato.
+Nel distribuito c'è un ente che è l'unico che conosce il suo stato, nel 
+concentrato una risorsa conosce lo stato delle varie entità che compongono il dominio.
+Partendo dal presupposto che la modellazione delle risorse in modo distribuito è da evitare 
+perchè è difficile mantenere coerenza e consistenza, in questa problematica è opportuno utilizzare
+un approccio misto in cui rappresentiamo lo stato del mondo con una risorsa "world"
+in cui il sistema è fatto da due entità fondamentali, <em>waiter</em> e "world" intorno a lui.
+La conseguenza diretta di questa analisi riguarda come gestire queste due entità, ovvero
+gestirle indipendentemente oppure inserire il "world" all'interno del <em>waiter</em>.
+Nel caso in questione, i requisiti ci indicano una via: ogni tipologia di richiesta/messaggio viene fatta
+verso il <em>waiter</em>, il quale deve avere la possibilità di accedere velocemente allo stato del "world". 
+Infatti, se facessi due entità separate, il <em>waiter</em> dovrebbe continuamente interagire con l'entità
+esterna, comportando un onere computazionale e un traffico non indifferente di comunicazione.
+Quindi la problematica dovrebbe essere modellata introducendo un'unica entità <em>waiter</em> il quale
+contiene al suo interno lo stato "world".
+</br>
+</br>
+Il <em>waiter</em> è un'entità che nel momento in cui fa un task, potrebbe dover sentire dei messaggi che gli arrivano dal mondo esterno.
+Se zoommiamo dentro al <em>waiter</em> è opportuno che ci siano entità separate e specifiche, magari una serie di attori. In una fase 
+iniziale è sufficiente pensare al <em>waiter</em> come un insieme di due attori, uno attento al modno esterno e uno attento alle operazioni da fare.
+Ovvero il <em>waiter</em> deve essere proattivo, ovvero deve poter fare cose per contro proprio, ma anche reattivo,
+cioè riuscire a catturare tutte le informazioni del mondo esterno, ovvero deve essere consapevole di tali informazioni.
+Per esempio se abbiamo una coda di messaggi in ingresso mentre il <em>waiter</em> sta pulendo il tavolo, possiamo dire che siamo sicuri che se 
+l'informazione gli arriva nella coda, il <em>waiter</em> può finire di effettuare il task che sta facendo
+sicuro che non siano perdute tali informazioni arrivate.
+
+</br>
+</br>
+Una problematica cruciale che viene direttamente dall'analisi appena effettuata se sono nella parte proattiva è se
+può essere opportuno che il <em>waiter</em> interrompa il task che sta facendo per farne un altro più prioritario. E' necessario 
+prendere uno per uno tutti i task, analizzarli e capire se e quali sono i task interrompibili. 
+</br>
+</br>
+<table style="width:100%">
+  <tr>
+    <th>Task</th>
+    <th>Tempo nel caso peggiore(sec)</th> 
+    <th>Interrompibile(sì/no)</th>
+	<th>Descrizione</th>
+    <th>Caso</th>
+  </tr>
+  <tr>
+    <td><em>Accept</em></td>
+    <td>5</td>
+    <td>no</td>
+    <td>è un task leggero e veloce, si tratta di un'accettazione di richiesta, quindi la sua durata potrebbe essere messa tra le durate "minime" 
+	di tutti i task presenti nel sistema, durata breve. Per finire questo task non è necessario molto tempo,
+	quindi non ha senso interromperlo.</td>
+	<td>-</td>
+  </tr>
+  <tr>
+    <td><em>Inform</em></td>
+    <td>5</td>
+    <td>no</td>
+	<td>task leggero e veloce, durata breve. Per la stessa considerazione non interrompibile.</td>
+    <td>-</td>
+  </tr>
+  <tr>
+    <td><em>reach and Convoy</em></td>
+    <td>80</td>
+    <td>sì</td>
+	<td>task in media più duraturi di tutti quelli presenti nel sistema. Stimiamo con il committente che possa volerci
+	nel caso peggiore circa 80 secondi per effettuare il reach verso la entrance door (da servicedesk caso peggiore).
+	</br><b>Nasce una problematica</b>: nel caso in cui il <em>waiter</em> stia accompagnando un cliente ad un tavolo, non è stato ancora aggiornato
+	lo stato del tavolo stesso. Questo vuol dire che se nel mentre arriva una richiesta di un altro cliente per entrare, è opportuno
+	non interrompere il task attuale, per non entrare in una inconsistenza di stati (se accettassimo quel cliente, potrebb
+	instaurarsi una catena infinita di accettazioni di clienti, non aggiornando mai lo stato del tavolo).
+	
+	Reach and convoy possono quindi essere interrompibili solo per richieste che NON siano nuovi clienti in arrivo.</td>
+    <td>ricezione richieste: serve, collect payment, take o convoy</td>
+  </tr>
+  <tr>
+    <td><em>Take</em></td>
+    <td>20</td>
+    <td>no</td>
+	<td>Il <em>waiter</em> va a prendere l'ordine del cliente e informa il <em>barman</em>. Con il committente è stato deciso che non è un task interrompibile.</td>
+    <td>-</td>
+  </tr>
+  <tr>
+    <td><em>Serve</em></td>
+    <td>30</td>
+    <td>no</td>
+	<td>Il <em>waiter</em> si reca a prendere l'ordine pronto e lo porta al cliente. Non è interrompibile.</td>
+    <td>-</td>
+  </tr>
+  <tr>
+    <td><em>Collect payment</em></td>
+    <td>50</td>
+    <td>no</td>
+	<td>durata medio/breve, sui 50 secondi. Con il committente, per questioni di marketing, è stato deciso che questo task non sia interrompibile.</td>
+    <td>-</td>
+  </tr>
+  <tr>
+    <td><em>Convoy</em></td>
+    <td>50</td>
+    <td>no</td>
+	<td>Se il <em>waiter</em> deve fare Convoy verso exitdoor il caso peggiore è dal tavolino più lontano, stimiamo con il committente che questo possa essere minore come tempo,
+	circa 50 secondi. <!--Nel convoy il <em>waiter</em> deve solo andare dalla porta di ingresso ad uno dei tavoli, caso peggiore tavolo più lontano, circa 50 secondi.-->
+	Con il committente è stato deciso che convoy non è interrompibile</td>
+    <td>-</td>
+  </tr>
+  <tr>
+    <td><em>Clean</em></td>
+    <td>60</td>
+    <td>sì</td>
+	<td>task da considerare con il committente per la durata, circa 60 secondi, quindi interrompibile. Con il committente è necessario
+	stabilire se ci sia un limite entro cui interrompere questo task, per esempio un limite a livello di "stato" in cui si trova,
+oppure, se è opportuno che il task venga interrotto in ogni momento</td>
+    <td>ricezione di qualunque richiesta</td>
+  </tr>
+  <tr>
+    <td><em>Rest</em></td>
+    <td>variabile</td>
+    <td>sì</td>
+	<td>Il <em>waiter</em> rimane in attesa di richieste nella sua home, quindi è il task interrompibile per eccellenza.</td>
+    <td>ricezione di qualunque richiesta</td>
+  </tr>
+</table>
+</br>
+Un esempio potrebbe essere che mentre il <em>waiter</em> fa il task <em>clean</em> per un cliente è pronto del cibo o il cliente è pronto a pagare: potrebbe
+essere il caso di interrompere e proseguire dopo aver completato l'altro task (prioritario).
+Ma se ho effettuato da tanto tempo il <em>clean</em> e mi manca poco a finire, potrebbe essere necessario concordare un limite entro 
+il quale un task è interrompibile o no. Dobbiamo concordare con il committente
+se per lui può andare bene oppure che il task venga interrotto comunque.
+</br>
+</br>
+E' opportuno modellare lo stato del tavolo all'interno della "mente" del <em>waiter</em>, ovvero una componente che memorizza un determinato stato
+e riesce a far orientare il <em>waiter</em>, soprattutto per task interrotti, per poterli ripristinare da dove era arrivato a farli. In questo modo, inoltre,
+semplifichiamo il modello in quanto non introduciamo altre entità riguardanti il tavolo. Per modellarlo, è opportuno utilizzare una stringa
+che rappresenta lo stato, il quale può essere:
+<ul>
+<li>"dirty": tavolo sporco, è appena andato via il cliente.</li>
+<li>"undirty": tavolo pulito dai residui del cliente precedente, quali stoviglie e tovaglia.</li>
+<li>"sanitized": tavolo pulito con prodotti disinfettanti e tavolo sanitizzato.</li>
+<li>"cleaned": tavolo rimesso in sesto con tovaglia e stoviglie nuove, pronto per accettare un nuovo cliente.</li>
+</ul>
+Quindi abbiamo una rappresentazione esplicita di stato, che passa da "dirty" a "cleaned" passando
+da delle fasi intermedie. Questa esigenza è dovuta dal fatto che dobbiamo sapere quale sia lo stato del tavolo, perchè se il <em>waiter</em> interrompe
+questo task, deve riprendere dallo stato in cui era arrivato e non ripartire da capo.
+Il <em>waiter</em> comincia a fare "<em>clean</em>" e, mentre lo fa, lo stato del tavolo cambia, passando, se non succede niente, da tutti i quattro stati.
+Queste problematiche affrontate aiutano a modellare il sistema in modo eterogeneo e indipendente dall'implementazione futura, 
+in quanto ogni tecnologia riesce a maneggiare una stringa.
+
+</br>
+
+</br>
+
+</div>
+
+<h2>Test plans</h2> 
+<div class="remark">
+Un test significativo per questo sistema è quello di simulare l'esecuzione di un task interrompibile,
+far avvenire un evento/messaggio che induca il task ad interrompersi e valutare se il funzionamento sia il seguente:
+il <em>waiter</em> smette, salva lo stato in cui era arrivato, esegue l'altro task e, dopo averlo concluso, riprende da dove ero arrivato nel primo task.
+Un altro test significativo è quello di simulare più richieste simultanee mentre il <em>waiter</em> sta effettuando un task interrompibile.
+Nel caso in cui ho un tavolo occupato, il <em>waiter</em> sta pulendo un tavolo e arriva una richiesta di un cliente, il <em>waiter</em> deve negare la richiesta di ingresso,
+perchè non ho più tavoli, e informarlo del tempo di attesa rimanente. Ma se il <em>barman</em> ha già preparato la consumazione mentre sto pulendo, devo
+interrompere il task e tornare lì.
+</br>
+</br>
+Il test plan consiste nel simulare l'arrivo di un altro messaggio o richiesta, per esempio il <em>barman</em> informa che l'ordine richiesto 
+è pronto per la consumazione del cliente. A quel punto il <em>waiter</em> non fa più il task che stava facendo, va a servire l'ordine e 
+riprende successivamente il task precedente.
+Per poter modellare questi test, è necessario aver modellato il funzionamento del <em>waiter</em>, quindi il <em>waiter</em> deve essere consapevole
+di fare quei determinati task.
+</div>
+
+
+
+<table style="width:100%" border="1">
+<tbody><tr>
+<td style="width:50%">
+</td>
+<td></td>
+</tr>
+</tbody></table>
+	      	
+<br><br> 	
+</div>  
+
+<div style="background-color:rgba(86, 56, 253, 0.9); width:60%;text-align:left;color:white">
+
+<img src="../Foto.jpg" alt="mbot" width="20%" height="15%">
+<img src="../angelo.jpeg" alt="mbot" width="20%" height="15%">
+<img src="../lonza.jpeg" alt="mbot" width="20%" height="15%">
+<hr>
+Paolo Verdini, 	Angelo Farina, 	Riccardo Turra
+<hr>
+paolo.verdini@studio.unibo.it, angelo.farina@studio.unibo.it, riccardo.turra@studio.unibo.it
+
+
+</div> 
+
+</body></html>
