@@ -227,14 +227,14 @@ including some significant <bc>TestPlan</bc>.</li>
 </div>
 <h2>Requirement analysis</h2>
 <div class="remark">
-In seguito ai risultati ottenuti con il primo sprint continuiamo lo sviluppo rendendo le assunzioni sempre più simili ai requisiti
+In seguito ai risultati ottenuti dal il primo sprint continuiamo lo sviluppo rendendo le assunzioni sempre più vicine ai requisiti
 del committente.<br>
 Con riferimento alle problematiche analizzate in <a href="./ConsiderazioniIniziali.html"><b>riflessioni</b></a>, 
 proseguiamo ad analizzare il sistema considerando questa assunzione:
  <ul>
-	<li>Possibilità di avere due clienti nel sistema. Consideriamo solo determinate situazioni,
-    una è quella in cui durante la fase di clean 
-    un cliente chieda di entrare nella <em>tearoom</em>, simulando così un task interrompibile. 
+	<li>Possibilità di avere due clienti nel sistema. Consideriamo solo una determinata situazione,
+    quella in cui durante la fase di clean 
+    un cliente chieda di entrare nella <em>tearoom</em>, simulando così il task interrompibile più complesso. 
 
     <!--La seconda è quella in cui un cliente richieda di entrare nella <em>tearoom</em> mentre il <em>waiter</em>
     sta svolgendo un task non interrompibile.-->
@@ -244,31 +244,46 @@ proseguiamo ad analizzare il sistema considerando questa assunzione:
 	si parte da un cliente che richiede l'accesso, fino alla sua uscita e relativa <em>clean</em> del tavolo.
     Inoltre un altro cliente richiederà l'accesso mentre il <em>waiter</em> sta eseguendo il task clean.</li>
 </ul>
-A seguito di questa assunzione, le considerazioni fatte precedentemente rimangono invariate.
-Poichè il <em>barman</em> deve interagire con il <em>waiter</em>, ricevere e preparare gli ordini, è opportuno
-modellarlo in un primo momento come un attore esterno. Il cliente è per ora simulato mediante la ricezione della request per entrare nella <em>tearoom</em>
-</br>
-Di seguito è stato modellato un primo sistema seguendo i requisiti e l'assunzione.
-E' opportuno considerare che il task <em>inform</em> non è da modellare, in quanto per l'assunzione fatta non potrà
-mai verificarsi. E' stato predisposto un oggetto "Table" che rappresenta lo stato di ciascun tavolo presente nella stanza.
-E' stato opportuno creare dei dispatch che modellano:
-<ul>
-<li>Intenzione del cliente a ordinare: clientready</li>
-<li>Drink pronto dal barman: drinkready</li>
-<li>Cliente pronto a pagare: paymentready</li>
-<li>Ordine trasmesso al <em>barman</em>: order</li>
-</ul>
-La richiesta e risposta del cliente e del <em>waiter</em> per entrare nella <em>tearoom</em> sono state modellate, in QAK, come 
-una Request/Reply.
-
-Come testplan è stato effettuato un controllo sullo stato del <em>waiter</em> in risposta alle richieste ed operazioni che deve svolgere,
-per esempio controllando che quando accetta una richiesta si rechi alla porta di ingresso, oppure quando accompagna il cliente al tavolo stia effettivamente andando verso il tavolo.
+I dispatch presenti nello sprint precedente sono sufficienti e quindi non ne sono stati aggiunti altri.<br>
+<!--I dispatch andavano scritti nel formato già simil codice, tipo: Dispatch drinkready : drinkready(V)-->
+Con la necessità di dover gestire più di un cliente alla volta ora dobbiamo approfondire l'interrompibilità dei task
+già analizzata nelle <a href="./ConsiderazioniIniziali.html"><b>riflessioni</b></a>. <br>
+La situazione più complicata che dobbiamo gestire è quella dell'interruzione del task <em>clean</em>, per far entrare un cliente in sala,
+e la successiva ripresa del task da dove è stato interrotto. <br>
+È fondamentale quindi che il <em>waiter</em> riprenda a fare quello che stava facendo prima di aver accomodato il cliente. Nasce quindi
+la necessità di implementare uno strumento per "ricordare" al <em>waiter</em> quello che stava facendo. Una coda FIFO è lo strumento
+più adatto. <br>
 </div>
 
 <h2>Problem analysis</h2> 
 <div class="remark">
-
-
+La prima conseguenza che porta la gestione di più clienti contemporaneamente è quella di dover assegnare un tavolo ad esso.
+Questo può essere fatto semplicemente dato che abbiamo accesso allo stato degli oggetti tavolo, quindi basta assegnare il primo tavolo
+con lo stato "clean" nel sistema. <br><br>
+Come accennato nell'analisi dei requisiti è necessario implementare una coda FIFO, all'interno della mente del <em>waiter</em>
+che gli permetta di riprendere il task interrotto precedentemente senza "dimenticarsi" o fare altri task prima di esso, ad esempio,
+banalmente, tornare alla home.<br><br>
+Lo stato del tavolo invece non rappresenta un problema in quanto è già memorizzato nell'oggetto tavolo, accessibile dal <em>waiter</em> 
+in ogni momento.<br><br>
+Inoltre è stato definito con il committente che quando il tavolo raggiunge lo stato di "sanitized" questo task dovrà essere completato
+senza interruzioni, dato che dovrebbe terminare a breve.<br><br>
+Un ulteriore problema sorge nel momento in cui il cliente che si siede al tavolo sappia già che cosa ordinare, e che quindi
+faccia immediatamente l'ordine, come un cliente abituale farebbe nella realtà, senza dare tempo al <em>waiter</em> di finire di pulire il tavolo.
+In questo caso, supponendo che il tavolo da pulire
+non abbia ancora raggiunto lo stato "sanitized", il task dovrà nuovamente essere interrotto e inserito in coda.<br><br>
+Nei test plan del primo sprint abbiamo già verificato che lo stato del tavolo cambi correttamente durante la fase di <em>clean</em>. <br>
+Ora però nasce una nuova problematica, quando il <em>clean</em> viene interrotto ovviamente lo stato del tavolo non tornerà a quello di
+<em>dirty</em> ma rimarrà salvato l'ultimo incontrato, così da permettere al <em>waiter</em> di riprendere il lavoro da dove l'ha
+interrotto. <br>
+Come fare questo test plan? Si potrebbe rifinire leggermente il test dello sprint precedente, parametrizzando lo stato da cui
+il <em>clean</em> parte. Quindi nel caso base sempre da <em>dirty</em>, mentre nel caso di ripresa a seguito di interruzione da uno 
+stato che verrà passato nei parametri.<br><br>
+In questo test plan dovremo controllare che:
+<ul>
+    <li>Il <em>waiter</em> interrompa il task se lo stato del tavolo non ha ancora raggiunto "sanitized". </li>
+    <li>il <em>waiter</em> NON interrompa il task <em>clean</em> se lo stato ha già raggiunto "sanitized"</li>
+    <li>il <em>waiter</em> riprenda il <em>clean</em> dall'ultimo stato raggiunto una volta accompagnato il cliente al tavolo.</li>
+</ul>
 </div>	
 
 <h2>Sprint review</h2> 
