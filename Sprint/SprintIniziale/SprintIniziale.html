@@ -946,20 +946,23 @@ class TestWaiterTableStates {
 E' necessario motivare accuratamente l'utilizzo del meta-modello QAK: questo modello
 considera le entità in gioco come "Attori", entità autonome e indipendenti che interagiscono
 tra loro tramite messaggi. Il QAK rende più efficiente e veloce
-la modellazione di questa tipologia di problemi, i quali se si partisse da zero con un
-qualunque altro linguaggio di modellazione sarebbero difficili da rappresentare.
+la modellazione di questa tipologia di problemi, i quali, se si partisse da zero con un
+qualunque altro linguaggio di modellazione, sarebbero difficili da rappresentare.
 </br>
 Inoltre, le entità nel sistema in analisi interagiscono tramite "messaggi", come si evince dai
 requisiti. Questi "messaggi" possono quindi essere opportunamente modellati, con la giusta
 semantica, nei vari tipi di messaggi presenti nel modello QAK (Dispatch, Request/Reply, Event).
 Questi messaggi sono stati inizialmente modellati con uno specifico tipo (per esempio, il 
-messaggio che identifica il drink pronto, mandato dal barman al waiter). Questa modellazione 
-deve però in realtà venire dopo un'accurata analisi del contesto di utilizzo e di scambio
+messaggio che identifica il drink pronto, mandato dal barman al waiter, è stato modellato come dispatch). Questa modellazione 
+deve però in realtà venire <b>dopo</b> un'accurata analisi del contesto di utilizzo e di scambio
 di tali messaggi. Per esempio, in un contesto reale, l'informazione di drink/ordine pronto
-potrebbe essere benissimo un evento. Quindi, tale modellazione NON è una scelta o un vincolo
-dei requisiti, ma una possibile rappresentazione, la quale dovrà poi essere valutata
+potrebbe essere anche un evento. Quindi, tale modellazione <b>NON</b> è una scelta o un vincolo
+dei requisiti, ma una <b>possibile</b> rappresentazione, la quale dovrà poi essere valutata
 nell'analisi del problema. Nel prossimo Sprint sarà specificata questa analisi e l'eventuale
-migliore modellazione presa in considerazione.
+migliore modellazione presa in considerazione. Infine, da qui in avanti, <b>viene dato per "fatto"
+tutto ciò che riguarda il modello QAK, quindi parleremo NON più di messaggi, ma di Dispatch, Request, Reply
+e Event.</b>
+
 </br></br>
 
 <b>Tests</b></br>
@@ -968,9 +971,9 @@ in modo da far capire ad un potenziale lettore il funzionamento, i casi presi
 in considerazione e la correttezza del modello. Inoltre, i vari test case è opportuno
 che vengano incapsulati in un'entità astratta o addirittura esterna, in modo tale da 
 rendere riutilizzabile il test in sè. Infatti, nel momento in cui, per esempio,
-i risultati attesi venissero messi in un file JSON o XML a parte, nel momento in cui è necessario
-un cambiamento di essi, i test non vengono toccati ma vengono aggiornati i valori
-nel file esterno. Potremmo anche pensare ad un'entità (magari Singleton) che contiene
+i risultati attesi venissero messi in un file JSON o XML a parte, se dovesse essere necessario
+un cambiamento di essi, i test non verrebbero toccati ma solo aggiornati i valori
+nel file esterno. Potremmo anche pensare ad un'entità (magari Singleton) che contenga
 tutte le proprietà dei risultati attesi in formato Stringa (Stringa perchè
 è universale tra molti paradigmi e tecnologie).
 </br></br>
@@ -982,7 +985,7 @@ planner, la quale però NECESSITA che la mappa sia conosciuta a priori per funzi
 Questo deve essere specificato, in quanto influisce sull'utilizzo e il funzionamento
 sia del modello che dei test. Un altro fattore importante riguarda la non mobilità
 delle pareti e ostacoli nella mappa. Nel sistema in esame, gli ostacoli sono fissi,
-ma se non lo fossero, ogni volta che c'è una modifica, la mappa deve essere riconfigurata
+ma se non lo fossero, ogni volta che c'è una modifica, la mappa dovrebbe essere riconfigurata
 e reimmessa nell'entità planner. Tutto questo potrebbe far parte di un'<b>ASSUNZIONE</b>.
 </br></br>
 
@@ -993,7 +996,12 @@ e reimmessa nell'entità planner. Tutto questo potrebbe far parte di un'<b>ASSUN
 Nel prossimo sprint dovranno essere rifiniti gli aspetti descritti nello sprint review.
 Gli incrementi considerati nello sprint successivo saranno quelli di aggiungere 
 un cliente al sistema e di simulare almeno un task significativo interrompibile.
-</div>
+E' opportuno anche iniziare a ragionare considerando le varie "situazioni" che possono
+accadere. Un esempio potrebbe essere quello di analizzare un particolare scenario,
+del tipo "il waiter sta facendo clean e un cliente è pronto ad ordinare". Questa può
+essere classificata come "situazione" da analizzare nel prossimo Sprint. Teniamo a mente
+che una volta modellata una "situazione", può essere riutilizzato il pattern per anche
+altre "situazioni" da analizzare.
 
 </div>
 

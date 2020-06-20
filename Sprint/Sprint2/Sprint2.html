@@ -227,8 +227,8 @@ including some significant <bc>TestPlan</bc>.</li>
 </div>
 <h2>Requirement analysis</h2>
 <div class="remark">
-In seguito ai risultati ottenuti dal il primo sprint continuiamo lo sviluppo rendendo le assunzioni sempre più vicine ai requisiti
-del committente.<br>
+A seguito dei risultati ottenuti nel primo sprint, continuiamo lo sviluppo rendendo le assunzioni sempre più vicine ai requisiti
+del committente.</br>
 Con riferimento alle problematiche analizzate in <a href="./ConsiderazioniIniziali.html"><b>riflessioni</b></a>, 
 proseguiamo ad analizzare il sistema considerando questa assunzione:
  <ul>
@@ -252,20 +252,29 @@ La situazione più complicata che dobbiamo gestire è quella dell'interruzione d
 e la successiva ripresa del task da dove è stato interrotto. <br>
 È fondamentale quindi che il <em>waiter</em> riprenda a fare quello che stava facendo prima di aver accomodato il cliente. Nasce quindi
 la necessità di implementare uno strumento per "ricordare" al <em>waiter</em> quello che stava facendo. Una coda FIFO è lo strumento
-più adatto. <br>
+più adatto. <b>Attenzione a parlare qua di IMPLEMENTARE, natali triggered anche se sappiamo cosa intendevi tu, e a parlare di una SOLUZIONE più adatta. Qua non dobbiamo parlare di soluzioni, keep in mind</b><br>
 </div>
 
 <h2>Problem analysis</h2> 
 <div class="remark">
 La prima conseguenza che porta la gestione di più clienti contemporaneamente è quella di dover assegnare un tavolo ad esso.
 Questo può essere fatto semplicemente dato che abbiamo accesso allo stato degli oggetti tavolo, quindi basta assegnare il primo tavolo
-con lo stato "clean" nel sistema. <br><br>
-Come accennato nell'analisi dei requisiti è necessario implementare una coda FIFO, all'interno della mente del <em>waiter</em>
+con lo stato "cleaned" nel sistema. <br><br>
+Come accennato nell'analisi dei requisiti è necessario implementare una coda FIFO (<b>anche qua, io analizzerei per bene la situazione: siamo sicuri che una coda FIFO sia la cosa più adatta a livello concettuale?
+ricordiamoci di pensare come analisti. L'unica cosa NECESSARIA è RICORDARE e RIPRISTINARE. Mi verrebbe da pensare a una struttura più semplice di una coda FIFO. Consideriamo
+che i task vengono fatti praticamente in sequenza, il waiter alla fine è uno. Questo vuol dire che se faccio un task, mi arriva una richiesta di un altro task 
+e se il primo era interrompibile, <i>salvo lo stato</i>, faccio quel task e come analista mi viene da dire
+che questo task LO FACCIO A ORECCHI TAPPATI, ovvero NON ascolto eventuali richieste di task in ingresso, perchè questo credo sia un concetto chiave. Se faccio un task
+dopo averne interrotto uno, è essenziale essere INSENSIBILI ad altre richieste. Queste richieste saranno messe in coda DAL MODELLO QAK STESSO, quindi non importa dire COME lo farà, sappiamo che lo fa. 
+Il dunque di questo discorso era sia far nasceere la problematica del "task non sensibile ad altre richieste", sia del fatto che, poichè non sarò sensibile ad altre richieste. il punto cruciale è che 
+di task "attivo", "sospeso" ne avrò sempre solo uno. QUindi tanto vale avere UNA SINGOLA PORZIONE DI MEMORIA che mi metta una corrispondenza tra un EVENTUALE task "sospeso" "interrotto" e il suo stato in cui lo ho lasciato, quindi senza coda. IMHO, non deve essere LA COSA GIUSTA, ma ho appuntato la mia idea</b>), all'interno della mente del <em>waiter</em>
 che gli permetta di riprendere il task interrotto precedentemente senza "dimenticarsi" o fare altri task prima di esso, ad esempio,
 banalmente, tornare alla home.<br><br>
-Lo stato del tavolo invece non rappresenta un problema in quanto è già memorizzato nell'oggetto tavolo, accessibile dal <em>waiter</em> 
+Lo stato del tavolo invece non rappresenta un problema <b>( per me invece lo rappresenta, mi fa un po' schifo modellato come un oggetto inglobato dentro il waitermind. Potremmo analizzare bene questa cosa e dedurne un'entità separata? Magari, come diceva natali, un attore che "nasconde" la vera natura del tavolo. Questo renderebbe molto più snello il modello. Pensandoci
+come è fatto adesso è una modellazione VINCOLATA, cioè ho un oggetto fisso dentro il waitermind. Se lo modelliamo come attore esterno, quell'entità può essere cambiata da sola, senza toccare minimamente il waitermind, che manda solo messaggi per interagire con essa.
+Potrebbe essere un altro problema da affrontare oppure diventa troppo grosso? Pensiamoci, ma così non può rimanere per me)</b> in quanto è già memorizzato nell'oggetto tavolo, accessibile dal <em>waiter</em> 
 in ogni momento.<br><br>
-Inoltre è stato definito con il committente che quando il tavolo raggiunge lo stato di "sanitized" questo task dovrà essere completato
+Inoltre è stato definito con il committente <b>(so che rompo il cazzo, ma natali non ci ha ancora detto questa cosa. Glielo chiedo e spero mi dia una risposta veloce per poter modellare subito per bene sto sprint 2)</b>che quando il tavolo raggiunge lo stato di "sanitized" questo task dovrà essere completato
 senza interruzioni, dato che dovrebbe terminare a breve.<br><br>
 Un ulteriore problema sorge nel momento in cui il cliente che si siede al tavolo sappia già che cosa ordinare, e che quindi
 faccia immediatamente l'ordine, come un cliente abituale farebbe nella realtà, senza dare tempo al <em>waiter</em> di finire di pulire il tavolo.
