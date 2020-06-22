@@ -245,6 +245,10 @@ proseguiamo ad analizzare il sistema considerando questa assunzione:
     Inoltre un altro cliente richiederà l'accesso mentre il <em>waiter</em> sta eseguendo il task clean.</li>
 </ul>
  <ul> <li>Modellazione task clean: Prototipo del primo sprint riutilizzabile tranne per il task clean, il quale dovrà gestie la nuova situazione.</li> </ul>  
+</br>
+parliamo di interrompibilità... il task inform era stato omesso dal primo sprint, ma adesso è necessario modellarlo.
+INfatti, il task clean può non essere interrompibile se nelle sue ultime fasi: il cliente deve essere avvisato del 
+</br>
 I dispatch presenti nello sprint precedente sono sufficienti e quindi non ne sono stati aggiunti altri.<br>
 <!--I dispatch andavano scritti nel formato già simil codice, tipo: Dispatch drinkready : drinkready(V)-->
 Con la necessità di dover gestire più di un cliente alla volta ora dobbiamo approfondire l'interrompibilità dei task
@@ -266,7 +270,7 @@ Per riprendere correttamente dallo stato in cui il task è stato interrotto è o
 <div class="remark">
 La prima conseguenza che porta la gestione di più (2) clienti <u>contemporaneamente</u> è quella di dover assegnare un tavolo ad esso.
 Questo può essere fatto semplicemente dato che abbiamo accesso allo stato degli oggetti tavolo, quindi basta assegnare il primo tavolo
-con lo stato "cleaned" nel sistema. <br><br>
+con lo stato "cleaned" nel sistema. </br></br>
 Come accennato nell'analisi dei requisiti è necessario implementare una coda FIFO (<b>anche qua, io analizzerei per bene la situazione: siamo sicuri che una coda FIFO sia la cosa più adatta a livello concettuale?
 ricordiamoci di pensare come analisti. L'unica cosa NECESSARIA è RICORDARE e RIPRISTINARE. Mi verrebbe da pensare a una struttura più semplice di una coda FIFO. Consideriamo
 che i task vengono fatti praticamente in sequenza, il waiter alla fine è uno. Questo vuol dire che se faccio un task, mi arriva una richiesta di un altro task 
@@ -276,7 +280,17 @@ dopo averne interrotto uno, è essenziale essere INSENSIBILI ad altre richieste.
 Il dunque di questo discorso era sia far nasceere la problematica del "task non sensibile ad altre richieste", sia del fatto che, poichè non sarò sensibile ad altre richieste. il punto cruciale è che 
 di task "attivo", "sospeso" ne avrò sempre solo uno. QUindi tanto vale avere UNA SINGOLA PORZIONE DI MEMORIA che mi metta una corrispondenza tra un EVENTUALE task "sospeso" "interrotto" e il suo stato in cui lo ho lasciato, quindi senza coda. IMHO, non deve essere LA COSA GIUSTA, ma ho appuntato la mia idea</b>), all'interno della mente del <em>waiter</em>
 che gli permetta di riprendere il task interrotto precedentemente senza "dimenticarsi" o fare altri task prima di esso, ad esempio,
-banalmente, tornare alla home.<br><br>
+banalmente, tornare alla home.</br></br>
+Potrebbe essere utile introdurre un'entità "timer", alla quale si apoggia il waitercleaner.
+Questo timer riceve un messaggio di "startTimer" con l'indicazione del tempo del timer da innescare. In modo tale 
+da simulare anche il tempo passato di ciascuno stato del clean. Quindi, ogni volta che interrompiamo il clean,
+viene memorizzato il tempo passato, cosicchè quando il task verrà ripristinato, si ripartirà innescano il timer
+solo con il tempo rimanente e non solo da un particolare stato.
+</br></br>
+nasce una problematica: nel momento in cui facciamo clean nella fase non interrompibile e un cliente arriva e cheide di entrare, è giusto
+rispondere subito "accept" al cliente e poi prenderlo alla fine del clean, oppure fare accept e prenderlo tutto alla fine?
+
+</br></br>
 Lo stato del tavolo invece non rappresenta un problema <b>( per me invece lo rappresenta, mi fa un po' schifo modellato come un oggetto inglobato dentro il waitermind. Potremmo analizzare bene questa cosa e dedurne un'entità separata? Magari, come diceva natali, un attore che "nasconde" la vera natura del tavolo. Questo renderebbe molto più snello il modello. Pensandoci
 come è fatto adesso è una modellazione VINCOLATA, cioè ho un oggetto fisso dentro il waitermind. Se lo modelliamo come attore esterno, quell'entità può essere cambiata da sola, senza toccare minimamente il waitermind, che manda solo messaggi per interagire con essa.
 Potrebbe essere un altro problema da affrontare oppure diventa troppo grosso? Pensiamoci, ma così non può rimanere per me)</b> in quanto è già memorizzato nell'oggetto tavolo, accessibile dal <em>waiter</em> 
