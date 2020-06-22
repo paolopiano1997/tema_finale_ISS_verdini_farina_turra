@@ -1,0 +1,9 @@
+Questo vuol dire che se faccio un task,
+ mi arriva una richiesta di un altro task 
+e se il primo era interrompibile, <i>salvo lo stato</i>, faccio quel task e come analista mi viene da dire
+che questo task LO FACCIO A ORECCHI TAPPATI, ovvero NON ascolto eventuali richieste di task in ingresso, 
+perchè questo credo sia un concetto chiave. Se faccio un task
+dopo averne interrotto uno, è essenziale essere INSENSIBILI ad altre richieste. Queste richieste saranno messe 
+in coda DAL MODELLO QAK STESSO, quindi non importa dire COME lo farà, sappiamo che lo fa. 
+Il dunque di questo discorso era sia far nasceere la problematica del "task non sensibile ad altre richieste", 
+sia del fatto che, poichè non sarò sensibile ad altre richieste.

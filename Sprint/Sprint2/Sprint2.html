@@ -227,94 +227,116 @@ including some significant <bc>TestPlan</bc>.</li>
 </div>
 <h2>Requirement analysis</h2>
 <div class="remark">
-A seguito dei risultati ottenuti nel primo sprint, continuiamo lo sviluppo rendendo le assunzioni sempre più vicine ai requisiti
+A seguito dei risultati ottenuti nel primo sprint, continuiamo lo sviluppo 
+rendendo le assunzioni sempre più vicine ai requisiti
 del committente.</br>
-Con riferimento alle problematiche analizzate in <a href="./ConsiderazioniIniziali.html"><b>riflessioni</b></a>, 
+Con riferimento alle problematiche analizzate in 
+<a href="./ConsiderazioniIniziali.html"><b>riflessioni</b></a>, 
 proseguiamo ad analizzare il sistema considerando questa assunzione:
  <ul>
-	<li>Possibilità di avere due clienti nel sistema. Consideriamo solo una determinata situazione,
+	<li>Possibilità di avere due clienti nel sistema. Consideriamo però solo una 
+	determinata situazione,
     quella in cui durante la fase di clean 
-    un cliente chieda di entrare nella <em>tearoom</em>, simulando così il task interrompibile più complesso. <b>(non parlerei qui di interrompibilità, non è un assunzione, lo spieghiamo sotto)</b> 
+    un cliente chieda di entrare nella <em>tearoom</em>. 
 
     <!--La seconda è quella in cui un cliente richieda di entrare nella <em>tearoom</em> mentre il <em>waiter</em>
     sta svolgendo un task non interrompibile.-->
     
     </br>
     Simuliamo una catena computazionale completa, in cui
-	si parte da un cliente che richiede l'accesso, fino alla sua uscita e relativa <em>clean</em> del tavolo.
-    Inoltre un altro cliente richiederà l'accesso mentre il <em>waiter</em> sta eseguendo il task clean.</li>
+	si parte da un cliente che richiede l'accesso, fino alla 
+	sua uscita e relativa <em>clean</em> del tavolo.
+    Inoltre un altro cliente richiederà l'accesso mentre il 
+	<em>waiter</em> sta eseguendo il task clean.</li>
 </ul>
- <ul> <li>Modellazione task clean: Prototipo del primo sprint riutilizzabile tranne per il task clean, il quale dovrà gestie la nuova situazione.</li> </ul>  
+ <ul> <li>Modellazione task clean: Prototipo del primo sprint riutilizzabile tranne per il task clean, 
+ il quale dovrà gestire la nuova situazione.</li> </ul>  
 </br>
-parliamo di interrompibilità... il task inform era stato omesso dal primo sprint, ma adesso è necessario modellarlo.
-INfatti, il task clean può non essere interrompibile se nelle sue ultime fasi: il cliente deve essere avvisato del 
+Un concetto fondamentale venuto fuori durante le analisi del primo Sprint è quello dell'interrompibilità dei task. In questo caso,
+simulando la situazione descritta nell'assunzione, ci avviciniamo a gestire questo aspetto nel task che potrebbe essere considerato più completo
+di tutti. In effetti, il task clean è sia interrompibile che non interrompibile, infatti nell'ultima fase, quando mancano pochi secondi al termine,
+il task non dovrà essere interrotto.
 </br>
-I dispatch presenti nello sprint precedente sono sufficienti e quindi non ne sono stati aggiunti altri.<br>
-<!--I dispatch andavano scritti nel formato già simil codice, tipo: Dispatch drinkready : drinkready(V)-->
+Il task inform era stato omesso dal primo sprint, ma adesso è necessario modellarlo, infatti nello scenario preso in considerazione potrebbe accadere che
+un cliente chieda di entrare nella <em>tearoom</em> proprio nella fase finale del clean. In questo caso, è opportuno che il <em>waiter</em> comunichi
+l'esito della richiesta in tempo reale, senza far aspettare troppo il cliente.
+</br>
+<!--I dispatch andavano scritti nel formato già simil codice, tipo: Dispatch drinkready : drinkready(V) -->
 Con la necessità di dover gestire più di un cliente alla volta ora dobbiamo approfondire l'interrompibilità dei task
-già analizzata nelle <a href="./ConsiderazioniIniziali.html"><b>riflessioni</b></a>. <br>
+già analizzata nelle <a href="./ConsiderazioniIniziali.html"><b>riflessioni</b></a>. </br>
 La situazione più complicata che dobbiamo gestire è quella dell'interruzione del task <em>clean</em>, per far entrare un cliente in sala,
-e la successiva ripresa del task da dove è stato interrotto. <br>
+e la successiva ripresa del task da dove è stato interrotto. </br>
 È fondamentale quindi che il <em>waiter</em> riprenda a fare quello che stava facendo prima di aver accomodato il cliente. Nasce quindi
-la necessità di implementare uno strumento per "ricordare" al <em>waiter</em> quello che stava facendo. <u>Una coda FIFO è lo strumento
-più adatto.</u> <b>Attenzione a parlare qua di IMPLEMENTARE, natali triggered anche se sappiamo cosa intendevi tu, e a parlare di una SOLUZIONE più adatta. Qua non dobbiamo parlare di soluzioni, keep in mind</b><br>
-<b>Il modello del primo sprint considera il task clean come un'azione composta da sottotask insensivbili a messaggi sia interni che esterni e non interrompibili. L'assunzione effettuata in questo sprint prevede che il task Clean sia interrompibile (sempre per assunzione nostra) 
-quindi occorre modificare la gestione di questi sottotask in modo da renderli sensibili a interazioni.In qak è possibile sfruttare la primitiva whenTime la quale ci dà la possibilità di interrompere un task simulando un 'delay' rimanendo sensibili a messaggi.
-Questo approccio essendo il più semplice sarà usato nella modellazione dei sottotask relativi al clean e poi ampliato nell'analisi del problema. </b>
-<br> Al fine di capire se il task clean è stato interotto e in che tavolo è necessario introdurre due attributi del waitermind, isCleanStopped e tableStopped (isTable1). 
-Per riprendere correttamente dallo stato in cui il task è stato interrotto è opportuno introdurre 3 automessaggi, gotoClean, gotoClean2 e gotoClean3.
-<br> TestPlan: Verificare la sospensione del processo Clean e l'esecuzione del processo che ha fatto richiesta. 
+la necessità di trovare un modo per far "ricordare" al <em>waiter</em> quello che stava facendo.</br></br>
+Il modello del primo sprint considera il task clean come un'azione composta da sottotask insensibili a messaggi sia interni
+ che esterni e non interrompibili. L'assunzione effettuata in questo sprint prevede che il task Clean sia interrompibile 
+quindi occorre modificare la gestione di questi sottotask in modo da renderli sensibili a interazioni. In QAK è possibile 
+sfruttare la primitiva whenTime la quale ci dà la possibilità di interrompere un task simulando un 'delay' ma rimanendo sensibili a messaggi.
+Questo approccio, essendo il più semplice, sarà usato nella modellazione dei sottotask relativi al clean e poi ampliato nell'analisi del problema.
+</br></br> Al fine di capire se il task clean sia stato interrotto e in relazione a quale tavolo è necessario introdurre due
+ attributi nel waitermind, isCleanStopped (booleano che identifica se il clean è interrotto oppure no) e tableStopped (stringa che identifica il tavolo in questione). 
+Per riprendere correttamente dallo stato in cui il task è stato interrotto è opportuno introdurre 3 auto-messaggi, gotoClean, gotoClean2 e gotoClean3.
+</br></br>TestPlan:
+<ul>
+<li> Verificare la sospensione del processo Clean all'arrivo di un cliente durante la fase interrompibile del clean.</li>
+<li> Verificare che, se arriva un cliente durante la fase non interrompibile del clean, venga comunque dato un feedback dal <em>waiter</em></li>
+</ul>
+
 </div>
 
 <h2>Problem analysis</h2> 
 <div class="remark">
-La prima conseguenza che porta la gestione di più (2) clienti <u>contemporaneamente</u> è quella di dover assegnare un tavolo ad esso.
-Questo può essere fatto semplicemente dato che abbiamo accesso allo stato degli oggetti tavolo, quindi basta assegnare il primo tavolo
+La prima conseguenza che porta la gestione di più di un cliente è quella di dover assegnare un tavolo ad esso.
+Questo può essere fatto in modo semplice, poichè abbiamo accesso allo stato degli oggetti tavolo; basta infatti assegnare il primo tavolo
 con lo stato "cleaned" nel sistema. </br></br>
-Come accennato nell'analisi dei requisiti è necessario implementare una coda FIFO (<b>anche qua, io analizzerei per bene la situazione: siamo sicuri che una coda FIFO sia la cosa più adatta a livello concettuale?
-ricordiamoci di pensare come analisti. L'unica cosa NECESSARIA è RICORDARE e RIPRISTINARE. Mi verrebbe da pensare a una struttura più semplice di una coda FIFO. Consideriamo
-che i task vengono fatti praticamente in sequenza, il waiter alla fine è uno. Questo vuol dire che se faccio un task, mi arriva una richiesta di un altro task 
-e se il primo era interrompibile, <i>salvo lo stato</i>, faccio quel task e come analista mi viene da dire
-che questo task LO FACCIO A ORECCHI TAPPATI, ovvero NON ascolto eventuali richieste di task in ingresso, perchè questo credo sia un concetto chiave. Se faccio un task
-dopo averne interrotto uno, è essenziale essere INSENSIBILI ad altre richieste. Queste richieste saranno messe in coda DAL MODELLO QAK STESSO, quindi non importa dire COME lo farà, sappiamo che lo fa. 
-Il dunque di questo discorso era sia far nasceere la problematica del "task non sensibile ad altre richieste", sia del fatto che, poichè non sarò sensibile ad altre richieste. il punto cruciale è che 
-di task "attivo", "sospeso" ne avrò sempre solo uno. QUindi tanto vale avere UNA SINGOLA PORZIONE DI MEMORIA che mi metta una corrispondenza tra un EVENTUALE task "sospeso" "interrotto" e il suo stato in cui lo ho lasciato, quindi senza coda. IMHO, non deve essere LA COSA GIUSTA, ma ho appuntato la mia idea</b>), all'interno della mente del <em>waiter</em>
-che gli permetta di riprendere il task interrotto precedentemente senza "dimenticarsi" o fare altri task prima di esso, ad esempio,
-banalmente, tornare alla home.</br></br>
-Potrebbe essere utile introdurre un'entità "timer", alla quale si apoggia il waitercleaner.
-Questo timer riceve un messaggio di "startTimer" con l'indicazione del tempo del timer da innescare. In modo tale 
-da simulare anche il tempo passato di ciascuno stato del clean. Quindi, ogni volta che interrompiamo il clean,
-viene memorizzato il tempo passato, cosicchè quando il task verrà ripristinato, si ripartirà innescano il timer
-solo con il tempo rimanente e non solo da un particolare stato.
-</br></br>
-nasce una problematica: nel momento in cui facciamo clean nella fase non interrompibile e un cliente arriva e cheide di entrare, è giusto
-rispondere subito "accept" al cliente e poi prenderlo alla fine del clean, oppure fare accept e prenderlo tutto alla fine?
 
 </br></br>
-Lo stato del tavolo invece non rappresenta un problema <b>( per me invece lo rappresenta, mi fa un po' schifo modellato come un oggetto inglobato dentro il waitermind. Potremmo analizzare bene questa cosa e dedurne un'entità separata? Magari, come diceva natali, un attore che "nasconde" la vera natura del tavolo. Questo renderebbe molto più snello il modello. Pensandoci
-come è fatto adesso è una modellazione VINCOLATA, cioè ho un oggetto fisso dentro il waitermind. Se lo modelliamo come attore esterno, quell'entità può essere cambiata da sola, senza toccare minimamente il waitermind, che manda solo messaggi per interagire con essa.
-Potrebbe essere un altro problema da affrontare oppure diventa troppo grosso? Pensiamoci, ma così non può rimanere per me)</b> in quanto è già memorizzato nell'oggetto tavolo, accessibile dal <em>waiter</em> 
-in ogni momento.<br><br>
+E' opportuno rifinire il concetto di "tavolo", definito nel primo Sprint. Questo era stato modellato come un oggetto, ovvero il modo più semplice per gestirlo,
+ma non necessariamente il modo migliore. Effettivamente, pensando all'entità "tavolo", potrebbe essere opportuno definirla come un attore dotato
+di comportamento autonomo. Infatti, avere un'entità separata che mantenga lo stato del tavolo stesso e se lo gestisca, renderebbe il sistema 
+più snello e meno vincolante. Oltretutto, in questo modo viene lasciato il puro compito da "mente" al waitermind e viene suddiviso a ciascun attore
+un ruolo principale e fondamentale. E' quindi necessario rimodellare il tavolo con relativo stato e gestire l'interazione tra <em>waiter</em> e tavolo.
+<b>DA PENSARE BENE COME FARE, QUALI MESSAGGI INTRODURRE E COME GESTIRE I TAVOLI</b>
+</br></br>
 
-Inoltre è stato definito con il committente <b>(so che rompo il cazzo, ma natali non ci ha ancora detto questa cosa. Glielo chiedo e spero mi dia una risposta veloce per poter modellare subito per bene sto sprint 2)</b>che quando il tavolo raggiunge lo stato di "sanitized" questo task dovrà essere completato
-senza interruzioni, dato che dovrebbe terminare a breve.<br><br>
-<b> Per l'interazione degli stati interrompibili e degli stati interrotti è nata la problematica su chi deve gestire il "nome" dello stato da riesumare una volta interrotto e sulla gestione dei 'goto' per la sospensione. 
-A tal fine si è ipotizzato un ulteriore <u>stato intermedio</u> che gestisce l'interazione tra processo interrompente e interrompibile, il quale gestisce le richieste provenienti da un processo più prioritario, inoltrando tale richiesta ad un processo meno prioritario. se non hai capito una sega ci lascio un disegnino nel git. </b> <br> <br> 
-La difficoltà di gestire sia interazioni esterne che la simulazione del clean, potrebbe indurre a modellare una nuova entità che farà parte del waiter che potremo chaimare waitercleaner. Questa entità gestisce tutti gli scenari relativi al task clean di un tavolo per esempio riceve un messaggio da waitermind che identifica l'inizio del task clean e un altro che identifica il fatto di interrompersi (stop).
-Il waitercleaner gestisce anche tutta la logca dietro al ripristino del task interrotto in modo tale da sollevare il waitermind da questo compito.
-Introduciamo (analizzare bene la differenza tra modellarlo come dispatch e req&repl) un dispatch startcleaner che waitermind manda a waitercleaner con parametro il tavolo da pulire. Il waitercleaner a seconda dello stato del tavolo indicato saprà se deve effettivamente iniziare il clean o ripristinarlo.
-Introcuciamo anche il dispatch stopcleaner tra waitermind e waitercleaner per interrompere il clean. <br> Problema: riprendere l'esecuzione del clean da dove ci siamo fermati ( timer o progressivo), es. pulizia interrotta da accept, ripresa, interrotta da ordine, ripresa, interrotta da consegna piatti, ripresa, interr... senza un goto al prossimo stato di clean. <br> 
+<b> Per l'interazione degli stati interrompibili e degli stati interrotti è nata la problematica su chi deve gestire
+ il "nome" dello stato da riesumare una volta interrotto e sulla gestione dei 'goto' per la sospensione. 
+A tal fine si è ipotizzato un ulteriore <u>stato intermedio</u> che gestisce l'interazione tra processo interrompente 
+e interrompibile, il quale gestisce le richieste provenienti da un processo più prioritario, inoltrando tale richiesta
+ ad un processo meno prioritario. se non hai capito una sega ci lascio un disegnino nel git. </b> </br> </br>
+ 
+La difficoltà di gestire sia interazioni esterne che la simulazione del clean, potrebbe indurre a modellare una nuova
+ entità che farà parte del <em>waiter</em> che potremo chiamare waitercleaner. Questa entità gestisce tutti gli scenari relativi 
+ al task clean di un tavolo; riceve un messaggio da waitermind che identifica l'inizio del task clean e un altro 
+ che identifica il fatto di interrompersi. <b> Specifichiamo che tipo di messaggio e perchè </b>
+Il waitercleaner gestisce anche tutta la logica che sta al ripristino del task interrotto, in modo tale da
+sollevare il waitermind da questo compito.
+Viene introdotto <b>(analizzare bene la differenza tra modellarlo come dispatch e req/reply)</b> un dispatch "startcleaner" 
+che waitermind manda a waitercleaner con parametro il tavolo da pulire. Il waitercleaner a seconda dello stato
+del tavolo indicato saprà se deve effettivamente iniziare il clean o ripristinarlo.
+E' stato introdutto anche il dispatch stopcleaner tra waitermind e waitercleaner per interrompere il clean. </br> </br>
+Poichè è stato stabilito con il committente che nell'ultima fase del clean (quella in cui si passa da
+"sanitized" a "cleaned" come stato del tavolo) in cui mancano circa 15 secondi alla fine il suddetto task non è interrompibile, 
+è necessario introdurre una gestione relativa al tempo passato e rimanente di ciascuna fase del task clean.
+Per effettuare questa gestione, è opportuno modellare un'entità "timer", la quale fa da supporto al waitercleaner </br></br>
+Questo timer riceve un messaggio <b> vedere bene che tipo di messaggio </b> di "startTimer" con l'indicazione del tempo del
+ timer da innescare, in modo tale da simulare anche il tempo passato di ciascuno stato del clean. Quindi, ogni volta che interrompiamo il clean,
+viene memorizzato il tempo trascorso, cosicchè quando il task verrà ripristinato, si ripartirà innescando il timer
+solo con il tempo rimanente e non solo da un particolare stato, altrimenti saremmo potuti ripartire dal solito stato che precedentemente
+avrebbe potuto essere quasi finito.
+</br></br>
 Un ulteriore problema sorge nel momento in cui il cliente che si siede al tavolo sappia già che cosa ordinare, e che quindi
 faccia immediatamente l'ordine, come un cliente abituale farebbe nella realtà, senza dare tempo al <em>waiter</em> di finire di pulire il tavolo.
-In questo caso, supponendo che il tavolo da pulire
-non abbia ancora raggiunto lo stato "sanitized", il task dovrà nuovamente essere interrotto e inserito in coda.<br><br>
+In questo caso, supponendo che il tavolo da pulire non abbia ancora raggiunto lo stato "sanitized", il task dovrà nuovamente essere interrotto. 
+Questo scenario fa sì che il waiter interrompa più volte di fila il task <em>clean</em> nello stesso stato.</br></br>
+<b> Da rivedere e pensare bene </b>
 Nei test plan del primo sprint abbiamo già verificato che lo stato del tavolo cambi correttamente durante la fase di <em>clean</em>. <br>
 Ora però nasce una nuova problematica, quando il <em>clean</em> viene interrotto ovviamente lo stato del tavolo non tornerà a quello di
 <em>dirty</em> ma rimarrà salvato l'ultimo incontrato, così da permettere al <em>waiter</em> di riprendere il lavoro da dove l'ha
-interrotto. <br>
+interrotto. </br>
 Come fare questo test plan? Si potrebbe rifinire leggermente il test dello sprint precedente, parametrizzando lo stato da cui
 il <em>clean</em> parte. Quindi nel caso base sempre da <em>dirty</em>, mentre nel caso di ripresa a seguito di interruzione da uno 
-stato che verrà passato nei parametri.<br><br>
+stato che verrà passato nei parametri.</br></br>
 In questo test plan dovremo controllare che:
 <ul>
     <li>Il <em>waiter</em> interrompa il task se lo stato del tavolo non ha ancora raggiunto "sanitized". </li>
