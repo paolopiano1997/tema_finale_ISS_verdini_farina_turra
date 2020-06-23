@@ -350,14 +350,13 @@ Un ulteriore problema sorge nel momento in cui il cliente che si siede al tavolo
 faccia immediatamente l'ordine, come un cliente abituale farebbe nella realtà, senza dare tempo al <em>waiter</em> di finire di pulire il tavolo.
 In questo caso, supponendo che il tavolo da pulire non abbia ancora raggiunto lo stato "sanitized", il task dovrà nuovamente essere interrotto. 
 Questo scenario fa sì che il waiter interrompa più volte di fila il task <em>clean</em> nello stesso stato.</br></br>
+
+
+
 <b> Da rivedere e pensare bene </b>
-Nei test plan del primo sprint abbiamo già verificato che lo stato del tavolo cambi correttamente durante la fase di <em>clean</em>. <br>
-Ora però nasce una nuova problematica, quando il <em>clean</em> viene interrotto ovviamente lo stato del tavolo non tornerà a quello di
-<em>dirty</em> ma rimarrà salvato l'ultimo incontrato, così da permettere al <em>waiter</em> di riprendere il lavoro da dove l'ha
-interrotto. </br>
-Come fare questo test plan? Si potrebbe rifinire leggermente il test dello sprint precedente, parametrizzando lo stato da cui
-il <em>clean</em> parte. Quindi nel caso base sempre da <em>dirty</em>, mentre nel caso di ripresa a seguito di interruzione da uno 
-stato che verrà passato nei parametri.</br></br>
+Lo scopo principale di questo test plan sarà quello di verificare che il <em>clean</em> venga interrotto correttamente e che 
+lo stato del tavolo rimanga aggiornato all'ultimo incontrato, così da permettere al <em>waiter</em> di riprendere 
+il lavoro da dove l'ha interrotto. </br>
 In questo test plan dovremo controllare che:
 <ul>
     <li>Il <em>waiter</em> interrompa il task se lo stato del tavolo non ha ancora raggiunto "sanitized". </li>
