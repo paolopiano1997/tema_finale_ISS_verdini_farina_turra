@@ -573,6 +573,67 @@ QActor waitermind context ctxtearoom{
 <ul>
 <li> Verificare la sospensione del processo Clean all'arrivo di un cliente durante la fase interrompibile del clean.</li>
 </ul>
+Il test plan seguente utilizza un'entità Expected per gestire il valore atteso ed effettuare il check.
+Verrà simulato un cliente nella <em>tearoom</em> e tutto il processo che lo porta fino ad uscire; successivamente un cliente
+chiederà di entrare quando il waiter fa il task clean, il quale deve essere interrotto e ripristinato dopo aver portato il nuovo cliente al tavolo.
+Per verificare questo, viene utilizzato il "resource" degli attori QAK. Infatti, quando il clean viene interrotto, la risorsa deve avere
+il valore atteso che si trova dentro Expected.expect.
+</br>
+<pre>
+class TestWaiterTableStates {
+	var waitermind            : ActorBasic? = null
+	//val mqttTest   	      = MqttUtils("test")
+	val initDelayTime     = 1000L
+	
+	val enter = MsgUtil.buildRequest("waitermind","enter","enter","waitermind")
+	val clientready = MsgUtil.buildDispatch("waitermind","clientready","clientready","waitermind")
+	val drinkready = MsgUtil.buildDispatch("waitermind","drinkready","drinkready","waitermind")
+	val paymentready = MsgUtil.buildDispatch("waitermind","paymentready","paymentready","waitermind")
+	
+	@kotlinx.coroutines.ObsoleteCoroutinesApi
+	@kotlinx.coroutines.ExperimentalCoroutinesApi
+	@Before
+	fun systemSetUp() {
+   		kotlin.concurrent.thread(start = true) {
+			it.unibo.ctxtearoom.main()
+		}
+	}
+
+	@After
+	fun terminate() {
+		println("%%%  TestWaiter terminate ")
+	}
+	
+	fun checkState(){
+		if(waitermind!=null)
+			assert(waitermind!!.geResourceRep()==Expected.expect)
+	}
+	
+	@Test
+	fun testRobotboundary(){
+	 	runBlocking{
+ 			while( waitermind == null ){
+				println("testWaiterPosition waits for waitermind ... ")
+				delay(initDelayTime)  //time for robot to start
+				waitermind = it.unibo.kactor.sysUtil.getActor("waitermind")
+ 			}
+			MsgUtil.sendMsg(enter,waitermind!!)
+ 			delay(10000)
+			MsgUtil.sendMsg(clientready,waitermind!!)
+			delay(10000)
+			MsgUtil.sendMsg(drinkready,waitermind!!)
+			delay(10000)
+			MsgUtil.sendMsg(paymentready,waitermind!!)
+			delay(15000)
+			MsgUtil.sendMsg(enter,waitermind!!)
+ 			delay(20000)
+			MsgUtil.sendMsg("end","end","end",waitermind!!)
+ 			if( waitermind != null ) waitermind!!.waitTermination()
+  		}
+	 	println("testWaiterPosition BYE  ")  
+	}
+}
+</pre>
 
 </div>
 

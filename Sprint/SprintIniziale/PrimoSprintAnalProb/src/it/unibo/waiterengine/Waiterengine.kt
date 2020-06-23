@@ -16,16 +16,27 @@ class Waiterengine ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( nam
 	@kotlinx.coroutines.ObsoleteCoroutinesApi
 	@kotlinx.coroutines.ExperimentalCoroutinesApi			
 	override fun getBody() : (ActorBasicFsm.() -> Unit){
+		
+				var XP = "0"
+				var YP = "0"
+				var CurMove = ""
+				val inmapname  = "teaRoomExplored"
+				var StepTime    	   = 348L
+				val BackTime           = 2 * StepTime / 3
 		return { //this:ActionBasciFsm
 				state("s0") { //this:State
 					action { //it:State
+						discardMessages = true
 						itunibo.planner.plannerUtil.initAI(  )
+						itunibo.planner.plannerUtil.loadRoomMap( inmapname  )
+						itunibo.planner.plannerUtil.showCurrentRobotState(  )
 						println("waiterengine   |||   init")
 					}
 					 transition(edgeName="t00",targetState="started",cond=whenRequest("start"))
 				}	 
 				state("started") { //this:State
 					action { //it:State
+						println("waiterengine   |||   started")
 						answer("start", "ready", "ready(waiterengine)"   )  
 					}
 					 transition( edgeName="goto",targetState="wait", cond=doswitch() )
@@ -46,22 +57,69 @@ class Waiterengine ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( nam
 								itunibo.planner.plannerUtil.planForGoal( "$XP", "$YP"  )
 						}
 					}
-					 transition( edgeName="goto",targetState="execMove", cond=doswitch() )
+					 transition( edgeName="goto",targetState="execPlanMove", cond=doswitch() )
+				}	 
+				state("execPlanMove") { //this:State
+					action { //it:State
+						  CurMove = itunibo.planner.plannerUtil.getNextPlannedMove()  
+					}
+					 transition( edgeName="goto",targetState="execStep", cond=doswitchGuarded({ CurMove == "w"  
+					}) )
+					transition( edgeName="goto",targetState="execMove", cond=doswitchGuarded({! ( CurMove == "w"  
+					) }) )
+				}	 
+				state("execStep") { //this:State
+					action { //it:State
+						request("step", "step($StepTime)" ,"basicrobot" )  
+					}
+					 transition(edgeName="t02",targetState="stepDone",cond=whenReply("stepdone"))
+					transition(edgeName="t03",targetState="stepFailed",cond=whenReply("stepfail"))
+				}	 
+				state("stepDone") { //this:State
+					action { //it:State
+						updateResourceRep( itunibo.planner.plannerUtil.getMapOneLine()  
+						)
+						itunibo.planner.plannerUtil.updateMap( "w"  )
+					}
+					 transition( edgeName="goto",targetState="execPlanMove", cond=doswitchGuarded({ CurMove.length > 0  
+					}) )
+					transition( edgeName="goto",targetState="endSuccess", cond=doswitchGuarded({! ( CurMove.length > 0  
+					) }) )
+				}	 
+				state("stepFailed") { //this:State
+					action { //it:State
+						println("waiterengine | stepFailed")
+						if( checkMsgContent( Term.createTerm("stepfail(DURATION,CAUSE)"), Term.createTerm("stepfail(DURATION,CAUSE)"), 
+						                        currentMsg.msgContent()) ) { //set msgArgList
+								 val D = payloadArg(0).toLong()  ; val Dt = Math.abs(StepTime-D); val BackT = D/2  
+								println("waiterengine stepFail D= $D, BackTime = ${BackTime}")
+								if(  D > BackTime  
+								 ){forward("cmd", "cmd(s)" ,"basicrobot" ) 
+								delay(BackTime)
+								forward("cmd", "cmd(h)" ,"basicrobot" ) 
+								}
+						}
+					}
+					 transition( edgeName="goto",targetState="execPlanMove", cond=doswitchGuarded({ CurMove.length > 0  
+					}) )
+					transition( edgeName="goto",targetState="endSuccess", cond=doswitchGuarded({! ( CurMove.length > 0  
+					) }) )
 				}	 
 				state("execMove") { //this:State
 					action { //it:State
-						println("waiterengine   |||   execMo, curpos=($XP,$YP)")
-						  CurMove = itunibo.planner.plannerUtil.getNextPlannedMove()  
 						forward("cmd", "cmd($CurMove)" ,"basicrobot" ) 
 						itunibo.planner.plannerUtil.updateMap( "$CurMove"  )
+						delay(200) 
 					}
-					 transition( edgeName="goto",targetState="execMove", cond=doswitchGuarded({ CurMove.length > 0  
+					 transition( edgeName="goto",targetState="execPlanMove", cond=doswitchGuarded({ CurMove.length > 0  
 					}) )
 					transition( edgeName="goto",targetState="endSuccess", cond=doswitchGuarded({! ( CurMove.length > 0  
 					) }) )
 				}	 
 				state("endSuccess") { //this:State
 					action { //it:State
+						updateResourceRep( "($XP,$YP)"  
+						)
 						println("waiterengine   |||   endSuccess, curpos=($XP,$YP)")
 						itunibo.planner.plannerUtil.showCurrentRobotState(  )
 						answer("moveto", "done", "done($XP,$YP)"   )  
