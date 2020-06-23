@@ -276,6 +276,328 @@ Questo approccio, essendo il più semplice, sarà usato nella modellazione dei s
 </br></br> Al fine di capire se il task clean sia stato interrotto e in relazione a quale tavolo è necessario introdurre due
  attributi nel waitermind, isCleanStopped (booleano che identifica se il clean è interrotto oppure no) e tableStopped (stringa che identifica il tavolo in questione). 
 Per riprendere correttamente dallo stato in cui il task è stato interrotto è opportuno introdurre 3 auto-messaggi, gotoClean, gotoClean2 e gotoClean3.
+
+Modello (riportato solo waitermind, in quanto il resto è rimasto come nel primo Sprint)
+<pre>
+System tearoom
+
+//Movements messages
+Request moveto : moveto(X,Y)
+Reply done : done(X,Y)
+
+//Init messages
+Request start : start(S)
+Reply ready : ready(V)
+
+//Client and tearoom messages
+Request enter : enter(ID)
+Reply accept : accept(C)
+Dispatch drinkready : drinkready(V)
+Dispatch clientready : clientready(C)
+Dispatch paymentready : paymentready(P)
+Dispatch order : order(O)
+Dispatch end : end (E)
+
+Dispatch gotoclean : gotoclean(G)
+Dispatch gotoclean2 : gotoclean2(G)
+Dispatch gotoclean3 : gotoclean3(G)
+
+
+Context ctxbasicrobot     ip [host="localhost"   port=8020] 
+Context ctxtearoom ip [ host="127.0.0.1" port=8068 ]
+
+ExternalQActor basicrobot  context ctxbasicrobot
+
+CodedQActor waiterengine context ctxtearoom className "it.unibo.waiterengine.Waiterengine"
+
+QActor waitermind context ctxtearoom{
+[#
+//	//Coordinates of the entrance door
+	val X_Entrancedoor = "0"
+	val Y_Entrancedoor = "4"
+
+//	//Coordinates of the exit door
+	val X_Exitdoor = "6"
+	val Y_Exitdoor = "4"
+	
+//  //Coordinates of the barman
+	val X_servicedesk = "6"
+	val Y_servicedesk = "0"	
+
+//	//Coordinates Tables
+	val X_teatable1     = "2"
+	val Y_teatable1     = "2"
+
+	val X_teatable2     = "4"
+	val Y_teatable2     = "2"
+
+	//Coordinates of the home
+    val X_home			= "0"
+	val Y_home 			= "0"
+
+	val	Cleantime = 3000L
+	val Servicetime = 5000L
+	val CollectTime = 4000L
+	data class Table(var state: String ="cleaned") {
+		
+	}
+	val table1 = Table()
+	val table2 = Table()
+	var stateTable1 = "cleaned"
+	var stateTable2 = "cleaned"
+	
+	var isCleanStopped = false
+	var tableStopped = ""
+#]
+	State s0 initial {
+		discardMsg Off
+		println("waitermind   |||   init")
+		request waiterengine -m start : start(id)
+	}
+	Transition t0 whenReply ready -> home
+	
+	State reachhome{
+		println("waitermind   |||   reachhome")
+		request waiterengine -m moveto : moveto($X_home,$Y_home)
+	}
+	Transition t0 whenReply done -> home
+	
+	State home{
+		println("waitermind   |||   home")
+		updateResource [# "home" #]
+	}
+	Transition t0 whenRequest enter -> accept
+				  whenMsg clientready -> take
+				  whenMsg drinkready -> reachBarman
+				  whenMsg paymentready -> reachTableCollect
+				  whenMsg end -> endwork
+	
+	State accept {
+		println("waitermind   |||   accept")
+		replyTo enter with accept : accept(idclient)
+	}
+	Goto reachEntranceDoor
+	
+	State reachEntranceDoor {
+		println("waitermind   |||   reachEntranceDoor")
+		//updateResource[# "reachEntranceDoor" #]
+		request waiterengine -m moveto : moveto($X_Entrancedoor, $Y_Entrancedoor)
+	}
+	Transition t0 whenReply done -> checkTables
+	
+	State checkTables{
+		println("waitermind   |||   checkTables")	
+	}
+	Goto convoyToTable1 if [# table1.state=="cleaned" #] else convoyToTable2
+	//Cruciale questo if/else, per capire in quale tavolo andare
+	
+	State convoyToTable1{
+		println("waitermind   |||   convoyToTable1")
+		request waiterengine -m moveto : moveto ($X_teatable1,$Y_teatable1)
+		[# table1.state= "occupied" #]
+		println("waitermind   |||   table1 state occupied")
+		//updateResource [# "convoyToTable1" #]
+		delay 5000
+	}
+	Transition t0 whenReply done -> checkCleanHome
+	
+	State convoyToTable2{
+		println("waitermind   |||   convoyToTable2")
+		request waiterengine -m moveto : moveto ($X_teatable2,$Y_teatable2)
+		[# table2.state= "occupied" #]
+		println("waitermind   |||   table2 state occupied")
+		//updateResource [# "convoyToTable2" #]
+		delay 5000
+	}
+	Transition t0 whenReply done -> checkCleanHome
+	
+	State checkCleanHome{
+		println("waitermind   |||   checkClean")
+	}
+	Goto reachhome if [# !isCleanStopped #] else reachTable1CleanStopped
+	
+	State reachTable1CleanStopped{
+		println("waitermind   |||   reachTable1CleanStopped")
+		request waiterengine -m moveto : moveto ($X_teatable1,$Y_teatable1)
+	}
+	Transition t0 whenReply done -> checkCleanStopped
+	
+	State checkCleanStopped {
+		println("waitermind   |||   checkCleanStopped")
+		if [# tableStopped=="table1" #] {
+			if [# table1.state == "dirty" #]{
+				forward waitermind -m gotoclean : gotoclean(clean1)
+			}
+			else{
+				if[# table1.state == "undirty" #]{
+					forward waitermind -m gotoclean2 : gotoclean2(clean2)
+				}
+				else {
+					forward waitermind -m gotoclean3 : gotoclean3(clean3)
+				}
+			}
+			
+		}
+		else{
+			if [# table2.state == "dirty" #]{
+				forward waitermind -m gotoclean : gotoclean(clean1)
+			}
+			else{
+				if[# table2.state == "undirty" #]{
+					forward waitermind -m gotoclean2 : gotoclean2(clean2)
+				}
+				else{
+					forward waitermind -m gotoclean3 : gotoclean3(clean3)
+				}
+			}
+		}
+	}
+	Transition t0 whenMsg gotoclean -> clean
+					whenMsg gotoclean2 -> clean2
+					whenMsg gotoclean3 -> clean3
+	
+	State take{
+		println("waitermind   |||   take")
+		updateResource [# "take" #]
+		request waiterengine -m moveto : moveto ($X_teatable1,$Y_teatable1)
+	}
+	Transition t0 whenReply done -> transmit
+	
+	State transmit{
+		println("waitermind   |||   transmit")
+		updateResource [# "transmit" #]
+		//forward barman -m order : order(payloadArg(0))
+	}
+	Goto reachhome
+	
+	State reachBarman{
+		println("waitermind   |||   reachBarman")
+		updateResource[# "reachBarman" #]
+		request waiterengine -m moveto: moveto($X_servicedesk,$Y_servicedesk)
+	}
+	Transition t0 whenReply done -> serve
+	
+	State serve{
+		println("waitermind   |||   serve")
+		updateResource[# "serve" #]
+		request waiterengine -m moveto : moveto ($X_teatable1,$Y_teatable1)
+	}
+	Transition t0 whenReply done -> reachhome
+	
+	State reachTableCollect {
+		println("waitermind   |||   reachTable")
+		updateResource[# "reachTable" #]
+		request waiterengine -m moveto : moveto ($X_teatable1,$Y_teatable1)
+	}
+	Transition t0 whenReply done -> collect
+	
+	State reachTableClean {
+		println("waitermind   |||   reachTable")
+		updateResource[# "reachTable" #]
+		request waiterengine -m moveto : moveto ($X_teatable1,$Y_teatable1)
+	}
+	Transition t0 whenReply done -> clean
+	
+	State collect {
+		println("waitermind   |||   collect")
+		updateResource[# "collect" #]
+		delayVar CollectTime
+	}
+	Goto convoyToExitDoor
+	
+	State convoyToExitDoor{
+		println("waitermind   |||   convoyToExitDoor")
+		updateResource[# "convoyToExitDoor" #]
+		request waiterengine -m moveto : moveto($X_Exitdoor,$Y_Exitdoor)
+		[# table1.state = "dirty" #]
+		println("waitermind   |||   table state dirty")
+		delay 5000
+	}
+	Transition t0 whenReply done -> reachTableClean
+	
+	State stopCleanEnter {
+		updateResource[# "cleanStopped" #]
+		[# 
+			isCleanStopped = true
+			tableStopped = "table1"	
+		#]
+	}
+	Goto accept
+	
+	
+	State clean{
+		println("waitermind   |||   clean")
+		
+		//updateResource[# "undirty" #]
+		//delayVar Cleantime
+		//[# table1.state = "undirty" #]
+		//println("waitermind   |||   clean")
+	}
+	Transition t0 whenTimeVar Cleantime -> clean2
+					whenRequest enter -> stopCleanEnter
+	
+	State clean2{
+		println("waitermind   |||   clean2")
+		[# table1.state = "undirty" #]
+		//updateResource[# "sanitized" #]
+		//delayVar Cleantime
+		//println("waitermind   |||   table state sanitized")
+	}
+	Transition t0 whenTimeVar Cleantime -> clean3
+					whenRequest enter -> stopCleanEnter
+	
+	State clean3{
+		println("waitermind   |||   clean3")
+		//updateResource[# "cleaned" #]
+		//delayVar Cleantime
+		[# table1.state = "sanitized" #]
+		//println("waitermind   |||   table state cleaned")
+	}
+	Transition t0 whenTimeVar Cleantime -> clean4
+					whenRequest enter -> stopCleanEnter
+
+	State clean4{
+		[# table1.state = "cleaned" #]
+	}
+	Goto reachhome
+	
+	State endwork{
+		println("waitermind   |||   end")
+		terminate 0
+	}
+}
+
+
+QActor client context ctxtearoom {
+	State s0 initial{
+		println("client   |||   init")
+	}
+	Goto doSomething
+	
+	State doSomething{
+		println("client   |||   sending enter request")
+		request waitermind -m enter : enter(id)
+	}
+	Transition t0 whenReply accept -> ok
+	
+	State ok{
+		println("client   |||   accepted")
+		delay 15000
+		println("client   |||   ready")
+		forward waitermind -m clientready : clientready(id)
+		delay 15000
+		println("barman   |||   ready")
+		forward waitermind -m drinkready : drinkready(id)
+		delay 15000
+		forward waitermind -m paymentready : paymentready(id)
+		delay 6000
+		request waitermind -m enter : enter(id)
+		delay 20000
+		forward waitermind -m end : end(end)
+	}
+}
+</pre>
+
 </br></br>TestPlan:
 <ul>
 <li> Verificare la sospensione del processo Clean all'arrivo di un cliente durante la fase interrompibile del clean.</li>
