@@ -257,7 +257,7 @@ simulando la situazione descritta nell'assunzione, ci avviciniamo a gestire ques
 di tutti. In effetti, il task clean è sia interrompibile che non interrompibile, infatti nell'ultima fase, quando mancano pochi secondi al termine,
 il task non dovrà essere interrotto.
 </br>
-Il task inform era stato omesso dal primo sprint, ma adesso è necessario modellarlo, infatti nello scenario preso in considerazione potrebbe accadere che
+Nello scenario preso in considerazione potrebbe accadere che
 un cliente chieda di entrare nella <em>tearoom</em> proprio nella fase finale del clean. In questo caso, è opportuno che il <em>waiter</em> comunichi
 l'esito della richiesta in tempo reale, senza far aspettare troppo il cliente.
 </br>
@@ -279,7 +279,8 @@ Per riprendere correttamente dallo stato in cui il task è stato interrotto è o
 </br></br>TestPlan:
 <ul>
 <li> Verificare la sospensione del processo Clean all'arrivo di un cliente durante la fase interrompibile del clean.</li>
-<li> Verificare che, se arriva un cliente durante la fase non interrompibile del clean, venga comunque dato un feedback dal <em>waiter</em></li>
+<li> Verificare che, se arriva un cliente durante la fase non interrompibile del clean, venga comunque dato un feedback dal <em>waiter</em> <b> io lo toglierei 
+dall'analisi dei requisiti, perchè il problema nasce successivamente. Qui rendiamolo facile, non preoccupandoci di sto feedback</b></li>
 </ul>
 
 </div>
@@ -288,7 +289,7 @@ Per riprendere correttamente dallo stato in cui il task è stato interrotto è o
 <div class="remark">
 La prima conseguenza che porta la gestione di più di un cliente è quella di dover assegnare un tavolo ad esso.
 Questo può essere fatto in modo semplice, poichè abbiamo accesso allo stato degli oggetti tavolo; basta infatti assegnare il primo tavolo
-con lo stato "cleaned" nel sistema. </br></br>
+con lo stato "cleaned" nel sistema.
 
 </br></br>
 E' opportuno rifinire il concetto di "tavolo", definito nel primo Sprint. Questo era stato modellato come un oggetto, ovvero il modo più semplice per gestirlo,

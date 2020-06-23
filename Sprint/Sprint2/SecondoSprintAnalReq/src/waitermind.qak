@@ -18,8 +18,8 @@ Dispatch order : order(O)
 Dispatch end : end (E)
 
 Dispatch gotoclean : gotoclean(G)
-Dispatch gotoclean1 : gotoclean1(G)
 Dispatch gotoclean2 : gotoclean2(G)
+Dispatch gotoclean3 : gotoclean3(G)
 
 
 Context ctxbasicrobot     ip [host="localhost"   port=8020] 
@@ -99,20 +99,81 @@ QActor waitermind context ctxtearoom{
 	
 	State reachEntranceDoor {
 		println("waitermind   |||   reachEntranceDoor")
-		updateResource[# "reachEntranceDoor" #]
+		//updateResource[# "reachEntranceDoor" #]
 		request waiterengine -m moveto : moveto($X_Entrancedoor, $Y_Entrancedoor)
 	}
-	Transition t0 whenReply done -> convoyToTable
+	Transition t0 whenReply done -> checkTables
 	
-	State convoyToTable{
-		println("waitermind   |||   convoyToTable")
+	State checkTables{
+		println("waitermind   |||   checkTables")	
+	}
+	Goto convoyToTable1 if [# table1.state=="cleaned" #] else convoyToTable2
+	//Cruciale questo if/else, per capire in quale tavolo andare
+	
+	State convoyToTable1{
+		println("waitermind   |||   convoyToTable1")
 		request waiterengine -m moveto : moveto ($X_teatable1,$Y_teatable1)
 		[# table1.state= "occupied" #]
-		println("waitermind   |||   table state occupied")
-		updateResource [# "convoyToTable" #]
+		println("waitermind   |||   table1 state occupied")
+		//updateResource [# "convoyToTable1" #]
 		delay 5000
 	}
-	Transition t0 whenReply done -> reachhome
+	Transition t0 whenReply done -> checkCleanHome
+	
+	State convoyToTable2{
+		println("waitermind   |||   convoyToTable2")
+		request waiterengine -m moveto : moveto ($X_teatable2,$Y_teatable2)
+		[# table2.state= "occupied" #]
+		println("waitermind   |||   table2 state occupied")
+		//updateResource [# "convoyToTable2" #]
+		delay 5000
+	}
+	Transition t0 whenReply done -> checkCleanHome
+	
+	State checkCleanHome{
+		println("waitermind   |||   checkClean")
+	}
+	Goto reachhome if [# !isCleanStopped #] else reachTable1CleanStopped
+	
+	State reachTable1CleanStopped{
+		println("waitermind   |||   reachTable1CleanStopped")
+		request waiterengine -m moveto : moveto ($X_teatable1,$Y_teatable1)
+	}
+	Transition t0 whenReply done -> checkCleanStopped
+	
+	State checkCleanStopped {
+		println("waitermind   |||   checkCleanStopped")
+		if [# tableStopped=="table1" #] {
+			if [# table1.state == "dirty" #]{
+				forward waitermind -m gotoclean : gotoclean(clean1)
+			}
+			else{
+				if[# table1.state == "undirty" #]{
+					forward waitermind -m gotoclean2 : gotoclean2(clean2)
+				}
+				else {
+					forward waitermind -m gotoclean3 : gotoclean3(clean3)
+				}
+			}
+			
+		}
+		else{
+			if [# table2.state == "dirty" #]{
+				forward waitermind -m gotoclean : gotoclean(clean1)
+			}
+			else{
+				if[# table2.state == "undirty" #]{
+					forward waitermind -m gotoclean2 : gotoclean2(clean2)
+				}
+				else{
+					forward waitermind -m gotoclean3 : gotoclean3(clean3)
+				}
+			}
+		}
+	}
+	Transition t0 whenMsg gotoclean -> clean
+					whenMsg gotoclean2 -> clean2
+					whenMsg gotoclean3 -> clean3
 	
 	State take{
 		println("waitermind   |||   take")
@@ -174,6 +235,7 @@ QActor waitermind context ctxtearoom{
 	Transition t0 whenReply done -> reachTableClean
 	
 	State stopCleanEnter {
+		updateResource[# "cleanStopped" #]
 		[# 
 			isCleanStopped = true
 			tableStopped = "table1"	
@@ -247,6 +309,8 @@ QActor client context ctxtearoom {
 		forward waitermind -m drinkready : drinkready(id)
 		delay 15000
 		forward waitermind -m paymentready : paymentready(id)
+		delay 6000
+		request waitermind -m enter : enter(id)
 		delay 20000
 		forward waitermind -m end : end(end)
 	}
