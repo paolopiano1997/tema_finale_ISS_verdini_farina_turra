@@ -41,7 +41,7 @@ class Client ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, sco
 						forward("drinkready", "drinkready(id)" ,"waitermind" ) 
 						delay(15000) 
 						forward("paymentready", "paymentready(id)" ,"waitermind" ) 
-						delay(6000) 
+						delay(10000) 
 						request("enter", "enter(id)" ,"waitermind" )  
 						delay(20000) 
 						forward("end", "end(end)" ,"waitermind" ) 

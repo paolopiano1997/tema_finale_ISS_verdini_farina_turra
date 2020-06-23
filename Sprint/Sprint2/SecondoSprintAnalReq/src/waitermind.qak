@@ -309,7 +309,7 @@ QActor client context ctxtearoom {
 		forward waitermind -m drinkready : drinkready(id)
 		delay 15000
 		forward waitermind -m paymentready : paymentready(id)
-		delay 6000
+		delay 10000
 		request waitermind -m enter : enter(id)
 		delay 20000
 		forward waitermind -m end : end(end)
