@@ -1,0 +1,162 @@
+System subtearoom
+
+Dispatch startcleaner : startcleaner(T)
+Dispatch cleanerdone : cleanerdone(C)
+Dispatch stopcleaner : stopcleaner(C)
+
+Dispatch starttimer : starttimer(T)
+Dispatch endtime : endtime(T)
+
+Dispatch setTableState : setTableState(N,S)
+
+Request tableState : tableState(N)
+Reply state : state(N,S)
+
+Request stoptimer : stoptimer(T)
+Reply okStop : okStop(T)
+
+Dispatch gotodirty : gotodirty(G)
+Dispatch gotoundirty : gotoundirty(G)
+Dispatch gotosanitized : gotosanitized(G)
+
+
+Request isTableStopped : isTableStopped(T)
+Reply isTableStoppedDone : isTableStoppedDone(E)
+
+Context ctxtearoom ip [ host="127.0.0.1" port=8068 ]
+Context ctxtearoom_dummy   ip [host="localhost" port=8050]
+
+CodedQActor teatables context ctxtearoom_dummy className "it.unibo.teatables.Teatables"
+CodedQActor timer context ctxtearoom_dummy className "it.unibo.timer.Timer"
+CodedQActor waitermind context ctxtearoom className "it.unibo.waitermind.Waitermind"
+
+QActor waitercleaner context ctxtearoom_dummy {
+	
+	[# 
+		var Table = "" 
+		val	Cleantime = 3000L
+		var Clean = Cleantime
+		
+	#]
+	State s0 initial{// Accettazione richieste/dispatch
+		println("waitercleaner   |||   init")
+	}
+	Goto wait
+	
+	State wait {
+		println("waitercleaner   |||   wait")
+	}
+	Transition t0 whenMsg startcleaner -> preDirty
+	
+	State interStop{
+		request timer -m stoptimer : stoptimer(stop)
+	}
+	Transition t0 whenReply okStop -> stop
+	
+	State stop {
+		onMsg(okStop : okStop(T)){
+			[# Clean = Cleantime - payloadArg(0).toLong() #]
+		}
+	}
+	Transition t0 whenMsg startcleaner -> interStart
+				whenRequest isTableStopped -> replyTableStop
+				
+	State replyTableStop{
+		replyTo isTableStopped with isTableStoppedDone : isTableStoppedDone($Table)
+	}
+	Goto stop
+	
+	State interStart{
+		onMsg(startcleaner : startcleaner(T)){
+			request teatables -m tableState : tableState(payloadArg(0))
+		}
+	}
+	Transition t0 whenReply state -> checkState
+	
+	State checkState {
+		onMsg(state : state(N,S)){
+			if[# payloadArg(0) == "dirty" #]{
+				forward waitercleaner -m gotodirty : gotodirty(go)
+			}
+			else{
+				if[# payloadArg(0)=="undirty" #]
+				{
+					forward waitercleaner -m gotoundirty : gotoundirty(go)
+				}
+				else{
+					forward waitercleaner -m gotosanitized : gotosanitized(go)
+				}
+			}
+		}
+	}
+	Transition t0 whenMsg gotodirty ->cleanDirty
+					whenMsg gotoundirty -> cleanUndirty
+					whenMsg gotosanitized -> cleanSanitized
+					
+	State preDirty{
+		[# Clean = Cleantime #]
+		onMsg(startcleaner : startcleaner(T)){
+			[# Table = payloadArg(0) #]
+		}
+	}
+	Goto cleanDirty
+	
+	State preUndirty{
+		[# Clean = Cleantime #]
+	}
+	Goto cleanUndirty
+	
+	State preSanitized{
+		[# Clean = Cleantime #]
+	}
+	Goto cleanSanitized
+	
+	State cleanDirty { //Inizio catena di clean
+		onMsg(isTableStopped : isTableStopped(T)){
+			replyTo isTableStopped with isTableStoppedDone : isTableStoppedDone(0)
+		}
+		else {
+			forward timer -m starttimer : starttimer($Clean)
+		}
+	}
+	Transition t0 whenMsg endtime -> preUndirty
+				whenMsg stopcleaner -> interStop
+				whenRequest isTableStopped -> cleanDirty
+				
+	
+	State cleanUndirty{
+		onMsg(isTableStopped : isTableStopped(T)){
+			replyTo isTableStopped with isTableStoppedDone : isTableStoppedDone(0)
+		}
+		else{
+			forward teatables -m setTableState : setTableState($Table,undirty) //I forward andrebbero fatti solo una volta, così
+			//invece vengono fatti ogni volta che resumiamo.
+			forward timer -m starttimer : starttimer($Clean)
+		}
+		
+	}
+	Transition t0 whenMsg endtime -> preSanitized
+				whenMsg stopcleaner -> interStop
+				whenRequest isTableStopped -> cleanUndirty
+	
+	State cleanSanitized{
+		onMsg(isTableStopped : isTableStopped(T)){
+			replyTo isTableStopped with isTableStoppedDone : isTableStoppedDone(0)
+		}
+		else{
+			forward teatables -m setTableState : setTableState($Table,sanitized)
+			forward timer -m starttimer : starttimer($Clean)
+		}
+		
+	}
+	Transition t0 whenMsg endtime -> cleanDone
+				whenMsg stopcleaner -> interStop
+				whenRequest isTableStopped -> cleanSanitized
+	
+	State cleanDone{ //Messaggio al waitermind di "fine"
+		forward teatables -m setTableState : setTableState($Table,cleaned)
+		forward waitermind -m cleanerdone : cleanerdone(done)
+	}
+	Goto wait
+	
+}
