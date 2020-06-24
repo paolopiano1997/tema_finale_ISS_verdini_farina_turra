@@ -8,6 +8,11 @@ Dispatch clean   : clean(N)
 Request isClean : isClean(N)
 Reply isCleanDone : isCleanDone(E)
 
+Dispatch setTableState : setTableState(N,S)
+
+Request tableState : tableState(N)
+Reply state : state(N,S)
+
 
 Context ctxtearoom_dummy   ip [host="localhost" port=8050]    
 
@@ -30,9 +35,14 @@ QActor teatables context ctxtearoom_dummy{
 	Transition t0  whenMsg engage -> engageTable
 					whenMsg clean -> cleanTable
 					whenRequest isClean -> replyClean
+					whenMsg setTableState -> setState
+					
+	State setState{
+		//Settiamo lo stato passato come parametro S al relatvo tavolo N
+	}
 					
 	State replyClean {
-		
+		//Rispondiamo con isCleanDone quando abbiamo settato il clean
 	}
 					
 	State engageTable{

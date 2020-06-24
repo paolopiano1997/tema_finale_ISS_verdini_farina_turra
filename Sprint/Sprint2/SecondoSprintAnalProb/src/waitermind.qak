@@ -77,7 +77,6 @@ QActor waitermind context ctxtearoom{
     val X_home			= "0"
 	val Y_home 			= "0"
 
-	val	Cleantime = 3000L
 	val Servicetime = 5000L
 	val CollectTime = 4000L
 	
@@ -126,7 +125,7 @@ QActor waitermind context ctxtearoom{
 	
 	State checkIsCleanDone1{
 		onMsg(isCleanDone : isCleanDone(N)){
-			if [# $payloadArg(0)=="yes" #]{
+			if [# payloadArg(0)=="yes" #]{
 				forward waitermind -m gototable1 : gototable1(table1)
 			}
 			else{
@@ -139,7 +138,7 @@ QActor waitermind context ctxtearoom{
 	
 	State checkIsCleanDone2{
 		onMsg(isCleanDone : isCleanDone(N)){
-			if [# $payloadArg(0)=="yes" #]{
+			if [# payloadArg(0)=="yes" #]{
 				forward waitermind -m gototable2 : gototable2(table2)
 			}
 		}
@@ -178,11 +177,11 @@ QActor waitermind context ctxtearoom{
 	State checkIsTableStopped{
 		println("waitermind   |||   checkIsTableStopped")
 		onMsg( isTableStoppedDone : isTableStoppedDone(E)){
-			if [# $payloadArg(0)==0 #]{ //0 non è interrotto nessun clean
+			if [# payloadArg(0)=="0" #]{ //0 non è interrotto nessun clean
 				forward waitermind -m gotohome : gotohome(go)
 			}
 			else{
-				if[# $payloadArg(0)==1 #]{ //Interrotto clean table1
+				if[# payloadArg(0)=="1" #]{ //Interrotto clean table1
 					forward waitermind -m gototable1 : gototable1(go)
 				}
 				else{
@@ -254,8 +253,6 @@ QActor waitermind context ctxtearoom{
 		println("waitermind   |||   convoyToExitDoor")
 		updateResource[# "convoyToExitDoor" #]
 		request waiterengine -m moveto : moveto($X_Exitdoor,$Y_Exitdoor)
-		[# table1.state = "dirty" #]
-		println("waitermind   |||   table state dirty")
 		delay 5000
 	}
 	Transition t0 whenReply done -> reachTableClean

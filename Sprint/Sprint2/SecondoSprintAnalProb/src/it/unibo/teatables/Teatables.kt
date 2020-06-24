@@ -40,6 +40,11 @@ class Teatables ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, 
 					 transition(edgeName="t00",targetState="engageTable",cond=whenDispatch("engage"))
 					transition(edgeName="t01",targetState="cleanTable",cond=whenDispatch("clean"))
 					transition(edgeName="t02",targetState="replyClean",cond=whenRequest("isClean"))
+					transition(edgeName="t03",targetState="setState",cond=whenDispatch("setTableState"))
+				}	 
+				state("setState") { //this:State
+					action { //it:State
+					}
 				}	 
 				state("replyClean") { //this:State
 					action { //it:State

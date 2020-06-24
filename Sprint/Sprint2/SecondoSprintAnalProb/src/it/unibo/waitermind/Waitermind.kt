@@ -40,7 +40,6 @@ class Waitermind ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name,
 		    val X_home			= "0"
 			val Y_home 			= "0"
 		
-			val	Cleantime = 3000L
 			val Servicetime = 5000L
 			val CollectTime = 4000L
 			
@@ -97,7 +96,7 @@ class Waitermind ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name,
 					action { //it:State
 						if( checkMsgContent( Term.createTerm("isCleanDone(E)"), Term.createTerm("isCleanDone(N)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
-								if(  $payloadArg(0)=="yes"  
+								if(  payloadArg(0)=="yes"  
 								 ){forward("gototable1", "gototable1(table1)" ,"waitermind" ) 
 								}
 								else
@@ -112,7 +111,7 @@ class Waitermind ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name,
 					action { //it:State
 						if( checkMsgContent( Term.createTerm("isCleanDone(E)"), Term.createTerm("isCleanDone(N)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
-								if(  $payloadArg(0)=="yes"  
+								if(  payloadArg(0)=="yes"  
 								 ){forward("gototable2", "gototable2(table2)" ,"waitermind" ) 
 								}
 						}
@@ -151,11 +150,11 @@ class Waitermind ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name,
 						println("waitermind   |||   checkIsTableStopped")
 						if( checkMsgContent( Term.createTerm("isTableStoppedDone(E)"), Term.createTerm("isTableStoppedDone(E)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
-								if(  $payloadArg(0)==0  
+								if(  payloadArg(0)=="0"  
 								 ){forward("gotohome", "gotohome(go)" ,"waitermind" ) 
 								}
 								else
-								 {if(  $payloadArg(0)==1  
+								 {if(  payloadArg(0)=="1"  
 								  ){forward("gototable1", "gototable1(go)" ,"waitermind" ) 
 								 }
 								 }
@@ -239,8 +238,6 @@ class Waitermind ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name,
 						updateResourceRep( "convoyToExitDoor"  
 						)
 						request("moveto", "moveto($X_Exitdoor,$Y_Exitdoor)" ,"waiterengine" )  
-						 table1.state = "dirty"  
-						println("waitermind   |||   table state dirty")
 						delay(5000) 
 					}
 					 transition(edgeName="t022",targetState="reachTableClean",cond=whenReply("done"))

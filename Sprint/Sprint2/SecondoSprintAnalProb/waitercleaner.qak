@@ -1,9 +1,0 @@
-System subtearoom
-
-Context ctxtearoom_dummy   ip [host="localhost" port=8050]    
-
-QActor waitercleaner context ctxtearoom_dummy {
-	State s0 initial{
-		
-	}
-}

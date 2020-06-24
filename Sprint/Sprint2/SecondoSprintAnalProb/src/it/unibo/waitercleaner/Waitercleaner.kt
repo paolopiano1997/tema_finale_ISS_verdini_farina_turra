@@ -16,10 +16,145 @@ class Waitercleaner ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( na
 	@kotlinx.coroutines.ObsoleteCoroutinesApi
 	@kotlinx.coroutines.ExperimentalCoroutinesApi			
 	override fun getBody() : (ActorBasicFsm.() -> Unit){
+		 
+				var Table = "" 
+				val	Cleantime = 3000L
+				var Clean = Cleantime
+				
 		return { //this:ActionBasciFsm
 				state("s0") { //this:State
 					action { //it:State
+						println("waitercleaner   |||   init")
 					}
+					 transition( edgeName="goto",targetState="wait", cond=doswitch() )
+				}	 
+				state("wait") { //this:State
+					action { //it:State
+						println("waitercleaner   |||   wait")
+					}
+					 transition(edgeName="t00",targetState="preDirty",cond=whenDispatch("startcleaner"))
+				}	 
+				state("interStop") { //this:State
+					action { //it:State
+						request("stoptimer", "stoptimer(stop)" ,"timer" )  
+					}
+					 transition(edgeName="t01",targetState="stop",cond=whenReply("okStop"))
+				}	 
+				state("stop") { //this:State
+					action { //it:State
+						if( checkMsgContent( Term.createTerm("okStop(T)"), Term.createTerm("okStop(T)"), 
+						                        currentMsg.msgContent()) ) { //set msgArgList
+								 Clean = Cleantime - payloadArg(0).toLong()  
+						}
+					}
+					 transition(edgeName="t02",targetState="interStart",cond=whenDispatch("startcleaner"))
+					transition(edgeName="t03",targetState="replyTableStop",cond=whenRequest("isTableStopped"))
+				}	 
+				state("replyTableStop") { //this:State
+					action { //it:State
+						answer("isTableStopped", "isTableStoppedDone", "isTableStoppedDone($Table)"   )  
+					}
+					 transition( edgeName="goto",targetState="stop", cond=doswitch() )
+				}	 
+				state("interStart") { //this:State
+					action { //it:State
+						if( checkMsgContent( Term.createTerm("startcleaner(T)"), Term.createTerm("startcleaner(T)"), 
+						                        currentMsg.msgContent()) ) { //set msgArgList
+								request("tableState", "tableState(payloadArg(0))" ,"teatables" )  
+						}
+					}
+					 transition(edgeName="t04",targetState="checkState",cond=whenReply("state"))
+				}	 
+				state("checkState") { //this:State
+					action { //it:State
+						if( checkMsgContent( Term.createTerm("state(N,S)"), Term.createTerm("state(N,S)"), 
+						                        currentMsg.msgContent()) ) { //set msgArgList
+								if(  payloadArg(0) == "dirty"  
+								 ){forward("gotodirty", "gotodirty(go)" ,"waitercleaner" ) 
+								}
+								else
+								 {if(  payloadArg(0)=="undirty"  
+								  ){forward("gotoundirty", "gotoundirty(go)" ,"waitercleaner" ) 
+								 }
+								 else
+								  {forward("gotosanitized", "gotosanitized(go)" ,"waitercleaner" ) 
+								  }
+								 }
+						}
+					}
+					 transition(edgeName="t05",targetState="cleanDirty",cond=whenDispatch("gotodirty"))
+					transition(edgeName="t06",targetState="cleanUndirty",cond=whenDispatch("gotoundirty"))
+					transition(edgeName="t07",targetState="cleanSanitized",cond=whenDispatch("gotosanitized"))
+				}	 
+				state("preDirty") { //this:State
+					action { //it:State
+						 Clean = Cleantime  
+						if( checkMsgContent( Term.createTerm("startcleaner(T)"), Term.createTerm("startcleaner(T)"), 
+						                        currentMsg.msgContent()) ) { //set msgArgList
+								 Table = payloadArg(0)  
+						}
+					}
+					 transition( edgeName="goto",targetState="cleanDirty", cond=doswitch() )
+				}	 
+				state("preUndirty") { //this:State
+					action { //it:State
+						 Clean = Cleantime  
+					}
+					 transition( edgeName="goto",targetState="cleanUndirty", cond=doswitch() )
+				}	 
+				state("preSanitized") { //this:State
+					action { //it:State
+						 Clean = Cleantime  
+					}
+					 transition( edgeName="goto",targetState="cleanSanitized", cond=doswitch() )
+				}	 
+				state("cleanDirty") { //this:State
+					action { //it:State
+						if( checkMsgContent( Term.createTerm("isTableStopped(T)"), Term.createTerm("isTableStopped(T)"), 
+						                        currentMsg.msgContent()) ) { //set msgArgList
+								answer("isTableStopped", "isTableStoppedDone", "isTableStoppedDone(0)"   )  
+						}else{
+							forward("starttimer", "starttimer($Clean)" ,"timer" ) 
+						}
+					}
+					 transition(edgeName="t08",targetState="preUndirty",cond=whenDispatch("endtime"))
+					transition(edgeName="t09",targetState="interStop",cond=whenDispatch("stopcleaner"))
+					transition(edgeName="t010",targetState="cleanDirty",cond=whenRequest("isTableStopped"))
+				}	 
+				state("cleanUndirty") { //this:State
+					action { //it:State
+						if( checkMsgContent( Term.createTerm("isTableStopped(T)"), Term.createTerm("isTableStopped(T)"), 
+						                        currentMsg.msgContent()) ) { //set msgArgList
+								answer("isTableStopped", "isTableStoppedDone", "isTableStoppedDone(0)"   )  
+						}else{
+							forward("setTableState", "setTableState($Table,undirty)" ,"teatables" ) 
+							forward("starttimer", "starttimer($Clean)" ,"timer" ) 
+						}
+					}
+					 transition(edgeName="t011",targetState="preSanitized",cond=whenDispatch("endtime"))
+					transition(edgeName="t012",targetState="interStop",cond=whenDispatch("stopcleaner"))
+					transition(edgeName="t013",targetState="cleanUndirty",cond=whenRequest("isTableStopped"))
+				}	 
+				state("cleanSanitized") { //this:State
+					action { //it:State
+						if( checkMsgContent( Term.createTerm("isTableStopped(T)"), Term.createTerm("isTableStopped(T)"), 
+						                        currentMsg.msgContent()) ) { //set msgArgList
+								answer("isTableStopped", "isTableStoppedDone", "isTableStoppedDone(0)"   )  
+						}else{
+							forward("setTableState", "setTableState($Table,sanitized)" ,"teatables" ) 
+							forward("starttimer", "starttimer($Clean)" ,"timer" ) 
+						}
+					}
+					 transition(edgeName="t014",targetState="cleanDone",cond=whenDispatch("endtime"))
+					transition(edgeName="t015",targetState="interStop",cond=whenDispatch("stopcleaner"))
+					transition(edgeName="t016",targetState="cleanSanitized",cond=whenRequest("isTableStopped"))
+				}	 
+				state("cleanDone") { //this:State
+					action { //it:State
+						forward("setTableState", "setTableState($Table,cleaned)" ,"teatables" ) 
+						forward("cleanerdone", "cleanerdone(done)" ,"waitermind" ) 
+					}
+					 transition( edgeName="goto",targetState="wait", cond=doswitch() )
 				}	 
 			}
 		}

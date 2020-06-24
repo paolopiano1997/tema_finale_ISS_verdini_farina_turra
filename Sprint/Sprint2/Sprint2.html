@@ -687,7 +687,8 @@ Per la gestione degli stati del tavolo, una problematica è se sia opportuno far
 oppure se farglieli memorizzare autonomamente, senza dover modificare lo stato del tavolo globale. Questa problematica nasce dal fatto che i vari stati intermedi
 non devono essere accessibili da nessuno se non da waitercleaner, quindi non sarebbe necessario effettuare questa modifica nel sistema di memorizzazione PROLOG.
 Oltre a questo, dovremmo istituire un'interazione tra waitercleaner e teatables per aggiornare gli stati intermedi. Per ora questa problematica è modellata 
-senza aggiornare questi stati da parte del waitercleaner.
+senza aggiornare questi stati da parte del waitercleaner. <b> Sarebbe forse meglio chiedere a teatables gli stati,
+così nel waitercleaner on ci sono gestioni di stato del tavolo, ma il tavolo fa il tavolo, il cleaner fa il cleaner. </b>
 </br></br>
 Poichè è stato stabilito con il committente che nell'ultima fase del clean (quella in cui si passa da
 "sanitized" a "cleaned" come stato del tavolo) in cui mancano circa 15 secondi alla fine il suddetto task non è interrompibile, 
