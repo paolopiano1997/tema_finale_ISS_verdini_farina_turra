@@ -40,7 +40,7 @@ class Waitermind ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name,
 		    val X_home			= "0"
 			val Y_home 			= "0"
 		
-			val	Cleantime = 2000L
+			val	Cleantime = 3000L
 			val Servicetime = 5000L
 			val CollectTime = 4000L
 			data class Table(var state: String ="cleaned") {
@@ -50,6 +50,9 @@ class Waitermind ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name,
 			val table2 = Table()
 			var stateTable1 = "cleaned"
 			var stateTable2 = "cleaned"
+			
+			var isCleanStopped = false
+			var tableStopped = ""
 		return { //this:ActionBasciFsm
 				state("s0") { //this:State
 					action { //it:State
@@ -88,23 +91,88 @@ class Waitermind ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name,
 				state("reachEntranceDoor") { //this:State
 					action { //it:State
 						println("waitermind   |||   reachEntranceDoor")
-						updateResourceRep( "reachEntranceDoor"  
-						)
 						request("moveto", "moveto($X_Entrancedoor,$Y_Entrancedoor)" ,"waiterengine" )  
 					}
-					 transition(edgeName="t07",targetState="convoyToTable",cond=whenReply("done"))
+					 transition(edgeName="t07",targetState="checkTables",cond=whenReply("done"))
 				}	 
-				state("convoyToTable") { //this:State
+				state("checkTables") { //this:State
 					action { //it:State
-						println("waitermind   |||   convoyToTable")
+						println("waitermind   |||   checkTables")
+					}
+					 transition( edgeName="goto",targetState="convoyToTable1", cond=doswitchGuarded({ table1.state=="cleaned"  
+					}) )
+					transition( edgeName="goto",targetState="convoyToTable2", cond=doswitchGuarded({! ( table1.state=="cleaned"  
+					) }) )
+				}	 
+				state("convoyToTable1") { //this:State
+					action { //it:State
+						println("waitermind   |||   convoyToTable1")
 						request("moveto", "moveto($X_teatable1,$Y_teatable1)" ,"waiterengine" )  
 						 table1.state= "occupied"  
-						println("waitermind   |||   table state occupied")
-						updateResourceRep( "convoyToTable"  
-						)
+						println("waitermind   |||   table1 state occupied")
 						delay(5000) 
 					}
-					 transition(edgeName="t08",targetState="reachhome",cond=whenReply("done"))
+					 transition(edgeName="t08",targetState="checkCleanHome",cond=whenReply("done"))
+				}	 
+				state("convoyToTable2") { //this:State
+					action { //it:State
+						println("waitermind   |||   convoyToTable2")
+						request("moveto", "moveto($X_teatable2,$Y_teatable2)" ,"waiterengine" )  
+						 table2.state= "occupied"  
+						println("waitermind   |||   table2 state occupied")
+						delay(5000) 
+					}
+					 transition(edgeName="t09",targetState="checkCleanHome",cond=whenReply("done"))
+				}	 
+				state("checkCleanHome") { //this:State
+					action { //it:State
+						println("waitermind   |||   checkClean")
+					}
+					 transition( edgeName="goto",targetState="reachhome", cond=doswitchGuarded({ !isCleanStopped  
+					}) )
+					transition( edgeName="goto",targetState="reachTable1CleanStopped", cond=doswitchGuarded({! ( !isCleanStopped  
+					) }) )
+				}	 
+				state("reachTable1CleanStopped") { //this:State
+					action { //it:State
+						println("waitermind   |||   reachTable1CleanStopped")
+						request("moveto", "moveto($X_teatable1,$Y_teatable1)" ,"waiterengine" )  
+					}
+					 transition(edgeName="t010",targetState="checkCleanStopped",cond=whenReply("done"))
+				}	 
+				state("checkCleanStopped") { //this:State
+					action { //it:State
+						println("waitermind   |||   checkCleanStopped")
+						if(  tableStopped=="table1"  
+						 ){if(  table1.state == "dirty"  
+						 ){forward("gotoclean", "gotoclean(clean1)" ,"waitermind" ) 
+						}
+						else
+						 {if(  table1.state == "undirty"  
+						  ){forward("gotoclean2", "gotoclean2(clean2)" ,"waitermind" ) 
+						 }
+						 else
+						  {forward("gotoclean3", "gotoclean3(clean3)" ,"waitermind" ) 
+						  }
+						 }
+						}
+						else
+						 {if(  table2.state == "dirty"  
+						  ){forward("gotoclean", "gotoclean(clean1)" ,"waitermind" ) 
+						 }
+						 else
+						  {if(  table2.state == "undirty"  
+						   ){forward("gotoclean2", "gotoclean2(clean2)" ,"waitermind" ) 
+						  }
+						  else
+						   {forward("gotoclean3", "gotoclean3(clean3)" ,"waitermind" ) 
+						   }
+						  }
+						 }
+					}
+					 transition(edgeName="t011",targetState="clean",cond=whenDispatch("gotoclean"))
+					transition(edgeName="t012",targetState="clean2",cond=whenDispatch("gotoclean2"))
+					transition(edgeName="t013",targetState="clean3",cond=whenDispatch("gotoclean3"))
 				}	 
 				state("take") { //this:State
 					action { //it:State
@@ -113,7 +181,7 @@ class Waitermind ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name,
 						)
 						request("moveto", "moveto($X_teatable1,$Y_teatable1)" ,"waiterengine" )  
 					}
-					 transition(edgeName="t09",targetState="transmit",cond=whenReply("done"))
+					 transition(edgeName="t014",targetState="transmit",cond=whenReply("done"))
 				}	 
 				state("transmit") { //this:State
 					action { //it:State
@@ -130,7 +198,7 @@ class Waitermind ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name,
 						)
 						request("moveto", "moveto($X_servicedesk,$Y_servicedesk)" ,"waiterengine" )  
 					}
-					 transition(edgeName="t010",targetState="serve",cond=whenReply("done"))
+					 transition(edgeName="t015",targetState="serve",cond=whenReply("done"))
 				}	 
 				state("serve") { //this:State
 					action { //it:State
@@ -139,7 +207,7 @@ class Waitermind ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name,
 						)
 						request("moveto", "moveto($X_teatable1,$Y_teatable1)" ,"waiterengine" )  
 					}
-					 transition(edgeName="t011",targetState="reachhome",cond=whenReply("done"))
+					 transition(edgeName="t016",targetState="reachhome",cond=whenReply("done"))
 				}	 
 				state("reachTableCollect") { //this:State
 					action { //it:State
@@ -148,7 +216,7 @@ class Waitermind ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name,
 						)
 						request("moveto", "moveto($X_teatable1,$Y_teatable1)" ,"waiterengine" )  
 					}
-					 transition(edgeName="t012",targetState="collect",cond=whenReply("done"))
+					 transition(edgeName="t017",targetState="collect",cond=whenReply("done"))
 				}	 
 				state("reachTableClean") { //this:State
 					action { //it:State
@@ -157,7 +225,7 @@ class Waitermind ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name,
 						)
 						request("moveto", "moveto($X_teatable1,$Y_teatable1)" ,"waiterengine" )  
 					}
-					 transition(edgeName="t013",targetState="clean",cond=whenReply("done"))
+					 transition(edgeName="t018",targetState="clean",cond=whenReply("done"))
 				}	 
 				state("collect") { //this:State
 					action { //it:State
@@ -178,38 +246,50 @@ class Waitermind ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name,
 						println("waitermind   |||   table state dirty")
 						delay(5000) 
 					}
-					 transition(edgeName="t014",targetState="reachTableClean",cond=whenReply("done"))
+					 transition(edgeName="t019",targetState="reachTableClean",cond=whenReply("done"))
+				}	 
+				state("stopCleanEnter") { //this:State
+					action { //it:State
+						updateResourceRep( "cleanStopped"  
+						)
+						 
+									isCleanStopped = true
+									tableStopped = "table1"	
+					}
+					 transition( edgeName="goto",targetState="accept", cond=doswitch() )
 				}	 
 				state("clean") { //this:State
 					action { //it:State
 						println("waitermind   |||   clean")
-						updateResourceRep( "undirty"  
-						)
-						delay(Cleantime)
-						 table1.state = "undirty"  
-						println("waitermind   |||   table state undirty")
+						stateTimer = TimerActor("timer_clean", 
+							scope, context!!, "local_tout_waitermind_clean", Cleantime )
 					}
-					 transition( edgeName="goto",targetState="clean2", cond=doswitch() )
+					 transition(edgeName="t020",targetState="clean2",cond=whenTimeout("local_tout_waitermind_clean"))   
+					transition(edgeName="t021",targetState="stopCleanEnter",cond=whenRequest("enter"))
 				}	 
 				state("clean2") { //this:State
 					action { //it:State
 						println("waitermind   |||   clean2")
-						updateResourceRep( "sanitized"  
-						)
-						delay(Cleantime)
-						 table1.state = "sanitized"  
-						println("waitermind   |||   table state sanitized")
+						 table1.state = "undirty"  
+						stateTimer = TimerActor("timer_clean2", 
+							scope, context!!, "local_tout_waitermind_clean2", Cleantime )
 					}
-					 transition( edgeName="goto",targetState="clean3", cond=doswitch() )
+					 transition(edgeName="t022",targetState="clean3",cond=whenTimeout("local_tout_waitermind_clean2"))   
+					transition(edgeName="t023",targetState="stopCleanEnter",cond=whenRequest("enter"))
 				}	 
 				state("clean3") { //this:State
 					action { //it:State
 						println("waitermind   |||   clean3")
-						updateResourceRep( "cleaned"  
-						)
-						delay(Cleantime)
+						 table1.state = "sanitized"  
+						stateTimer = TimerActor("timer_clean3", 
+							scope, context!!, "local_tout_waitermind_clean3", Cleantime )
+					}
+					 transition(edgeName="t024",targetState="clean4",cond=whenTimeout("local_tout_waitermind_clean3"))   
+					transition(edgeName="t025",targetState="stopCleanEnter",cond=whenRequest("enter"))
+				}	 
+				state("clean4") { //this:State
+					action { //it:State
 						 table1.state = "cleaned"  
-						println("waitermind   |||   table state cleaned")
 					}
 					 transition( edgeName="goto",targetState="reachhome", cond=doswitch() )
 				}	 

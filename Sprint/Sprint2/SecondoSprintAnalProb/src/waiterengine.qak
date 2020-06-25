@@ -1,4 +1,4 @@
-System  -msglog  subtearoom 
+System  tearoom 
 
 Request 	moveto : moveto(X,Y)
 Reply 		done   : done(X,Y)

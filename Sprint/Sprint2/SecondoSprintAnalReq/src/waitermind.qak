@@ -109,7 +109,8 @@ QActor waitermind context ctxtearoom{
 	}
 	Goto convoyToTable1 if [# table1.state=="cleaned" #] else convoyToTable2
 	//Cruciale questo if/else, per capire in quale tavolo andare
-	
+
+
 	State convoyToTable1{
 		println("waitermind   |||   convoyToTable1")
 		request waiterengine -m moveto : moveto ($X_teatable1,$Y_teatable1)

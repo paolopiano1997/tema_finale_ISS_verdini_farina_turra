@@ -44,8 +44,9 @@ Dispatch gototable2 : gototable2(T)
 Context ctxbasicrobot     ip [host="localhost"   port=8020] 
 Context ctxtearoom ip [ host="127.0.0.1" port=8068 ]
 Context ctxtearoom_dummy   ip [host="192.168.0.38" port=8050]     
+Context ctxtearoom_teatables   ip [host="localhost" port=8030]
 
-CodedQActor teatables context ctxtearoom_dummy className "it.unibo.teatables.Teatables"
+CodedQActor teatables context ctxtearoom_teatables className "it.unibo.teatables.Teatables"
 CodedQActor waitercleaner context ctxtearoom_dummy className "it.unibo.waitercleaner.Waitercleaner"
 
 ExternalQActor basicrobot  context ctxbasicrobot

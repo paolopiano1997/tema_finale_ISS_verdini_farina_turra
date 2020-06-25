@@ -17,7 +17,7 @@ class Timer ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, scop
 	@kotlinx.coroutines.ExperimentalCoroutinesApi			
 	override fun getBody() : (ActorBasicFsm.() -> Unit){
 		 
-				var Time: Long = 0 
+				var Time: Long = 0
 				var StartTime : Long = 0	
 				var Duration : Long	= 0
 		return { //this:ActionBasciFsm

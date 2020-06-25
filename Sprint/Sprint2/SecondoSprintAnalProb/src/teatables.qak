@@ -1,4 +1,4 @@
-System   tearoomsubsys
+System subteatablestearoom
 
 
 Dispatch engage  : engage(N)
@@ -14,9 +14,9 @@ Request tableState : tableState(N)
 Reply state : state(N,S)
 
 
-Context ctxtearoom_dummy   ip [host="192.168.0.38" port=8050]    
+Context ctxtearoom_teatables   ip [host="localhost" port=8030]    
 
-QActor teatables context ctxtearoom_dummy{ 
+QActor teatables context ctxtearoom_teatables{ 
 [#
 	var StateOfTables = ""
 	var E = ""

@@ -4,7 +4,8 @@
 context(ctxbasicrobot, "localhost",  "TCP", "8020").
 context(ctxtearoom, "127.0.0.1",  "TCP", "8068").
 context(ctxtearoom_dummy, "192.168.0.38",  "TCP", "8050").
- qactor( teatables, ctxtearoom_dummy, "it.unibo.teatables.Teatables").
+context(ctxtearoom_teatables, "localhost",  "TCP", "8030").
+ qactor( teatables, ctxtearoom_teatables, "it.unibo.teatables.Teatables").
   qactor( waitercleaner, ctxtearoom_dummy, "it.unibo.waitercleaner.Waitercleaner").
   qactor( basicrobot, ctxbasicrobot, "external").
   qactor( waiterengine, ctxtearoom, "it.unibo.waiterengine.Waiterengine").
