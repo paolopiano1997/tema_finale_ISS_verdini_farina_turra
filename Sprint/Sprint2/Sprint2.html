@@ -644,39 +644,42 @@ Questo può essere fatto in modo semplice, poichè abbiamo accesso allo stato de
 con lo stato "cleaned" nel sistema.
 
 </br></br>
-E' opportuno rifinire il concetto di "tavolo", definito nel primo Sprint. Questo era stato modellato come un oggetto, ovvero il modo più semplice per gestirlo,
+<h3> Teatables </h3> </br>
+E' opportuno rifinire il concetto di "tavolo", definito nel primo Sprint.
+Questo era stato modellato come un oggetto, ovvero il modo più semplice per gestirlo,
 ma non necessariamente il modo migliore. Effettivamente, pensando all'entità "tavolo", potrebbe essere opportuno definirla come un attore dotato
 di comportamento autonomo. Infatti, avere un'entità separata che mantenga lo stato del tavolo stesso e se lo gestisca, renderebbe il sistema 
 più snello e meno vincolante. Oltretutto, in questo modo viene lasciato il puro compito da "mente" al waitermind e viene suddiviso a ciascun attore
 un ruolo principale e fondamentale. E' quindi necessario rimodellare il tavolo con relativo stato e gestire l'interazione tra <em>waiter</em> e tavolo.
-<b>DA PENSARE BENE COME FARE, QUALI MESSAGGI INTRODURRE E COME GESTIRE I TAVOLI.</b>
-Si potrebbe mettere variabili locali in waitermind per descrivere lo stato dei tavoli
-Per ovviare al problema della rappresentazione del tavolo e della gestione del suo stato interno sono emerse tre soluzioni, una modellandolo come un attore al cui waitermind invia dei messaggi per sapere il suo stato,
-una in cui il tavolo informa via dispatch il waitermind ogni qual volta cambia il suo stato (dirty, occupied, clean) ed infine una in cui il waitermind "ricorda" lo stato del tavolo a seconda delle azioni che ha compiuto precedentemente 
+Per ovviare al problema della rappresentazione del tavolo e della gestione del suo stato interno 
+sono emersi tre scenari, una modellandolo come un attore al cui waitermind invia dei dispatch per sapere il suo stato,
+una in cui il tavolo informa via dispatch il waitermind ogni qual volta cambia il suo stato (dirty, occupied, clean)
+ed infine una in cui il waitermind "ricorda" lo stato del tavolo a seconda delle azioni che ha compiuto precedentemente 
 (es. il waiter accompagna un cliente ad un tavolo e il waiter si ricorda che quel tavolo è occupato e che non può più portare alcun cliente li).
-Quest'ultima possibilità si allontana dal modello ad attori in quanto non sfrutta i messaggi tra waiter e tavolo, riducendone la potenza espressiva e la riusabilità, pertanto è stata esclusa.
-La seconda possibilità riduce la quantità di messaggi circolanti nel sistema ma inverte il controllo dello stato del tavolo, ovvero non è il waiter ad informarsi secondo necessità ma è il tavolo ad aggiornare il waiter ad ogni suo cambio di stato,
-con la necessità della gestione dei messaggi in ingresso anche nel caso in cui il waiter sta svolgendo un'altra azione non legata ad instradamento clienti o pulizia di tavoli.
+Quest'ultima possibilità si allontana dal modello ad attori in quanto non sfrutta interazione a messaggi tra waiter e tavolo, 
+riducendone la potenza espressiva e la riusabilità, pertanto è stata esclusa.
+La seconda possibilità riduce la quantità di messaggi circolanti nel sistema ma inverte il controllo dello stato del tavolo, 
+ovvero non è il waiter ad informarsi secondo necessità ma è il tavolo ad aggiornare il waiter ad ogni suo cambio di stato,
+con la necessità della gestione dei messaggi in ingresso anche nel caso in cui il waiter stia svolgendo un'altra azione non 
+legata ad accompagnare clienti o fare <em>clean</em>.
 La prima possibilità è quella che sposa completamente il modello ad attori, pertanto il modello seguirà questa direzione.
-Modellando l'entità tavolo come attore, è necessario introdurre una gestione sia dell'interazione con il waiter che degli stati dei tavoli.
-Gli stati dei tavoli dovranno essere memorizzati da qualche parte, in modo tale da ottimizzare l'utilizzo dell'attore "teatables". Facendo così, è possibile
-mandare dei dispatch da waitermind a teatables per effettuare le principali operazioni, ovvero "occupy" per occupare un determinato tavolo,
+Modellando l'entità tavolo come attore, in particolare l'entità gestisce entrambi i tavoli e si chiama "teatables",
+ è necessario introdurre una gestione sia dell'interazione con il waiter che degli stati dei tavoli.
+Gli stati dei tavoli dovranno essere memorizzati da qualche parte, in modo tale da ottimizzare l'utilizzo dell'attore "teatables".
+In tal modo è possibile gestire interazioni tra waitermind e teatables per effettuare le principali interazioni. Per questo è 
+ Facendo così,
+è possibile mandare dei dispatch da waitermind a teatables per effettuare le principali operazioni, ovvero "occupy" per occupare un determinato tavolo,
 "tableclean" per aggiornare lo stato di un tavolo a "cleaned", "release" per aggiornare lo stato di un tavolo quando il cliente se ne va.
 Questa memorizzazione e gestione verrà modellata tramite fatti Prolog, poichè il modello QAK ne offre un supporto.
 
 </br></br>
 
-
-<b> Per l'interazione degli stati interrompibili e degli stati interrotti è nata la problematica su chi deve gestire
- il "nome" dello stato da riesumare una volta interrotto e sulla gestione dei 'goto' per la sospensione. 
-A tal fine si è ipotizzato un ulteriore <u>stato intermedio</u> che gestisce l'interazione tra processo interrompente 
-e interrompibile, il quale gestisce le richieste provenienti da un processo più prioritario, inoltrando tale richiesta
- ad un processo meno prioritario. se non hai capito una sega ci lascio un disegnino nel git. </b> </br> </br>
- 
+ <h3> Task <em>clean</em> </h3>
+ </br>
 La difficoltà di gestire sia interazioni esterne che la simulazione del clean, potrebbe indurre a modellare una nuova
- entità che farà parte del <em>waiter</em> che potremo chiamare waitercleaner. Questa entità gestisce tutti gli scenari relativi 
- al task clean di un tavolo; riceve un messaggio da waitermind che identifica l'inizio del task clean e un altro 
- che identifica il fatto di interrompersi. <b> Specifichiamo che tipo di messaggio e perchè </b>
+entità che farà parte del <em>waiter</em> che potremo chiamare waitercleaner. Questa entità gestisce tutti gli scenari relativi 
+al task clean di un tavolo; riceve un messaggio da waitermind che identifica l'inizio del task clean e un altro 
+che identifica il fatto di interrompersi. <b> Specifichiamo che tipo di messaggio e perchè </b>
 Il waitercleaner gestisce anche tutta la logica che sta al ripristino del task interrotto, in modo tale da
 sollevare il waitermind da questo compito.
 Viene introdotto <b>(analizzare bene la differenza tra modellarlo come dispatch e req/reply)</b> un dispatch "startcleaner" 
@@ -686,9 +689,7 @@ E' stato introdutto anche il dispatch stopcleaner tra waitermind e waitercleaner
 Per la gestione degli stati del tavolo, una problematica è se sia opportuno far modificare al waitercleaner i vari stati di passaggio del clean di un tavolo,
 oppure se farglieli memorizzare autonomamente, senza dover modificare lo stato del tavolo globale. Questa problematica nasce dal fatto che i vari stati intermedi
 non devono essere accessibili da nessuno se non da waitercleaner, quindi non sarebbe necessario effettuare questa modifica nel sistema di memorizzazione PROLOG.
-Oltre a questo, dovremmo istituire un'interazione tra waitercleaner e teatables per aggiornare gli stati intermedi. Per ora questa problematica è modellata 
-senza aggiornare questi stati da parte del waitercleaner. <b> Sarebbe forse meglio chiedere a teatables gli stati,
-così nel waitercleaner on ci sono gestioni di stato del tavolo, ma il tavolo fa il tavolo, il cleaner fa il cleaner. </b>
+In realtà chiediamo al teatables gli stati e non li facciamo memorizzare al waitercleaner, ognuno fa il proprio compito.
 </br></br>
 Poichè è stato stabilito con il committente che nell'ultima fase del clean (quella in cui si passa da
 "sanitized" a "cleaned" come stato del tavolo) in cui mancano circa 15 secondi alla fine il suddetto task non è interrompibile, 

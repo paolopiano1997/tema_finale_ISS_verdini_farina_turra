@@ -24,7 +24,7 @@ Request isTableStopped : isTableStopped(T)
 Reply isTableStoppedDone : isTableStoppedDone(E)
 
 Context ctxtearoom ip [ host="127.0.0.1" port=8068 ]
-Context ctxtearoom_dummy   ip [host="localhost" port=8050]
+Context ctxtearoom_dummy   ip [host="192.168.0.38" port=8050] 
 
 CodedQActor teatables context ctxtearoom_dummy className "it.unibo.teatables.Teatables"
 CodedQActor timer context ctxtearoom_dummy className "it.unibo.timer.Timer"
@@ -44,11 +44,17 @@ QActor waitercleaner context ctxtearoom_dummy {
 	Goto wait
 	
 	State wait {
-		println("waitercleaner   |||   wait")
+		onMsg(isTableStopped : isTableStopped(T)){
+			replyTo isTableStopped with isTableStoppedDone : isTableStoppedDone(0)
+		}
+		else{
+			println("waitercleaner   |||   wait")
+		}
 	}
 	Transition t0 whenMsg startcleaner -> preDirty
+					whenRequest isTableStopped -> wait
 	
-	State interStop{
+	State timerStop{
 		request timer -m stoptimer : stoptimer(stop)
 	}
 	Transition t0 whenReply okStop -> stop
@@ -58,7 +64,7 @@ QActor waitercleaner context ctxtearoom_dummy {
 			[# Clean = Cleantime - payloadArg(0).toLong() #]
 		}
 	}
-	Transition t0 whenMsg startcleaner -> interStart
+	Transition t0 whenMsg startcleaner -> preStart
 				whenRequest isTableStopped -> replyTableStop
 				
 	State replyTableStop{
@@ -66,7 +72,7 @@ QActor waitercleaner context ctxtearoom_dummy {
 	}
 	Goto stop
 	
-	State interStart{
+	State preStart{
 		onMsg(startcleaner : startcleaner(T)){
 			request teatables -m tableState : tableState(payloadArg(0))
 		}
@@ -89,7 +95,7 @@ QActor waitercleaner context ctxtearoom_dummy {
 			}
 		}
 	}
-	Transition t0 whenMsg gotodirty ->cleanDirty
+	Transition t0 whenMsg gotodirty -> cleanDirty
 					whenMsg gotoundirty -> cleanUndirty
 					whenMsg gotosanitized -> cleanSanitized
 					
@@ -120,7 +126,7 @@ QActor waitercleaner context ctxtearoom_dummy {
 		}
 	}
 	Transition t0 whenMsg endtime -> preUndirty
-				whenMsg stopcleaner -> interStop
+				whenMsg stopcleaner -> timerStop
 				whenRequest isTableStopped -> cleanDirty
 				
 	
@@ -136,7 +142,7 @@ QActor waitercleaner context ctxtearoom_dummy {
 		
 	}
 	Transition t0 whenMsg endtime -> preSanitized
-				whenMsg stopcleaner -> interStop
+				whenMsg stopcleaner -> timerStop
 				whenRequest isTableStopped -> cleanUndirty
 	
 	State cleanSanitized{
@@ -150,7 +156,7 @@ QActor waitercleaner context ctxtearoom_dummy {
 		
 	}
 	Transition t0 whenMsg endtime -> cleanDone
-				whenMsg stopcleaner -> interStop
+				whenMsg stopcleaner -> timerStop
 				whenRequest isTableStopped -> cleanSanitized
 	
 	State cleanDone{ //Messaggio al waitermind di "fine"

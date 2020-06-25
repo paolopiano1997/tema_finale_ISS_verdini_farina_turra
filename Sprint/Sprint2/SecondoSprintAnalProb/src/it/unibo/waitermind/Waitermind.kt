@@ -94,9 +94,9 @@ class Waitermind ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name,
 				}	 
 				state("checkIsCleanDone1") { //this:State
 					action { //it:State
-						if( checkMsgContent( Term.createTerm("isCleanDone(E)"), Term.createTerm("isCleanDone(N)"), 
+						if( checkMsgContent( Term.createTerm("isCleanDone(N,E)"), Term.createTerm("isCleanDone(N,E)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
-								if(  payloadArg(0)=="yes"  
+								if(  payloadArg(1)=="yes"  
 								 ){forward("gototable1", "gototable1(table1)" ,"waitermind" ) 
 								}
 								else
@@ -109,9 +109,9 @@ class Waitermind ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name,
 				}	 
 				state("checkIsCleanDone2") { //this:State
 					action { //it:State
-						if( checkMsgContent( Term.createTerm("isCleanDone(E)"), Term.createTerm("isCleanDone(N)"), 
+						if( checkMsgContent( Term.createTerm("isCleanDone(N,E)"), Term.createTerm("isCleanDone(N,E)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
-								if(  payloadArg(0)=="yes"  
+								if(  payloadArg(1)=="yes"  
 								 ){forward("gototable2", "gototable2(table2)" ,"waitermind" ) 
 								}
 						}
@@ -248,14 +248,14 @@ class Waitermind ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name,
 						forward("startcleaner", "startcleaner(1)" ,"waitercleaner" ) 
 					}
 					 transition(edgeName="t023",targetState="reachhome",cond=whenDispatch("cleanerdone"))
+					transition(edgeName="t024",targetState="handleEnter",cond=whenRequest("enter"))
 				}	 
 				state("cleanTable2") { //this:State
 					action { //it:State
 						println("waitermind   |||   cleanTable2")
 						forward("startcleaner", "startcleaner(2)" ,"waitercleaner" ) 
 					}
-					 transition(edgeName="t024",targetState="reachhome",cond=whenDispatch("cleanerdone"))
-					transition(edgeName="t025",targetState="handleEnter",cond=whenRequest("enter"))
+					 transition(edgeName="t025",targetState="reachhome",cond=whenDispatch("cleanerdone"))
 				}	 
 				state("handleEnter") { //this:State
 					action { //it:State

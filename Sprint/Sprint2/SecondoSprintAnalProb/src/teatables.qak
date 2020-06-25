@@ -6,7 +6,7 @@ Dispatch release : release(N)
 Dispatch clean   : clean(N)
 
 Request isClean : isClean(N)
-Reply isCleanDone : isCleanDone(E)
+Reply isCleanDone : isCleanDone(N,E)
 
 Dispatch setTableState : setTableState(N,S)
 
@@ -14,11 +14,13 @@ Request tableState : tableState(N)
 Reply state : state(N,S)
 
 
-Context ctxtearoom_dummy   ip [host="localhost" port=8050]    
+Context ctxtearoom_dummy   ip [host="192.168.0.38" port=8050]    
 
 QActor teatables context ctxtearoom_dummy{ 
 [#
 	var StateOfTables = ""
+	var E = ""
+	var Table = ""
 #]	
 	State s0 initial{
 		println("teatables START")
@@ -27,23 +29,56 @@ QActor teatables context ctxtearoom_dummy{
 	Goto work
 	
 	State work{
-		solve( stateOfTeatables(S) )
-		ifSolved { [# StateOfTables = getCurSol("S").toString() #] }
+//		solve( stateOfTeatables(S) )
+//		ifSolved { [# StateOfTables = getCurSol("S").toString() #] }
 		println("teatables s0: $StateOfTables")
 		updateResource [# StateOfTables #]
 	}
 	Transition t0  whenMsg engage -> engageTable
 					whenMsg clean -> cleanTable
-					whenRequest isClean -> replyClean
+				whenRequest isClean -> replyClean
 					whenMsg setTableState -> setState
+					whenRequest tableState -> tableState
+					
+	State tableState{
+		onMsg(tableState : tableState(N)){
+			[# Table = payloadArg(0) #]
+			solve( getState(N,S))
+			ifSolved{
+				[# E = getCurSol("S").toString() #]
+			}
+			replyTo tableState with state : state($Table,$E)
+		}
+	}
+	Goto work
 					
 	State setState{
-		//Settiamo lo stato passato come parametro S al relatvo tavolo N
+		onMsg(setTableState : setTableState(N,S)){
+			solve( setState(N,S) )
+		}
 	}
+	Goto work
 					
 	State replyClean {
-		//Rispondiamo con isCleanDone quando abbiamo settato il clean
+		println("teatables   |||   replyClean")
+		onMsg(isClean : isClean(N)){
+			[# Table = payloadArg(0) #]
+			println("onMsg isClean")
+			solve( getState(N,S) )
+			ifSolved{
+				[# 
+					E = getCurSol("S").toString()
+					if(E == "clean")
+						E = "yes"
+					else
+						E = "no"
+				#]
+			}
+			replyTo isClean with isCleanDone : isCleanDone($Table,$E)
+			println("replyTo isClean $E")
+		}
 	}
+	Goto work
 					
 	State engageTable{
 		printCurrentMessage
@@ -70,5 +105,32 @@ QActor teatables context ctxtearoom_dummy{
 		}
 	}
 	Goto work
-	
 }
+
+//QActor prova context ctxtearoom_dummy {
+//	State s0 initial{
+//		println("Prova starts...")
+//		request teatables -m isClean : isClean(1)
+//		println("prova request")
+//	}	
+//	Transition t0 whenReply isCleanDone -> cleanDone
+//	
+//	State cleanDone{
+//		println("prova cleanDone")
+//		onMsg(isCleanDone : isCleanDone(N,E)){
+//			println("Table ${payloadArg(0)} is clean: ${payloadArg(1)}")
+//		}
+//	}
+//	Goto tableState
+//	
+//	State tableState{
+//		request teatables -m tableState : tableState(1)
+//	}
+//	Transition t0 whenReply state -> rep
+//	
+//	State rep{
+//		onMsg(state : state(N,S)){
+//			println("Table ${payloadArg(0)} in state ${payloadArg(1)}")
+//		}
+//	}
+//}

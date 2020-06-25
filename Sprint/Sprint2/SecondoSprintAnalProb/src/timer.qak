@@ -7,12 +7,13 @@ Request stoptimer : stoptimer(T)
 Reply okStop : okStop(T)
 
 
-Context ctxtearoom_dummy   ip [host="localhost" port=8050]
+Context ctxtearoom_dummy   ip [host="192.168.0.38" port=8050] 
 
 CodedQActor waitercleaner context ctxtearoom_dummy className "it.unibo.waitercleaner.Waitercleaner"
 
 QActor timer context ctxtearoom_dummy {
-	
+
+
 	[# 
 		var Time: Long = 0 
 		var StartTime : Long = 0	

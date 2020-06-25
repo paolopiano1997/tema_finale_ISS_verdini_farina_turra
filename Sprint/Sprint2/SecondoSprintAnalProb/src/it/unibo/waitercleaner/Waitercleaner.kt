@@ -30,15 +30,21 @@ class Waitercleaner ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( na
 				}	 
 				state("wait") { //this:State
 					action { //it:State
-						println("waitercleaner   |||   wait")
+						if( checkMsgContent( Term.createTerm("isTableStopped(T)"), Term.createTerm("isTableStopped(T)"), 
+						                        currentMsg.msgContent()) ) { //set msgArgList
+								answer("isTableStopped", "isTableStoppedDone", "isTableStoppedDone(0)"   )  
+						}else{
+							println("waitercleaner   |||   wait")
+						}
 					}
 					 transition(edgeName="t00",targetState="preDirty",cond=whenDispatch("startcleaner"))
+					transition(edgeName="t01",targetState="wait",cond=whenRequest("isTableStopped"))
 				}	 
-				state("interStop") { //this:State
+				state("timerStop") { //this:State
 					action { //it:State
 						request("stoptimer", "stoptimer(stop)" ,"timer" )  
 					}
-					 transition(edgeName="t01",targetState="stop",cond=whenReply("okStop"))
+					 transition(edgeName="t02",targetState="stop",cond=whenReply("okStop"))
 				}	 
 				state("stop") { //this:State
 					action { //it:State
@@ -47,8 +53,8 @@ class Waitercleaner ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( na
 								 Clean = Cleantime - payloadArg(0).toLong()  
 						}
 					}
-					 transition(edgeName="t02",targetState="interStart",cond=whenDispatch("startcleaner"))
-					transition(edgeName="t03",targetState="replyTableStop",cond=whenRequest("isTableStopped"))
+					 transition(edgeName="t03",targetState="preStart",cond=whenDispatch("startcleaner"))
+					transition(edgeName="t04",targetState="replyTableStop",cond=whenRequest("isTableStopped"))
 				}	 
 				state("replyTableStop") { //this:State
 					action { //it:State
@@ -56,14 +62,14 @@ class Waitercleaner ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( na
 					}
 					 transition( edgeName="goto",targetState="stop", cond=doswitch() )
 				}	 
-				state("interStart") { //this:State
+				state("preStart") { //this:State
 					action { //it:State
 						if( checkMsgContent( Term.createTerm("startcleaner(T)"), Term.createTerm("startcleaner(T)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
 								request("tableState", "tableState(payloadArg(0))" ,"teatables" )  
 						}
 					}
-					 transition(edgeName="t04",targetState="checkState",cond=whenReply("state"))
+					 transition(edgeName="t05",targetState="checkState",cond=whenReply("state"))
 				}	 
 				state("checkState") { //this:State
 					action { //it:State
@@ -82,9 +88,9 @@ class Waitercleaner ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( na
 								 }
 						}
 					}
-					 transition(edgeName="t05",targetState="cleanDirty",cond=whenDispatch("gotodirty"))
-					transition(edgeName="t06",targetState="cleanUndirty",cond=whenDispatch("gotoundirty"))
-					transition(edgeName="t07",targetState="cleanSanitized",cond=whenDispatch("gotosanitized"))
+					 transition(edgeName="t06",targetState="cleanDirty",cond=whenDispatch("gotodirty"))
+					transition(edgeName="t07",targetState="cleanUndirty",cond=whenDispatch("gotoundirty"))
+					transition(edgeName="t08",targetState="cleanSanitized",cond=whenDispatch("gotosanitized"))
 				}	 
 				state("preDirty") { //this:State
 					action { //it:State
@@ -117,9 +123,9 @@ class Waitercleaner ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( na
 							forward("starttimer", "starttimer($Clean)" ,"timer" ) 
 						}
 					}
-					 transition(edgeName="t08",targetState="preUndirty",cond=whenDispatch("endtime"))
-					transition(edgeName="t09",targetState="interStop",cond=whenDispatch("stopcleaner"))
-					transition(edgeName="t010",targetState="cleanDirty",cond=whenRequest("isTableStopped"))
+					 transition(edgeName="t09",targetState="preUndirty",cond=whenDispatch("endtime"))
+					transition(edgeName="t010",targetState="timerStop",cond=whenDispatch("stopcleaner"))
+					transition(edgeName="t011",targetState="cleanDirty",cond=whenRequest("isTableStopped"))
 				}	 
 				state("cleanUndirty") { //this:State
 					action { //it:State
@@ -131,9 +137,9 @@ class Waitercleaner ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( na
 							forward("starttimer", "starttimer($Clean)" ,"timer" ) 
 						}
 					}
-					 transition(edgeName="t011",targetState="preSanitized",cond=whenDispatch("endtime"))
-					transition(edgeName="t012",targetState="interStop",cond=whenDispatch("stopcleaner"))
-					transition(edgeName="t013",targetState="cleanUndirty",cond=whenRequest("isTableStopped"))
+					 transition(edgeName="t012",targetState="preSanitized",cond=whenDispatch("endtime"))
+					transition(edgeName="t013",targetState="timerStop",cond=whenDispatch("stopcleaner"))
+					transition(edgeName="t014",targetState="cleanUndirty",cond=whenRequest("isTableStopped"))
 				}	 
 				state("cleanSanitized") { //this:State
 					action { //it:State
@@ -145,9 +151,9 @@ class Waitercleaner ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( na
 							forward("starttimer", "starttimer($Clean)" ,"timer" ) 
 						}
 					}
-					 transition(edgeName="t014",targetState="cleanDone",cond=whenDispatch("endtime"))
-					transition(edgeName="t015",targetState="interStop",cond=whenDispatch("stopcleaner"))
-					transition(edgeName="t016",targetState="cleanSanitized",cond=whenRequest("isTableStopped"))
+					 transition(edgeName="t015",targetState="cleanDone",cond=whenDispatch("endtime"))
+					transition(edgeName="t016",targetState="timerStop",cond=whenDispatch("stopcleaner"))
+					transition(edgeName="t017",targetState="cleanSanitized",cond=whenRequest("isTableStopped"))
 				}	 
 				state("cleanDone") { //this:State
 					action { //it:State

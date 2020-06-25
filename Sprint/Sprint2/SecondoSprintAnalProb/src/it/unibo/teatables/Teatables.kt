@@ -18,6 +18,8 @@ class Teatables ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, 
 	override fun getBody() : (ActorBasicFsm.() -> Unit){
 		
 			var StateOfTables = ""
+			var E = ""
+			var Table = ""
 		return { //this:ActionBasciFsm
 				state("s0") { //this:State
 					action { //it:State
@@ -28,11 +30,6 @@ class Teatables ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, 
 				}	 
 				state("work") { //this:State
 					action { //it:State
-						solve("stateOfTeatables(S)","") //set resVar	
-						if( currentSolution.isSuccess() ) { StateOfTables = getCurSol("S").toString()  
-						}
-						else
-						{}
 						println("teatables s0: $StateOfTables")
 						updateResourceRep( StateOfTables  
 						)
@@ -41,14 +38,54 @@ class Teatables ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, 
 					transition(edgeName="t01",targetState="cleanTable",cond=whenDispatch("clean"))
 					transition(edgeName="t02",targetState="replyClean",cond=whenRequest("isClean"))
 					transition(edgeName="t03",targetState="setState",cond=whenDispatch("setTableState"))
+					transition(edgeName="t04",targetState="tableState",cond=whenRequest("tableState"))
+				}	 
+				state("tableState") { //this:State
+					action { //it:State
+						if( checkMsgContent( Term.createTerm("tableState(N)"), Term.createTerm("tableState(N)"), 
+						                        currentMsg.msgContent()) ) { //set msgArgList
+								 Table = payloadArg(0)  
+								solve("getState(N,S)","") //set resVar	
+								if( currentSolution.isSuccess() ) { E = getCurSol("S").toString()  
+								}
+								else
+								{}
+								answer("tableState", "state", "state($Table,$E)"   )  
+						}
+					}
+					 transition( edgeName="goto",targetState="work", cond=doswitch() )
 				}	 
 				state("setState") { //this:State
 					action { //it:State
+						if( checkMsgContent( Term.createTerm("setTableState(N,S)"), Term.createTerm("setTableState(N,S)"), 
+						                        currentMsg.msgContent()) ) { //set msgArgList
+								solve("setState(N,S)","") //set resVar	
+						}
 					}
+					 transition( edgeName="goto",targetState="work", cond=doswitch() )
 				}	 
 				state("replyClean") { //this:State
 					action { //it:State
+						println("teatables   |||   replyClean")
+						if( checkMsgContent( Term.createTerm("isClean(N)"), Term.createTerm("isClean(N)"), 
+						                        currentMsg.msgContent()) ) { //set msgArgList
+								 Table = payloadArg(0)  
+								println("onMsg isClean")
+								solve("getState(N,S)","") //set resVar	
+								if( currentSolution.isSuccess() ) { 
+													E = getCurSol("S").toString()
+													if(E == "clean")
+														E = "yes"
+													else
+														E = "no"
+								}
+								else
+								{}
+								answer("isClean", "isCleanDone", "isCleanDone($Table,$E)"   )  
+								println("replyTo isClean $E")
+						}
 					}
+					 transition( edgeName="goto",targetState="work", cond=doswitch() )
 				}	 
 				state("engageTable") { //this:State
 					action { //it:State

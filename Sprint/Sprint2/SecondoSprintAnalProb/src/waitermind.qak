@@ -26,7 +26,7 @@ Dispatch release : release(N)
 Dispatch clean   : clean(N)
 
 Request isClean : isClean(N)
-Reply isCleanDone : isCleanDone(E)
+Reply isCleanDone : isCleanDone(N,E)
 
 Request isTableStopped : isTableStopped(T)
 Reply isTableStoppedDone : isTableStoppedDone(E)
@@ -43,7 +43,7 @@ Dispatch gototable2 : gototable2(T)
 
 Context ctxbasicrobot     ip [host="localhost"   port=8020] 
 Context ctxtearoom ip [ host="127.0.0.1" port=8068 ]
-Context ctxtearoom_dummy   ip [host="localhost" port=8050]    
+Context ctxtearoom_dummy   ip [host="192.168.0.38" port=8050]     
 
 CodedQActor teatables context ctxtearoom_dummy className "it.unibo.teatables.Teatables"
 CodedQActor waitercleaner context ctxtearoom_dummy className "it.unibo.waitercleaner.Waitercleaner"
@@ -124,8 +124,8 @@ QActor waitermind context ctxtearoom{
 	Transition t0 whenReply isCleanDone -> checkIsCleanDone1
 	
 	State checkIsCleanDone1{
-		onMsg(isCleanDone : isCleanDone(N)){
-			if [# payloadArg(0)=="yes" #]{
+		onMsg(isCleanDone : isCleanDone(N,E)){
+			if [# payloadArg(1)=="yes" #]{
 				forward waitermind -m gototable1 : gototable1(table1)
 			}
 			else{
@@ -137,8 +137,8 @@ QActor waitermind context ctxtearoom{
 				whenReply isCleanDone -> checkIsCleanDone2
 	
 	State checkIsCleanDone2{
-		onMsg(isCleanDone : isCleanDone(N)){
-			if [# payloadArg(0)=="yes" #]{
+		onMsg(isCleanDone : isCleanDone(N,E)){
+			if [# payloadArg(1)=="yes" #]{
 				forward waitermind -m gototable2 : gototable2(table2)
 			}
 		}
@@ -262,16 +262,16 @@ QActor waitermind context ctxtearoom{
 		forward waitercleaner -m startcleaner : startcleaner(1)
 	}
 	Transition t0 whenMsg cleanerdone -> reachhome //Qua non posso ricevere altri messaggi per l'assunzione fatta
+				whenRequest enter -> handleEnter
 	
 	State cleanTable2{
 		println("waitermind   |||   cleanTable2")
 		forward waitercleaner -m startcleaner : startcleaner(2)
 	}
 	Transition t0 whenMsg cleanerdone -> reachhome
-					whenRequest enter -> handleEnter
 	
 	State handleEnter {
-		forward waitercleaner -m stopcleaner : stopcleaner(stop) 
+		forward waitercleaner -m stopcleaner : stopcleaner(stop)
 	}
 	Goto accept
 	
@@ -282,31 +282,31 @@ QActor waitermind context ctxtearoom{
 }
 
 
-//QActor client context ctxtearoom {
-//	State s0 initial{
-//		println("client   |||   init")
-//	}
-//	Goto doSomething
-//	
-//	State doSomething{
-//		println("client   |||   sending enter request")
-//		request waitermind -m enter : enter(id)
-//	}
-//	Transition t0 whenReply accept -> ok
-//	
-//	State ok{
-//		println("client   |||   accepted")
-//		delay 15000
-//		println("client   |||   ready")
-//		forward waitermind -m clientready : clientready(id)
-//		delay 15000
-//		println("barman   |||   ready")
-//		forward waitermind -m drinkready : drinkready(id)
-//		delay 15000
-//		forward waitermind -m paymentready : paymentready(id)
-//		delay 10000
-//		request waitermind -m enter : enter(id)
-//		delay 20000
-//		forward waitermind -m end : end(end)
-//	}
-//}
+QActor client context ctxtearoom {
+	State s0 initial{
+		println("client   |||   init")
+	}
+	Goto doSomething
+	
+	State doSomething{
+		println("client   |||   sending enter request")
+		request waitermind -m enter : enter(id)
+	}
+	Transition t0 whenReply accept -> ok
+	
+	State ok{
+		println("client   |||   accepted")
+		delay 15000
+		println("client   |||   ready")
+		forward waitermind -m clientready : clientready(id)
+		delay 15000
+		println("barman   |||   ready")
+		forward waitermind -m drinkready : drinkready(id)
+		delay 15000
+		forward waitermind -m paymentready : paymentready(id)
+		delay 10000
+		request waitermind -m enter : enter(id)
+		delay 20000
+		forward waitermind -m end : end(end)
+	}
+}

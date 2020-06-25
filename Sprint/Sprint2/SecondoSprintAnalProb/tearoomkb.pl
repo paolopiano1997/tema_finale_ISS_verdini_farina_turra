@@ -24,6 +24,15 @@ pos( exitdoor,     6, 4 ).
 teatable( 1, clean ).
 teatable( 2, clean ).
 
+setState(N,S) :-
+	retract(teatable(N,_)),
+	!,
+	assert(teatable(N,S)).
+
+getState(N,S) :-
+	teatable(N,S).
+	
+
 
 numfreetables(N) :-
 	findall( N,teatable( N,clean ), NList),
