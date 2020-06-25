@@ -699,6 +699,7 @@ Si chiedono al teatables gli stati e non li facciamo memorizzare al waitercleane
 Poichè è stato stabilito con il committente che nell'ultima fase del clean (quella in cui si passa da
 "sanitized" a "cleaned" come stato del tavolo) in cui mancano circa 15 secondi alla fine il suddetto task non è interrompibile, 
 è necessario introdurre una gestione relativa al tempo passato e rimanente di ciascuna fase del task clean.
+Lo stato "sanitized" viene modellato in modo che duri 15 secondi, così da renderlo non interrompibile e semplificarne la gestione.
 Per effettuare questa gestione, è opportuno modellare un'entità "timer", la quale fa da supporto al waitercleaner.
 Inoltre l'introduzione di questa entità risolverà il problema di rimanere bloccati in uno stato, nel caso di ripetute interruzioni. </br></br>
 Questo timer riceve un <i>Dispatch starttimer : starttimer(T)</i> con l'indicazione del tempo del
