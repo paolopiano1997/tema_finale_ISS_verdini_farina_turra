@@ -28,7 +28,7 @@ class Client ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, sco
 						println("client   |||   sending enter request")
 						request("enter", "enter(id)" ,"waitermind" )  
 					}
-					 transition(edgeName="t026",targetState="ok",cond=whenReply("accept"))
+					 transition(edgeName="t057",targetState="ok",cond=whenReply("accept"))
 				}	 
 				state("ok") { //this:State
 					action { //it:State

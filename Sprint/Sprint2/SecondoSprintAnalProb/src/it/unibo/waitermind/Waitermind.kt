@@ -103,6 +103,7 @@ class Waitermind ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name,
 								 {request("isClean", "isClean(2)" ,"teatables" )  
 								 }
 						}
+						 readLine()  
 					}
 					 transition(edgeName="t09",targetState="convoyToTable1",cond=whenDispatch("gototable1"))
 					transition(edgeName="t010",targetState="checkIsCleanDone2",cond=whenReply("isCleanDone"))
@@ -140,6 +141,7 @@ class Waitermind ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name,
 				}	 
 				state("checkCleanHome") { //this:State
 					action { //it:State
+						 readLine()  
 						println("waitermind   |||   checkClean")
 						request("isTableStopped", "isTableStopped(isStopped)" ,"waitercleaner" )  
 					}

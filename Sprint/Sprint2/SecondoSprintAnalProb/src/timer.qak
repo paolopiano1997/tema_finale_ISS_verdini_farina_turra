@@ -1,51 +1,50 @@
 System subtearoom
-
-Dispatch starttimer : starttimer(T)
-Dispatch endtime : endtime(T)
-
-Request stoptimer : stoptimer(T)
-Reply okStop : okStop(T)
-
-Context ctxtearoom_teatables ip [host="192.168.0.38" port=8045] 
-Context ctxtearoom_dummy   ip [host="127.0.0.1" port=8050] 
-
-CodedQActor waitercleaner context ctxtearoom_dummy className "it.unibo.waitercleaner.Waitercleaner" 
-
-QActor timer context ctxtearoom_teatables {
-
-
-	[# 
-		var Time: Long = 0
-		var StartTime : Long = 0	
-		var Duration : Long	= 0
-	#]
-	State s0 initial {
-		println("timer   |||   init")
-	}
-	Goto wait
-	
-	State wait {
-		println("timer   |||   wait")
-	}
-	Transition t0 whenMsg starttimer -> start
-	
-	State start{
-		onMsg(starttimer : starttimer(T)) {
-			[# Time = payloadArg(0).toLong() #]
-			memoCurrentTime StartTime
-		}
-	}
-	Transition t0 whenTimeVar Time -> timeFinish
-				whenRequest stoptimer -> stop
-				
-	State stop{
-		setDuration Duration from StartTime
-		replyTo stoptimer with okStop : okTop($Duration)
-	}
-	Goto wait
-	
-	State timeFinish{
-		forward waitercleaner -m endtime : endtime(endtime)
-	}
-	Goto wait
-}
+//
+//Dispatch starttimer : starttimer(T)
+//Dispatch endtime : endtime(T)
+//
+//Request stoptimer : stoptimer(T)
+//Reply okStop : okStop(T)
+//
+//Context ctxtearoom   ip [host="127.0.0.1" port=8050]  
+//
+//ExternalQActor waitercleaner context ctxtearoom 
+//
+//QActor timer context ctxtearoom {
+//
+//
+//	[# 
+//		var Time: Long = 0
+//		var StartTime : Long = 0	
+//		var Duration : Long	= 0
+//	#]
+//	State s0 initial {
+//		println("timer   |||   init")
+//	}
+//	Goto wait
+//	
+//	State wait {
+//		println("timer   |||   wait")
+//	}
+//	Transition t0 whenMsg starttimer -> start
+//	
+//	State start{
+//		onMsg(starttimer : starttimer(T)) {
+//			[# Time = payloadArg(0).toLong() #]
+//			memoCurrentTime StartTime
+//		}
+//	}
+//	Transition t0 whenTimeVar Time -> timeFinish
+//				whenRequest stoptimer -> stop
+//				
+//	State stop{
+//		setDuration Duration from StartTime
+//		replyTo stoptimer with okStop : okTop($Duration)
+//	}
+//	Goto wait
+//	
+//	State timeFinish{
+//		forward waitercleaner -m endtime : endtime(endtime)
+//	}
+//	Goto wait
+//}

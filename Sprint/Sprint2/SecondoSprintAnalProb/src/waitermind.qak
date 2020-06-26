@@ -8,6 +8,35 @@ Reply done : done(X,Y)
 Request start : start(S)
 Reply ready : ready(V)
 
+
+Request 	moveto : moveto(X,Y)
+Reply 		done   : done(X,Y)
+
+Request 	start  : start(S)
+Reply 		ready  : ready(V)
+Request 	step       : step( TIME )
+Reply   	stepdone   : stepdone(V)
+Dispatch 	cmd        : cmd(MOVE)
+Reply   	stepfail   : stepfail(DURATION, CAUSE)
+
+
+Dispatch starttimer : starttimer(T)
+Dispatch endtime : endtime(T)
+
+Dispatch setTableState : setTableState(N,S)
+
+Request tableState : tableState(N)
+Reply state : state(N,S)
+
+Request stoptimer : stoptimer(T)
+Reply okStop : okStop(T)
+
+Dispatch gotodirty : gotodirty(G)
+Dispatch gotoundirty : gotoundirty(G)
+Dispatch gotosanitized : gotosanitized(G)
+
+
+
 //Client and tearoom messages
 Request enter : enter(ID)
 Reply accept : accept(C)
@@ -17,6 +46,8 @@ Dispatch paymentready : paymentready(P)
 Dispatch order : order(O)
 Dispatch end : end (E)
 
+Dispatch starttimer : starttimer(T)
+Dispatch endtime : endtime(T)
 
 Dispatch startcleaner : startcleaner(T)
 Dispatch cleanerdone : cleanerdone(C)
@@ -41,15 +72,16 @@ Dispatch gotoclean3 : gotoclean3(G)
 Dispatch gototable1 : gototable1(T)
 Dispatch gototable2 : gototable2(T)
 
+Request tableState : tableState(N)
+Reply state : state(N,S)
 
 Context ctxbasicrobot     ip [host="localhost"   port=8020]
-Context ctxtearoom ip [ host="::1" port=8068 ]
-Context ctxtearoom_dummy   ip [host="127.0.0.1" port=8050] 
-Context ctxtearoom_teatables ip [host="192.168.0.38" port=8045]    
 
-CodedQActor teatables context ctxtearoom_teatables className "it.unibo.teatables.Teatables"
-CodedQActor waitercleaner context ctxtearoom_dummy className "it.unibo.waitercleaner.Waitercleaner"
-CodedQActor waiterengine context ctxtearoom className "it.unibo.waiterengine.Waiterengine"
+Context ctxtearoom   ip [host="127.0.0.1" port=8050]  
+
+//ExternalQActor teatables context ctxtearoom
+//ExternalQActor waitercleaner context ctxtearoom
+//ExternalQActor waiterengine context ctxtearoom
 
 ExternalQActor basicrobot  context ctxbasicrobot
 
@@ -133,6 +165,7 @@ QActor waitermind context ctxtearoom{
 				request teatables -m isClean : isClean(2)
 			}
 		}
+		[# readLine() #]
 	}
 	Transition t0 whenMsg gototable1 -> convoyToTable1
 				whenReply isCleanDone -> checkIsCleanDone2
@@ -169,6 +202,7 @@ QActor waitermind context ctxtearoom{
 	Transition t0 whenReply done -> checkCleanHome
 	
 	State checkCleanHome{
+		[# readLine() #]
 		println("waitermind   |||   checkClean")
 		request waitercleaner -m isTableStopped : isTableStopped(isStopped)
 	}
@@ -283,6 +317,388 @@ QActor waitermind context ctxtearoom{
 	}
 }
 
+
+
+QActor timer context ctxtearoom {
+
+
+	[# 
+		var Time: Long = 0
+		var StartTime : Long = 0	
+		var Duration : Long	= 0
+	#]
+	State s0 initial {
+		println("timer   |||   init")
+	}
+	Goto wait
+	
+	State wait {
+		println("timer   |||   wait")
+	}
+	Transition t0 whenMsg starttimer -> start
+	
+	State start{
+		onMsg(starttimer : starttimer(T)) {
+			[# Time = payloadArg(0).toLong() #]
+			memoCurrentTime StartTime
+		}
+	}
+	Transition t0 whenTimeVar Time -> timeFinish
+				whenRequest stoptimer -> stop
+				
+	State stop{
+		setDuration Duration from StartTime
+		replyTo stoptimer with okStop : okTop($Duration)
+	}
+	Goto wait
+	
+	State timeFinish{
+		forward waitercleaner -m endtime : endtime(endtime)
+	}
+	Goto wait
+}
+
+
+QActor waitercleaner context ctxtearoom {
+
+
+	[#
+		var Table = ""
+		val	Cleantime = 3000L
+		var Clean = Cleantime
+		
+	#]
+	State s0 initial{// Accettazione richieste/dispatch
+		println("waitercleaner   |||   init")
+	}
+	Goto wait
+	
+	State wait {
+		onMsg(isTableStopped : isTableStopped(T)){
+			replyTo isTableStopped with isTableStoppedDone : isTableStoppedDone(0)
+		}
+		else{
+			println("waitercleaner   |||   wait")
+		}
+	}
+	Transition t0 whenMsg startcleaner		 -> preDirty
+				  whenRequest isTableStopped -> wait
+
+
+	State timerStop{
+		request timer -m stoptimer : stoptimer(stop)
+	}
+	Transition t0 whenReply okStop -> stop
+	
+	State stop {
+		updateResource[# "cleanStopped" #]
+		onMsg(okStop : okStop(T)){
+			[# Clean = Cleantime - payloadArg(0).toLong() #]
+		}
+	}
+	Transition t0 whenMsg startcleaner -> preStart
+				whenRequest isTableStopped -> replyTableStop
+				
+	State replyTableStop{
+		replyTo isTableStopped with isTableStoppedDone : isTableStoppedDone($Table)
+	}
+	Goto stop
+	
+	State preStart{
+		updateResource[# "nonStopped" #]
+		onMsg(startcleaner : startcleaner(T)){
+			request teatables -m tableState : tableState(payloadArg(0))
+		}
+	}
+	Transition t0 whenReply state -> checkState
+	
+	State checkState {
+		onMsg(state : state(N,S)){
+			if[# payloadArg(0) == "dirty" #]{
+				forward waitercleaner -m gotodirty : gotodirty(go)
+			}
+			else{
+				if[# payloadArg(0)=="undirty" #]
+				{
+					forward waitercleaner -m gotoundirty : gotoundirty(go)
+				}
+				else{
+					forward waitercleaner -m gotosanitized : gotosanitized(go)
+				}
+			}
+		}
+	}
+	Transition t0 whenMsg gotodirty -> cleanDirty
+					whenMsg gotoundirty -> cleanUndirty
+					whenMsg gotosanitized -> cleanSanitized
+					
+	State preDirty{
+		[# Clean = Cleantime #]
+		onMsg(startcleaner : startcleaner(T)){
+			[# Table = payloadArg(0) #]
+		}
+	}
+	Goto cleanDirty
+	
+	State preUndirty{
+		[# Clean = Cleantime #]
+	}
+	Goto cleanUndirty
+	
+	State preSanitized{
+		[# Clean = Cleantime #]
+	}
+	Goto cleanSanitized
+	
+	State cleanDirty { //Inizio catena di clean
+		onMsg(isTableStopped : isTableStopped(T)){
+			replyTo isTableStopped with isTableStoppedDone : isTableStoppedDone(0)
+		}
+		else {
+			forward timer -m starttimer : starttimer($Clean)
+		}
+	}
+	Transition t0 whenMsg endtime -> preUndirty
+				whenMsg stopcleaner -> timerStop
+				whenRequest isTableStopped -> cleanDirty
+				
+	
+	State cleanUndirty{
+		onMsg(isTableStopped : isTableStopped(T)){
+			replyTo isTableStopped with isTableStoppedDone : isTableStoppedDone(0)
+		}
+		else{
+			forward teatables -m setTableState : setTableState($Table,undirty) //I forward andrebbero fatti solo una volta, così
+			//invece vengono fatti ogni volta che resumiamo.
+			forward timer -m starttimer : starttimer($Clean)
+		}
+		
+	}
+	Transition t0 whenMsg endtime -> preSanitized
+				whenMsg stopcleaner -> timerStop
+				whenRequest isTableStopped -> cleanUndirty
+	
+	State cleanSanitized{
+		onMsg(isTableStopped : isTableStopped(T)){
+			replyTo isTableStopped with isTableStoppedDone : isTableStoppedDone(0)
+		}
+		else{
+			forward teatables -m setTableState : setTableState($Table,sanitized)
+			forward timer -m starttimer : starttimer($Clean)
+		}
+		
+	}
+	Transition t0 whenMsg endtime -> cleanDone
+				whenMsg stopcleaner -> timerStop
+				whenRequest isTableStopped -> cleanSanitized
+	
+	State cleanDone{ //Messaggio al waitermind di "fine"
+		forward teatables -m setTableState : setTableState($Table,cleaned)
+		forward waitermind -m cleanerdone : cleanerdone(done)
+	}
+	Goto wait
+	
+}
+
+QActor teatables context ctxtearoom{ 
+[#
+	var StateOfTables = ""
+	var E = ""
+	var Table = ""
+#]
+	State s0 initial{
+		println("teatables START")
+		solve( consult("tearoomkb.pl")	 )
+	}
+	Goto work
+	
+	State work{
+		solve( stateOfTeatables(S) )
+		ifSolved { [# StateOfTables = getCurSol("S").toString() #] }
+		println("teatables s0: $StateOfTables")
+		updateResource [# StateOfTables #]
+	}
+	Transition t0  whenMsg occupy -> engageTable
+					whenMsg clean -> cleanTable
+					whenMsg release -> release
+				whenRequest isClean -> replyClean
+					whenMsg setTableState -> setState
+					whenRequest tableState -> tableState
+					
+					
+	State release {
+		println("teatables   |||   release")
+		onMsg(release : release(N)){
+			solve( releaseTable(N))
+		}
+	}
+	Goto work
+	
+	
+	State tableState{
+		println("teateables   |||   tableState")
+		onMsg(tableState : tableState(N)){
+			[# Table = payloadArg(0) #]
+			solve( getState(N,S))
+			ifSolved{
+				[# E = getCurSol("S").toString() #]
+			}
+			replyTo tableState with state : state($Table,$E)
+		}
+	}
+	Goto work
+					
+	State setState{
+		println("teatables   |||   setState")
+		onMsg(setTableState : setTableState(N,S)){
+			solve( setState(N,S) )
+			ifSolved{
+				solve( getState(N,S) )
+				ifSolved{
+					[# 
+						println(getCurSol("S").toString())
+					#]
+				}
+			}
+		}
+	}
+	Goto work
+					
+	State replyClean {
+		println("teatables   |||   replyClean")
+		onMsg(isClean : isClean(N)){
+			[# Table = payloadArg(0) #]
+			println("onMsg isClean")
+			solve( getState(N,S) )
+			ifSolved{
+				[# 
+					E = getCurSol("S").toString()
+					if(E == "clean")
+						E = "yes"
+					else
+						E = "no"
+				#]
+			}
+			replyTo isClean with isCleanDone : isCleanDone($Table,$E)
+			println("replyTo isClean $E")
+		}
+	}
+	Goto work
+					
+	State engageTable{
+		printCurrentMessage
+		onMsg( occupy : occupy(N) ){
+			println("engageTable ${payloadArg(0)}")
+			solve( occupyTable( $payloadArg(0) ) )	//could do anything
+			solve( stateOfTeatables(S) )
+			[# StateOfTables = getCurSol("S").toString() #]  
+			println("teatables engageTable ${payloadArg(0)}: $StateOfTables")
+			updateResource [# StateOfTables #]
+		}
+	}
+	Goto work
+
+	State cleanTable{
+		printCurrentMessage
+		onMsg( clean : clean(N) ){
+			println("clean ${payloadArg(0)}")
+			solve( cleanTable( $payloadArg(0) ) )	//could do anything
+			solve( stateOfTeatables(S) )
+			[# StateOfTables = getCurSol("S").toString() #]  
+			println("teatables cleanTable ${payloadArg(0)}: $StateOfTables")
+			updateResource [# StateOfTables #] 			 
+		}
+	}
+	Goto work
+}
+
+QActor waiterengine context ctxtearoom {
+	[#
+		var XP = "0"
+		var YP = "0"
+		var CurMove = ""
+		val inmapname  = "teaRoomExplored"
+		var StepTime    	   = 348L
+		val BackTime           = 2 * StepTime / 3
+	#]
+	State s0 initial{
+		discardMsg On
+		run itunibo.planner.plannerUtil.initAI() //init planner entity
+		run itunibo.planner.plannerUtil.loadRoomMap( inmapname ) 		
+		run itunibo.planner.plannerUtil.showCurrentRobotState()	
+		println("waiterengine   |||   init")
+	}
+	Transition t0 whenRequest start -> started
+	
+	State started{
+		println("waiterengine   |||   started")
+		replyTo start with ready : ready(waiterengine)
+	}
+	Goto wait
+	
+	State wait{
+		println("waiterengine   |||   wait")
+		
+	}
+	Transition t0 whenRequest moveto -> planmove
+	
+	State planmove{
+		onMsg( moveto : moveto(X,Y) ){
+			[# XP = payloadArg(0)
+			   YP = payloadArg(1)			  
+			 #]
+			println("waiterengine   |||   moveto ($XP,$YP)")
+			run itunibo.planner.plannerUtil.planForGoal("$XP","$YP")
+		}
+	}
+	Goto execPlanMove
+	
+	State execPlanMove{
+		[#  CurMove = itunibo.planner.plannerUtil.getNextPlannedMove() #]
+	}
+	Goto execStep if [# CurMove == "w" #] else execMove
+	
+	State execStep {
+		request basicrobot -m step : step( $StepTime  )
+	}
+	Transition t0   whenReply stepdone   -> stepDone
+					whenReply stepfail   -> stepFailed
+	
+	State stepDone{
+		updateResource [# itunibo.planner.plannerUtil.getMapOneLine() #]
+		run itunibo.planner.plannerUtil.updateMap(  "w" )
+  	}
+	Goto execPlanMove if [# CurMove.length > 0 #] else endSuccess
+	
+	State stepFailed{
+ 		println("waiterengine | stepFailed")
+		onMsg(stepfail : stepfail(DURATION, CAUSE) ){
+			[# val D = payloadArg(0).toLong()  ; val Dt = Math.abs(StepTime-D); val BackT = D/2 #] 
+			println("waiterengine stepFail D= $D, BackTime = ${BackTime}")
+			if [# D > BackTime #] {
+				forward basicrobot -m cmd : cmd( s )
+				delayVar BackTime
+				forward basicrobot -m cmd : cmd( h )
+			}	
+ 		}
+ 	}   
+	Goto execPlanMove if [# CurMove.length > 0 #] else endSuccess
+	
+	State execMove{
+		forward basicrobot -m cmd : cmd($CurMove)
+ 		run itunibo.planner.plannerUtil.updateMap( "$CurMove" )
+ 		delay 200
+	}
+	Goto execPlanMove if [# CurMove.length > 0 #] else endSuccess
+	
+	State endSuccess{
+		updateResource [# "($XP,$YP)" #]
+		println("waiterengine   |||   endSuccess, curpos=($XP,$YP)")
+		run itunibo.planner.plannerUtil.showCurrentRobotState()
+		replyTo moveto with done : done($XP,$YP)
+	}
+	Goto wait
+} 
 
 QActor client context ctxtearoom {
 	State s0 initial{

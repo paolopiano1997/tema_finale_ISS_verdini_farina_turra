@@ -39,12 +39,12 @@ class Teatables ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, 
 						updateResourceRep( StateOfTables  
 						)
 					}
-					 transition(edgeName="t00",targetState="engageTable",cond=whenDispatch("occupy"))
-					transition(edgeName="t01",targetState="cleanTable",cond=whenDispatch("clean"))
-					transition(edgeName="t02",targetState="release",cond=whenDispatch("release"))
-					transition(edgeName="t03",targetState="replyClean",cond=whenRequest("isClean"))
-					transition(edgeName="t04",targetState="setState",cond=whenDispatch("setTableState"))
-					transition(edgeName="t05",targetState="tableState",cond=whenRequest("tableState"))
+					 transition(edgeName="t047",targetState="engageTable",cond=whenDispatch("occupy"))
+					transition(edgeName="t048",targetState="cleanTable",cond=whenDispatch("clean"))
+					transition(edgeName="t049",targetState="release",cond=whenDispatch("release"))
+					transition(edgeName="t050",targetState="replyClean",cond=whenRequest("isClean"))
+					transition(edgeName="t051",targetState="setState",cond=whenDispatch("setTableState"))
+					transition(edgeName="t052",targetState="tableState",cond=whenRequest("tableState"))
 				}	 
 				state("release") { //this:State
 					action { //it:State

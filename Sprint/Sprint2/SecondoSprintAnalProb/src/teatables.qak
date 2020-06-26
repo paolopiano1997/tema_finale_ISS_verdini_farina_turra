@@ -1,156 +1,156 @@
 System subtearoom
-
-
-Dispatch occupy  : occupy(N)
-Dispatch release : release(N)
-Dispatch clean   : clean(N)
-
-Request isClean : isClean(N)
-Reply isCleanDone : isCleanDone(N,E)
-
-Dispatch setTableState : setTableState(N,S)
-
-Request tableState : tableState(N)
-Reply state : state(N,S)
-
-Context ctxtearoom_teatables ip [host="192.168.0.38" port=8045] 
-
-QActor teatables context ctxtearoom_teatables{ 
-[#
-	var StateOfTables = ""
-	var E = ""
-	var Table = ""
-#]
-	State s0 initial{
-		println("teatables START")
-		solve( consult("tearoomkb.pl")	 )
-	}
-	Goto work
-	
-	State work{
-		solve( stateOfTeatables(S) )
-		ifSolved { [# StateOfTables = getCurSol("S").toString() #] }
-		println("teatables s0: $StateOfTables")
-		updateResource [# StateOfTables #]
-	}
-	Transition t0  whenMsg occupy -> engageTable
-					whenMsg clean -> cleanTable
-					whenMsg release -> release
-				whenRequest isClean -> replyClean
-					whenMsg setTableState -> setState
-					whenRequest tableState -> tableState
-					
-					
-	State release {
-		println("teatables   |||   release")
-		onMsg(release : release(N)){
-			solve( releaseTable(N))
-		}
-	}
-	Goto work
-	
-	
-	State tableState{
-		println("teateables   |||   tableState")
-		onMsg(tableState : tableState(N)){
-			[# Table = payloadArg(0) #]
-			solve( getState(N,S))
-			ifSolved{
-				[# E = getCurSol("S").toString() #]
-			}
-			replyTo tableState with state : state($Table,$E)
-		}
-	}
-	Goto work
-					
-	State setState{
-		println("teatables   |||   setState")
-		onMsg(setTableState : setTableState(N,S)){
-			solve( setState(N,S) )
-			ifSolved{
-				solve( getState(N,S) )
-				ifSolved{
-					[# 
-						println(getCurSol("S").toString())
-					#]
-				}
-			}
-		}
-	}
-	Goto work
-					
-	State replyClean {
-		println("teatables   |||   replyClean")
-		onMsg(isClean : isClean(N)){
-			[# Table = payloadArg(0) #]
-			println("onMsg isClean")
-			solve( getState(N,S) )
-			ifSolved{
-				[# 
-					E = getCurSol("S").toString()
-					if(E == "clean")
-						E = "yes"
-					else
-						E = "no"
-				#]
-			}
-			replyTo isClean with isCleanDone : isCleanDone($Table,$E)
-			println("replyTo isClean $E")
-		}
-	}
-	Goto work
-					
-	State engageTable{
-		printCurrentMessage
-		onMsg( occupy : occupy(N) ){
-			println("engageTable ${payloadArg(0)}")
-			solve( occupyTable( $payloadArg(0) ) )	//could do anything
-			solve( stateOfTeatables(S) )
-			[# StateOfTables = getCurSol("S").toString() #]  
-			println("teatables engageTable ${payloadArg(0)}: $StateOfTables")
-			updateResource [# StateOfTables #]
-		}
-	}
-	Goto work
-
-	State cleanTable{
-		printCurrentMessage
-		onMsg( clean : clean(N) ){
-			println("clean ${payloadArg(0)}")
-			solve( cleanTable( $payloadArg(0) ) )	//could do anything
-			solve( stateOfTeatables(S) )
-			[# StateOfTables = getCurSol("S").toString() #]  
-			println("teatables cleanTable ${payloadArg(0)}: $StateOfTables")
-			updateResource [# StateOfTables #] 			 
-		}
-	}
-	Goto work
-}
-
-//QActor prova context ctxtearoom_dummy {
+//
+//
+//Dispatch occupy  : occupy(N)
+//Dispatch release : release(N)
+//Dispatch clean   : clean(N)
+//
+//Request isClean : isClean(N)
+//Reply isCleanDone : isCleanDone(N,E)
+//
+//Dispatch setTableState : setTableState(N,S)
+//
+//Request tableState : tableState(N)
+//Reply state : state(N,S)
+//
+//Context ctxtearoom ip [ host="127.0.0.1" port=8050 ] 
+//
+//QActor teatables context ctxtearoom{ 
+//[#
+//	var StateOfTables = ""
+//	var E = ""
+//	var Table = ""
+//#]
 //	State s0 initial{
-//		println("Prova starts...")
-//		request teatables -m isClean : isClean(1)
-//		println("prova request")
-//	}	
-//	Transition t0 whenReply isCleanDone -> cleanDone
+//		println("teatables START")
+//		solve( consult("tearoomkb.pl")	 )
+//	}
+//	Goto work
 //	
-//	State cleanDone{
-//		println("prova cleanDone")
-//		onMsg(isCleanDone : isCleanDone(N,E)){
-//			println("Table ${payloadArg(0)} is clean: ${payloadArg(1)}")
+//	State work{
+//		solve( stateOfTeatables(S) )
+//		ifSolved { [# StateOfTables = getCurSol("S").toString() #] }
+//		println("teatables s0: $StateOfTables")
+//		updateResource [# StateOfTables #]
+//	}
+//	Transition t0  whenMsg occupy -> engageTable
+//					whenMsg clean -> cleanTable
+//					whenMsg release -> release
+//				whenRequest isClean -> replyClean
+//					whenMsg setTableState -> setState
+//					whenRequest tableState -> tableState
+//					
+//					
+//	State release {
+//		println("teatables   |||   release")
+//		onMsg(release : release(N)){
+//			solve( releaseTable(N))
 //		}
 //	}
-//	Goto tableState
+//	Goto work
+//	
 //	
 //	State tableState{
-//		request teatables -m tableState : tableState(1)
-//	}
-//	Transition t0 whenReply state -> rep
-//	
-//	State rep{
-//		onMsg(state : state(N,S)){
-//			println("Table ${payloadArg(0)} in state ${payloadArg(1)}")
+//		println("teateables   |||   tableState")
+//		onMsg(tableState : tableState(N)){
+//			[# Table = payloadArg(0) #]
+//			solve( getState(N,S))
+//			ifSolved{
+//				[# E = getCurSol("S").toString() #]
+//			}
+//			replyTo tableState with state : state($Table,$E)
 //		}
 //	}
+//	Goto work
+//					
+//	State setState{
+//		println("teatables   |||   setState")
+//		onMsg(setTableState : setTableState(N,S)){
+//			solve( setState(N,S) )
+//			ifSolved{
+//				solve( getState(N,S) )
+//				ifSolved{
+//					[# 
+//						println(getCurSol("S").toString())
+//					#]
+//				}
+//			}
+//		}
+//	}
+//	Goto work
+//					
+//	State replyClean {
+//		println("teatables   |||   replyClean")
+//		onMsg(isClean : isClean(N)){
+//			[# Table = payloadArg(0) #]
+//			println("onMsg isClean")
+//			solve( getState(N,S) )
+//			ifSolved{
+//				[# 
+//					E = getCurSol("S").toString()
+//					if(E == "clean")
+//						E = "yes"
+//					else
+//						E = "no"
+//				#]
+//			}
+//			replyTo isClean with isCleanDone : isCleanDone($Table,$E)
+//			println("replyTo isClean $E")
+//		}
+//	}
+//	Goto work
+//					
+//	State engageTable{
+//		printCurrentMessage
+//		onMsg( occupy : occupy(N) ){
+//			println("engageTable ${payloadArg(0)}")
+//			solve( occupyTable( $payloadArg(0) ) )	//could do anything
+//			solve( stateOfTeatables(S) )
+//			[# StateOfTables = getCurSol("S").toString() #]  
+//			println("teatables engageTable ${payloadArg(0)}: $StateOfTables")
+//			updateResource [# StateOfTables #]
+//		}
+//	}
+//	Goto work
+//
+//	State cleanTable{
+//		printCurrentMessage
+//		onMsg( clean : clean(N) ){
+//			println("clean ${payloadArg(0)}")
+//			solve( cleanTable( $payloadArg(0) ) )	//could do anything
+//			solve( stateOfTeatables(S) )
+//			[# StateOfTables = getCurSol("S").toString() #]  
+//			println("teatables cleanTable ${payloadArg(0)}: $StateOfTables")
+//			updateResource [# StateOfTables #] 			 
+//		}
+//	}
+//	Goto work
 //}
+//
+////QActor prova context ctxtearoom_dummy {
+////	State s0 initial{
+////		println("Prova starts...")
+////		request teatables -m isClean : isClean(1)
+////		println("prova request")
+////	}	
+////	Transition t0 whenReply isCleanDone -> cleanDone
+////	
+////	State cleanDone{
+////		println("prova cleanDone")
+////		onMsg(isCleanDone : isCleanDone(N,E)){
+////			println("Table ${payloadArg(0)} is clean: ${payloadArg(1)}")
+////		}
+////	}
+////	Goto tableState
+////	
+////	State tableState{
+////		request teatables -m tableState : tableState(1)
+////	}
+////	Transition t0 whenReply state -> rep
+////	
+////	State rep{
+////		onMsg(state : state(N,S)){
+////			println("Table ${payloadArg(0)} in state ${payloadArg(1)}")
+////		}
+////	}
+////}

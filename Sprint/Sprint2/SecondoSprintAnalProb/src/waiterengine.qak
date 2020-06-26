@@ -1,105 +1,104 @@
 System  tearoom 
-
-Request 	moveto : moveto(X,Y)
-Reply 		done   : done(X,Y)
-
-Request 	start  : start(S)
-Reply 		ready  : ready(V)
-
-Request 	step       : step( TIME )
-Reply   	stepdone   : stepdone(V)
-Dispatch 	cmd        : cmd(MOVE)
-Reply   	stepfail   : stepfail(DURATION, CAUSE)
-
-Context ctxtearoom ip [ host="::1" port=8068 ]
-Context ctxbasicrobot ip [host="localhost"   port=8020] 
-
-ExternalQActor basicrobot  context ctxbasicrobot
-
-QActor waiterengine context ctxtearoom {
-	[#
-		var XP = "0"
-		var YP = "0"
-		var CurMove = ""
-		val inmapname  = "teaRoomExplored"
-		var StepTime    	   = 348L
-		val BackTime           = 2 * StepTime / 3
-	#]
-	State s0 initial{
-		discardMsg On
-		run itunibo.planner.plannerUtil.initAI() //init planner entity
-		run itunibo.planner.plannerUtil.loadRoomMap( inmapname ) 		
-		run itunibo.planner.plannerUtil.showCurrentRobotState()	
-		println("waiterengine   |||   init")
-	}
-	Transition t0 whenRequest start -> started
-	
-	State started{
-		println("waiterengine   |||   started")
-		replyTo start with ready : ready(waiterengine)
-	}
-	Goto wait
-	
-	State wait{
-		println("waiterengine   |||   wait")
-		
-	}
-	Transition t0 whenRequest moveto -> planmove
-	
-	State planmove{
-		onMsg( moveto : moveto(X,Y) ){
-			[# XP = payloadArg(0)
-			   YP = payloadArg(1)			  
-			 #]
-			println("waiterengine   |||   moveto ($XP,$YP)")
-			run itunibo.planner.plannerUtil.planForGoal("$XP","$YP")
-		}
-	}
-	Goto execPlanMove
-	
-	State execPlanMove{
-		[#  CurMove = itunibo.planner.plannerUtil.getNextPlannedMove() #]
-	}
-	Goto execStep if [# CurMove == "w" #] else execMove
-	
-	State execStep {
-		request basicrobot -m step : step( $StepTime  )
-	}
-	Transition t0   whenReply stepdone   -> stepDone
-					whenReply stepfail   -> stepFailed
-	
-	State stepDone{
-		updateResource [# itunibo.planner.plannerUtil.getMapOneLine() #]
-		run itunibo.planner.plannerUtil.updateMap(  "w" )
-  	}
-	Goto execPlanMove if [# CurMove.length > 0 #] else endSuccess
-	
-	State stepFailed{
- 		println("waiterengine | stepFailed")
-		onMsg(stepfail : stepfail(DURATION, CAUSE) ){
-			[# val D = payloadArg(0).toLong()  ; val Dt = Math.abs(StepTime-D); val BackT = D/2 #] 
-			println("waiterengine stepFail D= $D, BackTime = ${BackTime}")
-			if [# D > BackTime #] {
-				forward basicrobot -m cmd : cmd( s )
-				delayVar BackTime
-				forward basicrobot -m cmd : cmd( h )
-			}	
- 		}
- 	}   
-	Goto execPlanMove if [# CurMove.length > 0 #] else endSuccess
-	
-	State execMove{
-		forward basicrobot -m cmd : cmd($CurMove)
- 		run itunibo.planner.plannerUtil.updateMap( "$CurMove" )
- 		delay 200
-	}
-	Goto execPlanMove if [# CurMove.length > 0 #] else endSuccess
-	
-	State endSuccess{
-		updateResource [# "($XP,$YP)" #]
-		println("waiterengine   |||   endSuccess, curpos=($XP,$YP)")
-		run itunibo.planner.plannerUtil.showCurrentRobotState()
-		replyTo moveto with done : done($XP,$YP)
-	}
-	Goto wait
-} 
+//
+//Request 	moveto : moveto(X,Y)
+//Reply 		done   : done(X,Y)
+//
+//Request 	start  : start(S)
+//Reply 		ready  : ready(V)
+//Request 	step       : step( TIME )
+//Reply   	stepdone   : stepdone(V)
+//Dispatch 	cmd        : cmd(MOVE)
+//Reply   	stepfail   : stepfail(DURATION, CAUSE)
+//
+//Context ctxtearoom ip [ host="127.0.0.1" port=8050 ]
+//Context ctxbasicrobot ip [host="localhost"   port=8020] 
+//
+//ExternalQActor basicrobot  context ctxbasicrobot
+//
+//QActor waiterengine context ctxtearoom {
+//	[#
+//		var XP = "0"
+//		var YP = "0"
+//		var CurMove = ""
+//		val inmapname  = "teaRoomExplored"
+//		var StepTime    	   = 348L
+//		val BackTime           = 2 * StepTime / 3
+//	#]
+//	State s0 initial{
+//		discardMsg On
+//		run itunibo.planner.plannerUtil.initAI() //init planner entity
+//		run itunibo.planner.plannerUtil.loadRoomMap( inmapname ) 		
+//		run itunibo.planner.plannerUtil.showCurrentRobotState()	
+//		println("waiterengine   |||   init")
+//	}
+//	Transition t0 whenRequest start -> started
+//	
+//	State started{
+//		println("waiterengine   |||   started")
+//		replyTo start with ready : ready(waiterengine)
+//	}
+//	Goto wait
+//	
+//	State wait{
+//		println("waiterengine   |||   wait")
+//		
+//	}
+//	Transition t0 whenRequest moveto -> planmove
+//	
+//	State planmove{
+//		onMsg( moveto : moveto(X,Y) ){
+//			[# XP = payloadArg(0)
+//			   YP = payloadArg(1)			  
+//			 #]
+//			println("waiterengine   |||   moveto ($XP,$YP)")
+//			run itunibo.planner.plannerUtil.planForGoal("$XP","$YP")
+//		}
+//	}
+//	Goto execPlanMove
+//	
+//	State execPlanMove{
+//		[#  CurMove = itunibo.planner.plannerUtil.getNextPlannedMove() #]
+//	}
+//	Goto execStep if [# CurMove == "w" #] else execMove
+//	
+//	State execStep {
+//		request basicrobot -m step : step( $StepTime  )
+//	}
+//	Transition t0   whenReply stepdone   -> stepDone
+//					whenReply stepfail   -> stepFailed
+//	
+//	State stepDone{
+//		updateResource [# itunibo.planner.plannerUtil.getMapOneLine() #]
+//		run itunibo.planner.plannerUtil.updateMap(  "w" )
+//  	}
+//	Goto execPlanMove if [# CurMove.length > 0 #] else endSuccess
+//	
+//	State stepFailed{
+// 		println("waiterengine | stepFailed")
+//		onMsg(stepfail : stepfail(DURATION, CAUSE) ){
+//			[# val D = payloadArg(0).toLong()  ; val Dt = Math.abs(StepTime-D); val BackT = D/2 #] 
+//			println("waiterengine stepFail D= $D, BackTime = ${BackTime}")
+//			if [# D > BackTime #] {
+//				forward basicrobot -m cmd : cmd( s )
+//				delayVar BackTime
+//				forward basicrobot -m cmd : cmd( h )
+//			}	
+// 		}
+// 	}   
+//	Goto execPlanMove if [# CurMove.length > 0 #] else endSuccess
+//	
+//	State execMove{
+//		forward basicrobot -m cmd : cmd($CurMove)
+// 		run itunibo.planner.plannerUtil.updateMap( "$CurMove" )
+// 		delay 200
+//	}
+//	Goto execPlanMove if [# CurMove.length > 0 #] else endSuccess
+//	
+//	State endSuccess{
+//		updateResource [# "($XP,$YP)" #]
+//		println("waiterengine   |||   endSuccess, curpos=($XP,$YP)")
+//		run itunibo.planner.plannerUtil.showCurrentRobotState()
+//		replyTo moveto with done : done($XP,$YP)
+//	}
+//	Goto wait
+//} 
