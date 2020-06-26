@@ -1,7 +1,7 @@
-System subteatablestearoom
+System subtearoom
 
 
-Dispatch engage  : engage(N)
+Dispatch occupy  : occupy(N)
 Dispatch release : release(N)
 Dispatch clean   : clean(N)
 
@@ -13,15 +13,14 @@ Dispatch setTableState : setTableState(N,S)
 Request tableState : tableState(N)
 Reply state : state(N,S)
 
-
-Context ctxtearoom_teatables   ip [host="localhost" port=8030]    
+Context ctxtearoom_teatables ip [host="192.168.0.38" port=8045] 
 
 QActor teatables context ctxtearoom_teatables{ 
 [#
 	var StateOfTables = ""
 	var E = ""
 	var Table = ""
-#]	
+#]
 	State s0 initial{
 		println("teatables START")
 		solve( consult("tearoomkb.pl")	 )
@@ -34,13 +33,25 @@ QActor teatables context ctxtearoom_teatables{
 		println("teatables s0: $StateOfTables")
 		updateResource [# StateOfTables #]
 	}
-	Transition t0  whenMsg engage -> engageTable
+	Transition t0  whenMsg occupy -> engageTable
 					whenMsg clean -> cleanTable
+					whenMsg release -> release
 				whenRequest isClean -> replyClean
 					whenMsg setTableState -> setState
 					whenRequest tableState -> tableState
 					
+					
+	State release {
+		println("teatables   |||   release")
+		onMsg(release : release(N)){
+			forward teatables -m setTableState : setTableState(S,dirty)
+		}
+	}
+	Goto work
+	
+	
 	State tableState{
+		println("teateables   |||   tableState")
 		onMsg(tableState : tableState(N)){
 			[# Table = payloadArg(0) #]
 			solve( getState(N,S))
@@ -53,6 +64,7 @@ QActor teatables context ctxtearoom_teatables{
 	Goto work
 					
 	State setState{
+		println("teatables   |||   setState")
 		onMsg(setTableState : setTableState(N,S)){
 			solve( setState(N,S) )
 		}
@@ -82,9 +94,9 @@ QActor teatables context ctxtearoom_teatables{
 					
 	State engageTable{
 		printCurrentMessage
-		onMsg( engage : engage(N) ){
+		onMsg( occupy : occupy(N) ){
 			println("engageTable ${payloadArg(0)}")
-			solve( engageTable( $payloadArg(0) ) )	//could do anything
+			solve( occupyTable( $payloadArg(0) ) )	//could do anything
 			solve( stateOfTeatables(S) )
 			[# StateOfTables = getCurSol("S").toString() #]  
 			println("teatables engageTable ${payloadArg(0)}: $StateOfTables")

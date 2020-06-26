@@ -34,14 +34,26 @@ class Teatables ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, 
 						updateResourceRep( StateOfTables  
 						)
 					}
-					 transition(edgeName="t00",targetState="engageTable",cond=whenDispatch("engage"))
+					 transition(edgeName="t00",targetState="engageTable",cond=whenDispatch("occupy"))
 					transition(edgeName="t01",targetState="cleanTable",cond=whenDispatch("clean"))
-					transition(edgeName="t02",targetState="replyClean",cond=whenRequest("isClean"))
-					transition(edgeName="t03",targetState="setState",cond=whenDispatch("setTableState"))
-					transition(edgeName="t04",targetState="tableState",cond=whenRequest("tableState"))
+					transition(edgeName="t02",targetState="release",cond=whenDispatch("release"))
+					transition(edgeName="t03",targetState="replyClean",cond=whenRequest("isClean"))
+					transition(edgeName="t04",targetState="setState",cond=whenDispatch("setTableState"))
+					transition(edgeName="t05",targetState="tableState",cond=whenRequest("tableState"))
+				}	 
+				state("release") { //this:State
+					action { //it:State
+						println("teatables   |||   release")
+						if( checkMsgContent( Term.createTerm("release(N)"), Term.createTerm("release(N)"), 
+						                        currentMsg.msgContent()) ) { //set msgArgList
+								forward("setTableState", "setTableState(S,dirty)" ,"teatables" ) 
+						}
+					}
+					 transition( edgeName="goto",targetState="work", cond=doswitch() )
 				}	 
 				state("tableState") { //this:State
 					action { //it:State
+						println("teateables   |||   tableState")
 						if( checkMsgContent( Term.createTerm("tableState(N)"), Term.createTerm("tableState(N)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
 								 Table = payloadArg(0)  
@@ -57,6 +69,7 @@ class Teatables ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, 
 				}	 
 				state("setState") { //this:State
 					action { //it:State
+						println("teatables   |||   setState")
 						if( checkMsgContent( Term.createTerm("setTableState(N,S)"), Term.createTerm("setTableState(N,S)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
 								solve("setState(N,S)","") //set resVar	
@@ -90,10 +103,10 @@ class Teatables ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, 
 				state("engageTable") { //this:State
 					action { //it:State
 						println("$name in ${currentState.stateName} | $currentMsg")
-						if( checkMsgContent( Term.createTerm("engage(N)"), Term.createTerm("engage(N)"), 
+						if( checkMsgContent( Term.createTerm("occupy(N)"), Term.createTerm("occupy(N)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
 								println("engageTable ${payloadArg(0)}")
-								solve("engageTable(${payloadArg(0)})","") //set resVar	
+								solve("occupyTable(${payloadArg(0)})","") //set resVar	
 								solve("stateOfTeatables(S)","") //set resVar	
 								 StateOfTables = getCurSol("S").toString()  
 								println("teatables engageTable ${payloadArg(0)}: $StateOfTables")

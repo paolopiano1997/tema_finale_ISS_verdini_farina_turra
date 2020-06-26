@@ -122,7 +122,7 @@ class Waitermind ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name,
 					action { //it:State
 						println("waitermind   |||   convoyToTable1")
 						request("moveto", "moveto($X_teatable1,$Y_teatable1)" ,"waiterengine" )  
-						forward("engage", "engage(1)" ,"teatables" ) 
+						forward("occupy", "occupy(1)" ,"teatables" ) 
 						println("waitermind   |||   table1 state occupied")
 						delay(5000) 
 					}
@@ -132,7 +132,7 @@ class Waitermind ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name,
 					action { //it:State
 						println("waitermind   |||   convoyToTable2")
 						request("moveto", "moveto($X_teatable2,$Y_teatable2)" ,"waiterengine" )  
-						forward("engage", "engage(2)" ,"teatables" ) 
+						forward("occupy", "occupy(2)" ,"teatables" ) 
 						println("waitermind   |||   table2 state occupied")
 						delay(5000) 
 					}
@@ -238,6 +238,7 @@ class Waitermind ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name,
 						updateResourceRep( "convoyToExitDoor"  
 						)
 						request("moveto", "moveto($X_Exitdoor,$Y_Exitdoor)" ,"waiterengine" )  
+						forward("release", "release(1)" ,"teatables" ) 
 						delay(5000) 
 					}
 					 transition(edgeName="t022",targetState="reachTableClean",cond=whenReply("done"))

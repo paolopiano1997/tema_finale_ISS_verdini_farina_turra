@@ -1,4 +1,4 @@
-System subtimertearoom
+System subtearoom
 
 Dispatch starttimer : starttimer(T)
 Dispatch endtime : endtime(T)
@@ -6,10 +6,12 @@ Dispatch endtime : endtime(T)
 Request stoptimer : stoptimer(T)
 Reply okStop : okStop(T)
 
-Context ctxtearoom_dummy   ip [host="192.168.0.38" port=8050]
+Context ctxtearoom_teatables ip [host="192.168.0.38" port=8045] 
+Context ctxtearoom_dummy   ip [host="127.0.0.1" port=8050] 
 
 CodedQActor waitercleaner context ctxtearoom_dummy className "it.unibo.waitercleaner.Waitercleaner" 
-QActor timer context ctxtearoom_dummy {
+
+QActor timer context ctxtearoom_teatables {
 
 
 	[# 

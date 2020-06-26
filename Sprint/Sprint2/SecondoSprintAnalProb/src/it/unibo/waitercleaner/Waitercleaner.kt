@@ -16,8 +16,8 @@ class Waitercleaner ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( na
 	@kotlinx.coroutines.ObsoleteCoroutinesApi
 	@kotlinx.coroutines.ExperimentalCoroutinesApi			
 	override fun getBody() : (ActorBasicFsm.() -> Unit){
-		 
-				var Table = "" 
+		
+				var Table = ""
 				val	Cleantime = 3000L
 				var Clean = Cleantime
 				

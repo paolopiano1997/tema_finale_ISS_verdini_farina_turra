@@ -44,12 +44,12 @@ stateOfTeatables( [teatable1(V1),teatable2(V2)] ) :-
 	teatable( 2, V2 ).
 
 	
-engageTable(N)	 :-
+occupyTable(N)	 :-
 	%% stdout <- println( tearoomkb_engageTable(N) ),
 	retract( teatable( N, clean ) ),
 	!,
-	assert( teatable( N, engaged ) ).
-engageTable(N).	
+	assert( teatable( N, occupy ) ).
+occupyTable(N).	
 	
 	
 cleanTable(N)	 :-

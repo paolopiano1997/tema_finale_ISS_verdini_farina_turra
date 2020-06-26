@@ -17,11 +17,12 @@ Dispatch paymentready : paymentready(P)
 Dispatch order : order(O)
 Dispatch end : end (E)
 
+
 Dispatch startcleaner : startcleaner(T)
 Dispatch cleanerdone : cleanerdone(C)
 Dispatch stopcleaner : stopcleaner(C)
 
-Dispatch engage  : engage(N)
+Dispatch occupy  : occupy(N)
 Dispatch release : release(N)
 Dispatch clean   : clean(N)
 
@@ -41,18 +42,16 @@ Dispatch gototable1 : gototable1(T)
 Dispatch gototable2 : gototable2(T)
 
 
-Context ctxbasicrobot     ip [host="localhost"   port=8020] 
-Context ctxtearoom ip [ host="127.0.0.1" port=8068 ]
-Context ctxtearoom_dummy   ip [host="192.168.0.38" port=8050]     
-Context ctxtearoom_teatables   ip [host="localhost" port=8030]
+Context ctxbasicrobot     ip [host="localhost"   port=8020]
+Context ctxtearoom ip [ host="::1" port=8068 ]
+Context ctxtearoom_dummy   ip [host="127.0.0.1" port=8050] 
+Context ctxtearoom_teatables ip [host="192.168.0.38" port=8045]    
 
 CodedQActor teatables context ctxtearoom_teatables className "it.unibo.teatables.Teatables"
 CodedQActor waitercleaner context ctxtearoom_dummy className "it.unibo.waitercleaner.Waitercleaner"
 CodedQActor waiterengine context ctxtearoom className "it.unibo.waiterengine.Waiterengine"
 
 ExternalQActor basicrobot  context ctxbasicrobot
-
-
 
 QActor waitermind context ctxtearoom{
 [#
@@ -151,7 +150,7 @@ QActor waitermind context ctxtearoom{
 		println("waitermind   |||   convoyToTable1")
 		request waiterengine -m moveto : moveto ($X_teatable1,$Y_teatable1)
 //		[# table1.state= "occupied" #]
-		forward teatables -m engage : engage(1)
+		forward teatables -m occupy : occupy(1)
 		println("waitermind   |||   table1 state occupied")
 		//updateResource [# "convoyToTable1" #]
 		delay 5000
@@ -162,7 +161,7 @@ QActor waitermind context ctxtearoom{
 		println("waitermind   |||   convoyToTable2")
 		request waiterengine -m moveto : moveto ($X_teatable2,$Y_teatable2)
 		//[# table2.state= "occupied" #]
-		forward teatables -m engage : engage(2)
+		forward teatables -m occupy : occupy(2)
 		println("waitermind   |||   table2 state occupied")
 		//updateResource [# "convoyToTable2" #]
 		delay 5000
@@ -255,6 +254,7 @@ QActor waitermind context ctxtearoom{
 		println("waitermind   |||   convoyToExitDoor")
 		updateResource[# "convoyToExitDoor" #]
 		request waiterengine -m moveto : moveto($X_Exitdoor,$Y_Exitdoor)
+		forward teatables -m release : release(1)
 		delay 5000
 	}
 	Transition t0 whenReply done -> reachTableClean
@@ -284,31 +284,31 @@ QActor waitermind context ctxtearoom{
 }
 
 
-//QActor client context ctxtearoom {
-//	State s0 initial{
-//		println("client   |||   init")
-//	}
-//	Goto doSomething
-//	
-//	State doSomething{
-//		println("client   |||   sending enter request")
-//		request waitermind -m enter : enter(id)
-//	}
-//	Transition t0 whenReply accept -> ok
-//	
-//	State ok{
-//		println("client   |||   accepted")
-//		delay 15000
-//		println("client   |||   ready")
-//		forward waitermind -m clientready : clientready(id)
-//		delay 15000
-//		println("barman   |||   ready")
-//		forward waitermind -m drinkready : drinkready(id)
-//		delay 15000
-//		forward waitermind -m paymentready : paymentready(id)
-//		delay 10000
-//		request waitermind -m enter : enter(id)
-//		delay 20000
-//		forward waitermind -m end : end(end)
-//	}
-//}
+QActor client context ctxtearoom {
+	State s0 initial{
+		println("client   |||   init")
+	}
+	Goto doSomething
+	
+	State doSomething{
+		println("client   |||   sending enter request")
+		request waitermind -m enter : enter(id)
+	}
+	Transition t0 whenReply accept -> ok
+	
+	State ok{
+		println("client   |||   accepted")
+		delay 15000
+		println("client   |||   ready")
+		forward waitermind -m clientready : clientready(id)
+		delay 15000
+		println("barman   |||   ready")
+		forward waitermind -m drinkready : drinkready(id)
+		delay 15000
+		forward waitermind -m paymentready : paymentready(id)
+		delay 10000
+		request waitermind -m enter : enter(id)
+		delay 20000
+		forward waitermind -m end : end(end)
+	}
+}

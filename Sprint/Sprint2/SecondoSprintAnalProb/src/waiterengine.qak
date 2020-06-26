@@ -11,7 +11,7 @@ Reply   	stepdone   : stepdone(V)
 Dispatch 	cmd        : cmd(MOVE)
 Reply   	stepfail   : stepfail(DURATION, CAUSE)
 
-Context ctxtearoom ip [ host="127.0.0.1" port=8068 ]
+Context ctxtearoom ip [ host="::1" port=8068 ]
 Context ctxbasicrobot ip [host="localhost"   port=8020] 
 
 ExternalQActor basicrobot  context ctxbasicrobot
