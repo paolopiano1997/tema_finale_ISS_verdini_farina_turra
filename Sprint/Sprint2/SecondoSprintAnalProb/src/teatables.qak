@@ -28,8 +28,8 @@ QActor teatables context ctxtearoom_teatables{
 	Goto work
 	
 	State work{
-//		solve( stateOfTeatables(S) )
-//		ifSolved { [# StateOfTables = getCurSol("S").toString() #] }
+		solve( stateOfTeatables(S) )
+		ifSolved { [# StateOfTables = getCurSol("S").toString() #] }
 		println("teatables s0: $StateOfTables")
 		updateResource [# StateOfTables #]
 	}
@@ -44,7 +44,7 @@ QActor teatables context ctxtearoom_teatables{
 	State release {
 		println("teatables   |||   release")
 		onMsg(release : release(N)){
-			forward teatables -m setTableState : setTableState(S,dirty)
+			solve( releaseTable(N))
 		}
 	}
 	Goto work
@@ -67,6 +67,14 @@ QActor teatables context ctxtearoom_teatables{
 		println("teatables   |||   setState")
 		onMsg(setTableState : setTableState(N,S)){
 			solve( setState(N,S) )
+			ifSolved{
+				solve( getState(N,S) )
+				ifSolved{
+					[# 
+						println(getCurSol("S").toString())
+					#]
+				}
+			}
 		}
 	}
 	Goto work

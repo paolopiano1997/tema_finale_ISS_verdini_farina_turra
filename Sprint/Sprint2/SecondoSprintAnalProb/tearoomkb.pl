@@ -49,7 +49,11 @@ occupyTable(N)	 :-
 	retract( teatable( N, clean ) ),
 	!,
 	assert( teatable( N, occupy ) ).
-occupyTable(N).	
+
+releaseTable(N) :-
+	retract( teatable( N, occupy ) ),
+	!,
+	assert( teatable( N, dirty ) ).
 	
 	
 cleanTable(N)	 :-

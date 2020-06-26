@@ -55,7 +55,8 @@ QActor waitercleaner context ctxtearoom_dummy {
 	}
 	Transition t0 whenMsg startcleaner		 -> preDirty
 				  whenRequest isTableStopped -> wait
-	
+
+
 	State timerStop{
 		request timer -m stoptimer : stoptimer(stop)
 	}
