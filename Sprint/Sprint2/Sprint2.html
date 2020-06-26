@@ -273,8 +273,9 @@ Il modello del primo sprint considera il task clean come un'azione composta da s
 quindi occorre modificare la gestione di questi sottotask in modo da renderli sensibili a interazioni. In QAK è possibile 
 sfruttare la primitiva whenTime la quale ci dà la possibilità di interrompere un task simulando un 'delay' ma rimanendo sensibili a messaggi.
 Questo approccio, essendo il più semplice, sarà usato nella modellazione dei sottotask relativi al clean e poi ampliato nell'analisi del problema.
-</br></br> Al fine di capire se il task clean sia stato interrotto e in relazione a quale tavolo è necessario introdurre due
- attributi nel waitermind, isCleanStopped (booleano che identifica se il clean è interrotto oppure no) e tableStopped (stringa che identifica il tavolo in questione). 
+</br></br>
+Al fine di capire se il task clean sia stato interrotto e in relazione a quale tavolo è necessario introdurre due
+ attributi nel waitermind non compresi nei requisiti del sistema iniziale, isCleanStopped (booleano che identifica se il clean è interrotto oppure no) e tableStopped (stringa che identifica il tavolo in questione). 
 Per riprendere correttamente dallo stato in cui il task è stato interrotto è opportuno introdurre 3 auto-messaggi, gotoClean, gotoClean2 e gotoClean3.
 
 Modello (riportato solo waitermind, in quanto il resto è rimasto come nel primo Sprint)
@@ -652,7 +653,7 @@ E' opportuno rifinire il concetto di "tavolo", definito nel primo Sprint.
 Questo era stato modellato come un oggetto, ovvero il modo più semplice per gestirlo,
 ma non necessariamente il modo migliore. Effettivamente, pensando all'entità "tavolo", potrebbe essere opportuno definirla come un attore dotato
 di comportamento autonomo. Infatti, avere un'entità separata che mantenga lo stato del tavolo stesso e se lo gestisca, renderebbe il sistema 
-più snello e meno vincolante. Oltretutto, in questo modo viene lasciato il puro compito da "mente" al waitermind e viene suddiviso a ciascun attore
+più snello e meno vincolante. Oltretutto, in questo modo viene lasciato il puro compito da <a href="./ConsiderazioniIniziali.html#mente">"mente"</a> al waitermind e viene suddiviso a ciascun attore
 un ruolo principale e fondamentale. E' quindi necessario rimodellare il tavolo con relativo stato e gestire l'interazione tra <em>waiter</em> e tavolo.
 Per ovviare al problema della rappresentazione del tavolo e della gestione del suo stato interno 
 sono emersi tre scenari, una modellandolo come un attore al cui waitermind invia dei dispatch per sapere il suo stato,
@@ -670,9 +671,8 @@ Modellando l'entità tavolo come attore, in particolare l'entità gestisce entra
  è necessario introdurre una gestione sia dell'interazione con il waiter che degli stati dei tavoli.
 Gli stati dei tavoli dovranno essere memorizzati da qualche parte, in modo tale da ottimizzare l'utilizzo dell'attore "teatables".
 In tal modo è possibile gestire interazioni tra waitermind e teatables per effettuare le principali interazioni. Per questo è 
- Facendo così,
-è possibile mandare dei dispatch da waitermind a teatables per effettuare le principali operazioni, ovvero "occupy" per occupare un determinato tavolo,
-"tableclean" per aggiornare lo stato di un tavolo a "cleaned", "release" per aggiornare lo stato di un tavolo quando il cliente se ne va.
+ Facendo così, è possibile mandare dei dispatch da waitermind a teatables per effettuare le principali operazioni, ovvero <i>Dispatch occupy  : occupy(N)</i> per occupare un determinato tavolo,
+<i>Dispatch clean   : clean(N)</i> per aggiornare lo stato di un tavolo a "cleaned", <i>Dispatch release : release(N)</i> per aggiornare lo stato di un tavolo quando il cliente se ne va.
 Questa memorizzazione e gestione verrà modellata tramite fatti Prolog, poichè il modello QAK ne offre un supporto.
 
 </br></br>
@@ -699,10 +699,9 @@ una problematica è se sia opportuno far interagire teatables con waitercleaner 
 Si chiedono al teatables gli stati e non li facciamo memorizzare al waitercleaner, ognuno fa il proprio compito.
 </br></br>
 <h3> Timer </h3> </br>
-Poichè è stato stabilito con il committente che nell'ultima fase del clean (quella in cui si passa da
-"sanitized" a "cleaned" come stato del tavolo) in cui mancano circa 15 secondi alla fine il suddetto task non è interrompibile, 
-è necessario introdurre una gestione relativa al tempo passato e rimanente di ciascuna fase del task clean.
-Lo stato "sanitized" viene modellato in modo che duri 15 secondi, così da renderlo non interrompibile e semplificarne la gestione.
+In accordo con il committente è stato stabilito che nell'ultima fase del clean il task non è interrompibile, ovvero negli ultimi 15 secondi dell'esecuzione del task. 
+<br>È necessario dunque introdurre una gestione relativa al tempo passato e rimanente di ciascuna fase del task clean.
+<br>L'ultimo stato del clean ,"sanitized", viene modellato in modo che duri 15 secondi, così da renderlo non interrompibile e semplificarne la gestione.
 Per effettuare questa gestione, è opportuno modellare un'entità "timer", la quale fa da supporto al waitercleaner.
 Inoltre l'introduzione di questa entità risolverà il problema di rimanere bloccati in uno stato, nel caso di ripetute interruzioni. </br></br>
 Questo timer riceve un <i>Dispatch starttimer : starttimer(T)</i> con l'indicazione del tempo del
@@ -729,6 +728,7 @@ In questo test plan dovremo controllare che:
     <li>Il <em>waiter</em> interrompa il task se lo stato del tavolo non ha ancora raggiunto "sanitized" </li>
     <li>il <em>waiter</em> NON interrompa il task <em>clean</em> se lo stato ha già raggiunto "sanitized" </li>
     <li>il <em>waiter</em> riprenda il task <em>clean</em> dall'ultimo stato raggiunto con il tempo rimasto in precedenza </li>
+	
 </ul><br>
 Il test plan seguente utilizza un'entità Expected per gestire il valore atteso ed effettuare il check.
 Tramite le sue variabili cleanStopped, tablePrevState e cleanRemainingTime potremo verificare se la clean è 
@@ -739,6 +739,115 @@ chiederà di entrare quando il waiter fa il task clean, il quale deve essere int
 Per verificare questo, viene utilizzato il "resource" degli attori QAK. Infatti, quando il clean viene interrotto, la risorsa deve avere
 il valore atteso che si trova dentro Expected.xxx. <br>
 </br>
+<pre>
+package test
+import Expected
+
+class TestWaiterTableStates {
+	var waitermind            : ActorBasic? = null
+	var waitercleaner         : ActorBasic? = null 
+	val initDelayTime     = 1000L
+
+	val enter = MsgUtil.buildRequest("waitermind","enter","enter","waitermind")
+	val clientready = MsgUtil.buildDispatch("waitermind","clientready","clientready","waitermind")	
+	val drinkready = MsgUtil.buildDispatch("waitermind","drinkready","drinkready","waitermind")
+	val paymentready = MsgUtil.buildDispatch("waitermind","paymentready","paymentready","waitermind")
+	val tableState = MsgUtil.buildDispatch("waitercleaner","tableState","tableState","waitercleaner")
+	val stoptimer = MsgUtil.buildDispatch("waitercleaner","stoptimer","stoptimer","waitercleaner")
+	
+	@kotlinx.coroutines.ObsoleteCoroutinesApi
+	@kotlinx.coroutines.ExperimentalCoroutinesApi
+	@Before
+	fun systemSetUp() {
+   		kotlin.concurrent.thread(start = true) {
+			it.unibo.ctxtearoom.main()
+		}
+	}
+
+	@After
+	fun terminate() {
+		println("%%%  TestWaiter terminate ")
+	}
+	
+	fun checkStop(){
+		if(waitermind!=null)
+			assert(waitermind!!.geResourceRep()==Expected.cleanStopped)
+	}
+	
+	fun checkCleaning(){ //controllo che NON sia in stop
+		if(waitermind!=null)
+			assert(waitermind!!.geResourceRep()!=Expected.cleanStopped)
+	}
+	
+	fun checkPrevState(){	//controllo che riprenda la clean dallo stato precedente
+		if(waitermind!=null)
+			assert(waitermind!!.geResourceRep()==Expected.tablePrevState)
+	}
+	
+	fun checkRemainingTime(){	//controllo che il timer segni il tempo effettivamente rimasto
+		if(waitermind!=null)
+			assert(waitermind!!.geResourceRep()==Expected.cleanRemainingTime) //TODO CAMBIARE EXPECTED
+	}
+	
+	@Test
+	fun testRobotboundary(){
+	 	runBlocking{
+ 			while( waitermind == null ){
+				println("testWaiterPosition waits for waitermind ... ")
+				delay(initDelayTime)  //time for robot to start
+				waitermind = it.unibo.kactor.sysUtil.getActor("waitermind")
+				waitercleaner = it.unibo.kactor.sysUtil.getActor("waitercleaner")
+ 			}
+			
+			MsgUtil.sendMsg(enter,waitermind!!)
+ 			delay(15000)
+			MsgUtil.sendMsg(clientready,waitermind!!)
+			delay(15000)
+			MsgUtil.sendMsg(drinkready,waitermind!!)
+			delay(15000)
+			MsgUtil.sendMsg(paymentready,waitermind!!)
+			delay(10000)
+			MsgUtil.sendMsg(enter,waitermind!!)	//INTERROMPO LA CLEAN
+			
+			
+			MsgUtil.sendMsg(tableState,waitercleaner!!)
+			//Possiamo usare il resource se smattiamo troppo con la gestione delle risposte
+			
+			//subito dopo l'interruzione ho bisogno di sapere lo stato a cui era rimasto il tavolo
+			//RICEZIONE E SALVATAGGIO in Expected.tablePrevState
+			MsgUtil.sendMsg(stoptimer,waitercleaner!!) //allo stesso modo salvo il tempo rimasto stoptimer
+			//RICEZIONE E SALVATAGGIO
+ 			delay(8000)
+			checkStop()	//controllo che il waiter abbia interrotto la clean
+			delay(10000)
+			MsgUtil.sendMsg(tableState,waitercleaner!!)	//mando un dispatch tablestate per ricevere lo stato del tavolo
+			//RICEZIONE risposta MsgUtil.???? contenente lo stato del tavolo
+			MsgUtil.sendMsg(stoptimer,waitercleaner!!) //chiedo il tempo rimasto
+			//RICEZIONE			
+			checkCleaning()	//controllo che riprenda la clean
+			checkPrevState()	//controllo che riprenda la clean dallo stato precedente
+			checkRemainingTime()//controllo che il timer segni il tempo effettivamente rimasto
+			
+			delay(20000) //da aggiustare in modo che corrisponda più o meno alla fine della clean
+			//controllo che una volta raggiunto sanitized NON interrompa la clean
+			MsgUtil.sendMsg(enter,waitermind!!)
+			checkCleaning() //controllo semplicemente se sta continuando a pulire
+			
+			
+			MsgUtil.sendMsg("end","end","end",waitermind!!)
+ 			if( waitermind != null ) waitermind!!.waitTermination()
+  		}
+	 	println("testWaiterPosition BYE  ")  
+	}
+}
+</pre>
+<pre>
+object Expected{
+	val cleanStopped = "cleanStopped"
+	var tablePrevState = "dirty"
+	var cleanRemainingTime = "15"
+}
+</pre>
 </div>	
 
 <h2>Sprint review</h2> 
