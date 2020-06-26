@@ -746,14 +746,13 @@ import Expected
 class TestWaiterTableStates {
 	var waitermind            : ActorBasic? = null
 	var waitercleaner         : ActorBasic? = null 
+	var teatables         	  : ActorBasic? = null
 	val initDelayTime     = 1000L
 
 	val enter = MsgUtil.buildRequest("waitermind","enter","enter","waitermind")
 	val clientready = MsgUtil.buildDispatch("waitermind","clientready","clientready","waitermind")	
 	val drinkready = MsgUtil.buildDispatch("waitermind","drinkready","drinkready","waitermind")
 	val paymentready = MsgUtil.buildDispatch("waitermind","paymentready","paymentready","waitermind")
-	val tableState = MsgUtil.buildDispatch("waitercleaner","tableState","tableState","waitercleaner")
-	val stoptimer = MsgUtil.buildDispatch("waitercleaner","stoptimer","stoptimer","waitercleaner")
 	
 	@kotlinx.coroutines.ObsoleteCoroutinesApi
 	@kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -779,14 +778,14 @@ class TestWaiterTableStates {
 			assert(waitermind!!.geResourceRep()!=Expected.cleanStopped)
 	}
 	
-	fun checkPrevState(){	//controllo che riprenda la clean dallo stato precedente
-		if(waitermind!=null)
-			assert(waitermind!!.geResourceRep()==Expected.tablePrevState)
+	fun checkPrevState(int table){	//controllo che riprenda la clean dallo stato precedente
+		if(teatables!=null)
+			assert(teatables!!.getState()==Expected.tablePrevState)
 	}
 	
 	fun checkRemainingTime(){	//controllo che il timer segni il tempo effettivamente rimasto
-		if(waitermind!=null)
-			assert(waitermind!!.geResourceRep()==Expected.cleanRemainingTime) //TODO CAMBIARE EXPECTED
+		if(waitercleaner!=null)
+			assert(waitercleaner!!.getRemainingTime()<=Expected.cleanRemainingTime)
 	}
 	
 	@Test
@@ -797,6 +796,7 @@ class TestWaiterTableStates {
 				delay(initDelayTime)  //time for robot to start
 				waitermind = it.unibo.kactor.sysUtil.getActor("waitermind")
 				waitercleaner = it.unibo.kactor.sysUtil.getActor("waitercleaner")
+				teatables = it.unibo.kactor.sysUtil.getActor("teatables")
  			}
 			
 			MsgUtil.sendMsg(enter,waitermind!!)
@@ -809,30 +809,21 @@ class TestWaiterTableStates {
 			delay(10000)
 			MsgUtil.sendMsg(enter,waitermind!!)	//INTERROMPO LA CLEAN
 			
-			
-			MsgUtil.sendMsg(tableState,waitercleaner!!)
-			//Possiamo usare il resource se smattiamo troppo con la gestione delle risposte
-			
 			//subito dopo l'interruzione ho bisogno di sapere lo stato a cui era rimasto il tavolo
-			//RICEZIONE E SALVATAGGIO in Expected.tablePrevState
-			MsgUtil.sendMsg(stoptimer,waitercleaner!!) //allo stesso modo salvo il tempo rimasto stoptimer
-			//RICEZIONE E SALVATAGGIO
+			Expected.tablePrevState = teatables.getState(0)	//SALVATAGGIO in Expected.tablePrevState, param: tavolo
+			//allo stesso modo salvo il tempo rimasto
+			Expected.cleanRemainingTime = waitercleaner.getRemainingTime()
  			delay(8000)
 			checkStop()	//controllo che il waiter abbia interrotto la clean
 			delay(10000)
-			MsgUtil.sendMsg(tableState,waitercleaner!!)	//mando un dispatch tablestate per ricevere lo stato del tavolo
-			//RICEZIONE risposta MsgUtil.???? contenente lo stato del tavolo
-			MsgUtil.sendMsg(stoptimer,waitercleaner!!) //chiedo il tempo rimasto
-			//RICEZIONE			
 			checkCleaning()	//controllo che riprenda la clean
-			checkPrevState()	//controllo che riprenda la clean dallo stato precedente
 			checkRemainingTime()//controllo che il timer segni il tempo effettivamente rimasto
+			checkPrevState(0)	//controllo che riprenda la clean dallo stato precedente
 			
-			delay(20000) //da aggiustare in modo che corrisponda più o meno alla fine della clean
+			delay(20000)
 			//controllo che una volta raggiunto sanitized NON interrompa la clean
 			MsgUtil.sendMsg(enter,waitermind!!)
 			checkCleaning() //controllo semplicemente se sta continuando a pulire
-			
 			
 			MsgUtil.sendMsg("end","end","end",waitermind!!)
  			if( waitermind != null ) waitermind!!.waitTermination()
@@ -845,7 +836,7 @@ class TestWaiterTableStates {
 object Expected{
 	val cleanStopped = "cleanStopped"
 	var tablePrevState = "dirty"
-	var cleanRemainingTime = "15"
+	var cleanRemainingTime = 150000
 }
 </pre>
 </div>	
