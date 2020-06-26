@@ -582,11 +582,11 @@ il valore atteso che si trova dentro Expected.expect.
 <pre>
 class TestWaiterTableStates {
 	var waitermind            : ActorBasic? = null
-	//val mqttTest   	      = MqttUtils("test")
+	//val mqttTest   	      = MqttUtils("test") 
 	val initDelayTime     = 1000L
-	
+
 	val enter = MsgUtil.buildRequest("waitermind","enter","enter","waitermind")
-	val clientready = MsgUtil.buildDispatch("waitermind","clientready","clientready","waitermind")
+	val clientready = MsgUtil.buildDispatch("waitermind","clientready","clientready","waitermind")	
 	val drinkready = MsgUtil.buildDispatch("waitermind","drinkready","drinkready","waitermind")
 	val paymentready = MsgUtil.buildDispatch("waitermind","paymentready","paymentready","waitermind")
 	
@@ -617,15 +617,18 @@ class TestWaiterTableStates {
 				delay(initDelayTime)  //time for robot to start
 				waitermind = it.unibo.kactor.sysUtil.getActor("waitermind")
  			}
+			
 			MsgUtil.sendMsg(enter,waitermind!!)
- 			delay(10000)
+ 			delay(20000)
 			MsgUtil.sendMsg(clientready,waitermind!!)
-			delay(10000)
+			delay(20000)
 			MsgUtil.sendMsg(drinkready,waitermind!!)
-			delay(10000)
+			delay(20000)
 			MsgUtil.sendMsg(paymentready,waitermind!!)
 			delay(15000)
 			MsgUtil.sendMsg(enter,waitermind!!)
+			delay(6000)
+			checkState()
  			delay(20000)
 			MsgUtil.sendMsg("end","end","end",waitermind!!)
  			if( waitermind != null ) waitermind!!.waitTermination()

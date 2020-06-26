@@ -25,11 +25,10 @@ Reply isTableStoppedDone : isTableStoppedDone(E)
 
 Context ctxtearoom ip [ host="127.0.0.1" port=8068 ]
 Context ctxtearoom_dummy   ip [host="192.168.0.38" port=8050] 
-Context ctxtearoom_teatables   ip [host="localhost" port=8030]
-Context ctxtearoom_dummy_timer ip [host="localhost" port=8045]    
+Context ctxtearoom_teatables   ip [host="localhost" port=8030] 
 
 CodedQActor teatables context ctxtearoom_teatables className "it.unibo.teatables.Teatables"
-CodedQActor timer context ctxtearoom_dummy_timer className "it.unibo.timer.Timer"
+CodedQActor timer context ctxtearoom_dummy className "it.unibo.timer.Timer"
 CodedQActor waitermind context ctxtearoom className "it.unibo.waitermind.Waitermind"
 
 QActor waitercleaner context ctxtearoom_dummy {
@@ -62,6 +61,7 @@ QActor waitercleaner context ctxtearoom_dummy {
 	Transition t0 whenReply okStop -> stop
 	
 	State stop {
+		updateResource[# "cleanStopped" #]
 		onMsg(okStop : okStop(T)){
 			[# Clean = Cleantime - payloadArg(0).toLong() #]
 		}
@@ -75,6 +75,7 @@ QActor waitercleaner context ctxtearoom_dummy {
 	Goto stop
 	
 	State preStart{
+		updateResource[# "nonStopped" #]
 		onMsg(startcleaner : startcleaner(T)){
 			request teatables -m tableState : tableState(payloadArg(0))
 		}

@@ -48,6 +48,8 @@ class Waitercleaner ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( na
 				}	 
 				state("stop") { //this:State
 					action { //it:State
+						updateResourceRep( "cleanStopped"  
+						)
 						if( checkMsgContent( Term.createTerm("okStop(T)"), Term.createTerm("okStop(T)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
 								 Clean = Cleantime - payloadArg(0).toLong()  
@@ -64,6 +66,8 @@ class Waitercleaner ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( na
 				}	 
 				state("preStart") { //this:State
 					action { //it:State
+						updateResourceRep( "nonStopped"  
+						)
 						if( checkMsgContent( Term.createTerm("startcleaner(T)"), Term.createTerm("startcleaner(T)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
 								request("tableState", "tableState(payloadArg(0))" ,"teatables" )  

@@ -48,10 +48,11 @@ Context ctxtearoom_teatables   ip [host="localhost" port=8030]
 
 CodedQActor teatables context ctxtearoom_teatables className "it.unibo.teatables.Teatables"
 CodedQActor waitercleaner context ctxtearoom_dummy className "it.unibo.waitercleaner.Waitercleaner"
+CodedQActor waiterengine context ctxtearoom className "it.unibo.waiterengine.Waiterengine"
 
 ExternalQActor basicrobot  context ctxbasicrobot
 
-CodedQActor waiterengine context ctxtearoom className "it.unibo.waiterengine.Waiterengine"
+
 
 QActor waitermind context ctxtearoom{
 [#
@@ -283,31 +284,31 @@ QActor waitermind context ctxtearoom{
 }
 
 
-QActor client context ctxtearoom {
-	State s0 initial{
-		println("client   |||   init")
-	}
-	Goto doSomething
-	
-	State doSomething{
-		println("client   |||   sending enter request")
-		request waitermind -m enter : enter(id)
-	}
-	Transition t0 whenReply accept -> ok
-	
-	State ok{
-		println("client   |||   accepted")
-		delay 15000
-		println("client   |||   ready")
-		forward waitermind -m clientready : clientready(id)
-		delay 15000
-		println("barman   |||   ready")
-		forward waitermind -m drinkready : drinkready(id)
-		delay 15000
-		forward waitermind -m paymentready : paymentready(id)
-		delay 10000
-		request waitermind -m enter : enter(id)
-		delay 20000
-		forward waitermind -m end : end(end)
-	}
-}
+//QActor client context ctxtearoom {
+//	State s0 initial{
+//		println("client   |||   init")
+//	}
+//	Goto doSomething
+//	
+//	State doSomething{
+//		println("client   |||   sending enter request")
+//		request waitermind -m enter : enter(id)
+//	}
+//	Transition t0 whenReply accept -> ok
+//	
+//	State ok{
+//		println("client   |||   accepted")
+//		delay 15000
+//		println("client   |||   ready")
+//		forward waitermind -m clientready : clientready(id)
+//		delay 15000
+//		println("barman   |||   ready")
+//		forward waitermind -m drinkready : drinkready(id)
+//		delay 15000
+//		forward waitermind -m paymentready : paymentready(id)
+//		delay 10000
+//		request waitermind -m enter : enter(id)
+//		delay 20000
+//		forward waitermind -m end : end(end)
+//	}
+//}
