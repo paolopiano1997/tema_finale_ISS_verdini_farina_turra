@@ -716,11 +716,11 @@ faccia immediatamente l'ordine, come un cliente abituale farebbe nella realtà, 
 In questo caso, supponendo che il tavolo da pulire non abbia ancora raggiunto lo stato "sanitized", il task dovrà nuovamente essere interrotto. 
 Questo scenario fa sì che il waiter interrompa più volte di fila il task <em>clean</em> nello stesso stato. Tutto questo però viene gestito 
 dal fatto che utilizziamo un timer per memorizzare il tempo rimasto per ogni stato di <em>clean</em>, evitando dunque di rimanere bloccati in uno stato,
-e dando la possibilità di interrompere il task <em>clean</em> tutte le volte che si vuole. --></br></br>
+e dando la possibilità di interrompere il task <em>clean</em> tutte le volte che si vuole. --></br>
 
 
+TestPlan:<br>
 
-<b> Da rivedere e pensare bene </b>
 Lo scopo principale di questo test plan sarà quello di verificare che il <em>clean</em> venga interrotto correttamente e che 
 lo stato del tavolo rimanga aggiornato all'ultimo incontrato, mantenendo anche il tempo rimasto nel timer, così da permettere al <em>waiter</em> di riprendere 
 il lavoro da dove l'ha interrotto. </br>
@@ -729,7 +729,16 @@ In questo test plan dovremo controllare che:
     <li>Il <em>waiter</em> interrompa il task se lo stato del tavolo non ha ancora raggiunto "sanitized" </li>
     <li>il <em>waiter</em> NON interrompa il task <em>clean</em> se lo stato ha già raggiunto "sanitized" </li>
     <li>il <em>waiter</em> riprenda il task <em>clean</em> dall'ultimo stato raggiunto con il tempo rimasto in precedenza </li>
-</ul>
+</ul><br>
+Il test plan seguente utilizza un'entità Expected per gestire il valore atteso ed effettuare il check.
+Tramite le sue variabili cleanStopped, tablePrevState e cleanRemainingTime potremo verificare se la clean è 
+ferma o no, se la clean riparte dallo stato precedente all'interruzione e se il tempo rimasto è uguale
+a quello registrato prima dell'interruzione.
+Verrà simulato un cliente nella <em>tearoom</em> e tutto il processo che lo porta fino ad uscire; successivamente un cliente
+chiederà di entrare quando il waiter fa il task clean, il quale deve essere interrotto e ripristinato dopo aver portato il nuovo cliente al tavolo.
+Per verificare questo, viene utilizzato il "resource" degli attori QAK. Infatti, quando il clean viene interrotto, la risorsa deve avere
+il valore atteso che si trova dentro Expected.xxx. <br>
+</br>
 </div>	
 
 <h2>Sprint review</h2> 
