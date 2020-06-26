@@ -681,9 +681,9 @@ QActor waiterengine context ctxtearoom {
 				forward basicrobot -m cmd : cmd( h )
 			}	
  		}
- 	}   
+ 	}  
 	Goto execPlanMove if [# CurMove.length > 0 #] else endSuccess
-	
+
 	State execMove{
 		forward basicrobot -m cmd : cmd($CurMove)
  		run itunibo.planner.plannerUtil.updateMap( "$CurMove" )
@@ -700,31 +700,31 @@ QActor waiterengine context ctxtearoom {
 	Goto wait
 } 
 
-QActor client context ctxtearoom {
-	State s0 initial{
-		println("client   |||   init")
-	}
-	Goto doSomething
-	
-	State doSomething{
-		println("client   |||   sending enter request")
-		request waitermind -m enter : enter(id)
-	}
-	Transition t0 whenReply accept -> ok
-	
-	State ok{
-		println("client   |||   accepted")
-		delay 15000
-		println("client   |||   ready")
-		forward waitermind -m clientready : clientready(id)
-		delay 15000
-		println("barman   |||   ready")
-		forward waitermind -m drinkready : drinkready(id)
-		delay 15000
-		forward waitermind -m paymentready : paymentready(id)
-		delay 10000
-		request waitermind -m enter : enter(id)
-		delay 20000
-		forward waitermind -m end : end(end)
-	}
-}
+//QActor client context ctxtearoom {
+//	State s0 initial{
+//		println("client   |||   init")
+//	}
+//	Goto doSomething
+//	
+//	State doSomething{
+//		println("client   |||   sending enter request")
+//		request waitermind -m enter : enter(id)
+//	}
+//	Transition t0 whenReply accept -> ok
+//	
+//	State ok{
+//		println("client   |||   accepted")
+//		delay 15000
+//		println("client   |||   ready")
+//		forward waitermind -m clientready : clientready(id)
+//		delay 15000
+//		println("barman   |||   ready")
+//		forward waitermind -m drinkready : drinkready(id)
+//		delay 15000
+//		forward waitermind -m paymentready : paymentready(id)
+//		delay 10000
+//		request waitermind -m enter : enter(id)
+//		delay 20000
+//		forward waitermind -m end : end(end)
+//	}
+//}

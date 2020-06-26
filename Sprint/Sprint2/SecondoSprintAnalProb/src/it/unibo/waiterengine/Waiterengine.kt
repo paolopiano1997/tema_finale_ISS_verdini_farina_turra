@@ -32,7 +32,7 @@ class Waiterengine ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( nam
 						itunibo.planner.plannerUtil.showCurrentRobotState(  )
 						println("waiterengine   |||   init")
 					}
-					 transition(edgeName="t00",targetState="started",cond=whenRequest("start"))
+					 transition(edgeName="t053",targetState="started",cond=whenRequest("start"))
 				}	 
 				state("started") { //this:State
 					action { //it:State
@@ -45,7 +45,7 @@ class Waiterengine ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( nam
 					action { //it:State
 						println("waiterengine   |||   wait")
 					}
-					 transition(edgeName="t01",targetState="planmove",cond=whenRequest("moveto"))
+					 transition(edgeName="t054",targetState="planmove",cond=whenRequest("moveto"))
 				}	 
 				state("planmove") { //this:State
 					action { //it:State
@@ -72,8 +72,8 @@ class Waiterengine ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( nam
 					action { //it:State
 						request("step", "step($StepTime)" ,"basicrobot" )  
 					}
-					 transition(edgeName="t02",targetState="stepDone",cond=whenReply("stepdone"))
-					transition(edgeName="t03",targetState="stepFailed",cond=whenReply("stepfail"))
+					 transition(edgeName="t055",targetState="stepDone",cond=whenReply("stepdone"))
+					transition(edgeName="t056",targetState="stepFailed",cond=whenReply("stepfail"))
 				}	 
 				state("stepDone") { //this:State
 					action { //it:State
