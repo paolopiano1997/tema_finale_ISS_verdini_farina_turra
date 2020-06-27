@@ -89,11 +89,10 @@ class TestWaiterTableStates {
 			
 			
 			MsgUtil.sendMsg(tableState,waitercleaner!!)
-			//Possiamo usare il resource se smattiamo troppo con la gestione delle risposte
 			
 			//subito dopo l'interruzione ho bisogno di sapere lo stato a cui era rimasto il tavolo
 			//RICEZIONE E SALVATAGGIO in Expected.tablePrevState
-			MsgUtil.sendMsg(stoptimer,waitercleaner!!) //allo stesso modo salvo il tempo rimasto stoptimer
+			MsgUtil.sendMsg(stoptimer,waitercleaner!!)
 			//RICEZIONE E SALVATAGGIO
  			delay(8000)
 			checkStop()	//controllo che il waiter abbia interrotto la clean
