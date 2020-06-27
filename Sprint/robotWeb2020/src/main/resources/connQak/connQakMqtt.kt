@@ -12,7 +12,7 @@ class connQakMqtt(hostIP : String,  port : String,  destName : String ) :
 										         connQakBase(hostIP, port, destName), MqttCallback{
  	lateinit var client  : MqttClient
  	val clientid         = "clientmqtt"
-	val answerTopic      = "waitermind"
+	val answerTopic      = "unibo/qak/waitermind"
 
 	override fun messageArrived(topic: String, msg: MqttMessage) {
         //sysUtil.traceprintln("$tt ActorBasic $name |  MQTT messageArrived on "+ topic + ": "+msg.toString());
@@ -46,7 +46,7 @@ class connQakMqtt(hostIP : String,  port : String,  destName : String ) :
 		val brokerAddr = "tcp://$hostIP:$port"
 		try {
   			//println("     %%% connQakMqtt | doing connect for $clientid to $brokerAddr "  );
-			client = MqttClient(brokerAddr , answerTopic )
+			client = MqttClient(brokerAddr , clientid )
 			val options = MqttConnectOptions()
 			options.setKeepAliveInterval(480)
 			options.setWill("unibo/clienterrors", "crashed".toByteArray(), 2, true)

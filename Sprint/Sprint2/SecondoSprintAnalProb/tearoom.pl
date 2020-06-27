@@ -1,6 +1,7 @@
 %====================================================================================
 % tearoom description   
 %====================================================================================
+mqttBroker("mqtt.eclipse.org", "1883", "mado/mado").
 context(ctxbasicrobot, "localhost",  "TCP", "8020").
 context(ctxtearoom, "127.0.0.1",  "TCP", "8050").
  qactor( basicrobot, ctxbasicrobot, "external").

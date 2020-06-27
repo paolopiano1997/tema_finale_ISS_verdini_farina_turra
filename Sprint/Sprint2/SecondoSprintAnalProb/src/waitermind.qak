@@ -1,8 +1,12 @@
 System tearoom
 
+mqttBroker "mqtt.eclipse.org" : 1883 eventTopic "mado/mado"
+
 //Movements messages
 Request moveto : moveto(X,Y)
 Reply done : done(X,Y)
+
+
 
 //Init messages
 Request start : start(S)

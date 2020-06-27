@@ -12,7 +12,7 @@ object configurator{
 
 //MQTT broker	
 //	@JvmStatic var mqtthostAddr    	= "broker.hivemq.com"
-	@JvmStatic var mqtthostAddr    	= "localhost"
+	@JvmStatic var mqtthostAddr    	= "mqtt.eclipse.org"
 	@JvmStatic var mqttport    		= "1883"
 //
 	@JvmStatic var stepsize			= "350" 

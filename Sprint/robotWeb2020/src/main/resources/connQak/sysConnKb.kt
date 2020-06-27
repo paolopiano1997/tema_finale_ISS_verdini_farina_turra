@@ -4,7 +4,7 @@ object sysConnKb{
 	
 	val mqtthostAddr    = "mqtt.eclipse.org"
 	val mqttport		= "1883" 
-	val hostAddr 		= "localhost"
+	val hostAddr 		= "mqtt.eclipse.org"
 	val port     		= "8050"
 	val qakdestination 	= "waitermind"
 	val ctxqadest       = "ctxtearoom"

@@ -31,7 +31,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.util.HtmlUtils;
 
 import connQak.configurator;
-import connQak.connQakCoap;
+import connQak.connQakMqtt;
 import it.unibo.kactor.ApplMessage;
 import it.unibo.kactor.MsgUtil;
 
@@ -50,7 +50,7 @@ public class RobotController {
     
     Set<String> robotMoves = new HashSet<String>(); 
     
-    connQakCoap connQakSupport ;   
+    connQakMqtt connQakSupport ;   
     
     public RobotController() {
         connQak.configurator.configure();
@@ -59,7 +59,7 @@ public class RobotController {
         robotPort = connQak.configurator.getPort();
 
         robotMoves.addAll( Arrays.asList(new String[] {"w","s","h","r","l","z","x","p"}) );       
-        connQakSupport = new connQakCoap(  );  
+        connQakSupport = new connQakMqtt("mqtt.eclipse.org", "1883", "waitermind"  );  
         connQakSupport.createConnection();
           
      }
@@ -74,7 +74,7 @@ public class RobotController {
   @GetMapping("/") 		 
   public String entry(Model viewmodel) {
  	 viewmodel.addAttribute("arg", "Entry page loaded. Please use the buttons ");
- 	 peparePageUpdating();
+// 	 peparePageUpdating();
  	 return htmlPage;
   } 
    
@@ -102,21 +102,21 @@ public class RobotController {
 	}	
 	
  
-	private void peparePageUpdating() {
-    	connQakSupport.getClient().observe(new CoapHandler() {
-			@Override
-			public void onLoad(CoapResponse response) {
-				System.out.println("RobotController --> CoapClient changed ->" + response.getResponseText());
-				simpMessagingTemplate.convertAndSend(WebSocketConfig.topicForClient, 
-						new ResourceRep("" + HtmlUtils.htmlEscape(response.getResponseText())  ));
-			}
-
-			@Override
-			public void onError() {
-				System.out.println("RobotController --> CoapClient error!");
-			}
-		});
-	}
+//	private void peparePageUpdating() {
+//    	connQakSupport.getClient().observe(new CoapHandler() {
+//			@Override
+//			public void onLoad(CoapResponse response) {
+//				System.out.println("RobotController --> CoapClient changed ->" + response.getResponseText());
+//				simpMessagingTemplate.convertAndSend(WebSocketConfig.topicForClient, 
+//						new ResourceRep("" + HtmlUtils.htmlEscape(response.getResponseText())  ));
+//			}
+//
+//			@Override
+//			public void onError() {
+//				System.out.println("RobotController --> CoapClient error!");
+//			}
+//		});
+//	}
 	
 	/*
 	 * INTERACTION WITH THE BUSINESS LOGIC			
@@ -185,7 +185,8 @@ public class RobotController {
 	}
 
 	public ResourceRep getWebPageRep()   {
-		String resourceRep = connQakSupport.readRep();
+//		String resourceRep = connQakSupport.readRep();
+		String resourceRep = "mado";
 		System.out.println("------------------- RobotController resourceRep=" + resourceRep  );
 		return new ResourceRep("" + HtmlUtils.htmlEscape(resourceRep)  );
 	}
