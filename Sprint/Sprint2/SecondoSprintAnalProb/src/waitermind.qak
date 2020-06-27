@@ -548,6 +548,7 @@ QActor teatables context ctxtearoom{
 					
 					
 	State release {
+		updateResource[# "clean" #]
 		println("teatables   |||   release")
 		printCurrentMessage
 		onMsg(release : release(N)){
@@ -572,8 +573,10 @@ QActor teatables context ctxtearoom{
 					
 	State setState{
 		println("teatables   |||   setState")
+		
 		printCurrentMessage
 		onMsg(setTableState : setTableState(N,S)){
+			updateResource[# "$payloadArg(1)" #]
 			solve( setState($payloadArg(0),$payloadArg(1)) )
 			ifSolved{
 				solve( getState($payloadArg(0),S) )
@@ -612,6 +615,7 @@ QActor teatables context ctxtearoom{
 	State engageTable{
 		printCurrentMessage
 		onMsg( occupy : occupy(N) ){
+			updateResource[# "occupy" #]
 			println("engageTable ${payloadArg(0)}")
 			solve( occupyTable( $payloadArg(0) ) )	//could do anything
 			solve( stateOfTeatables(S) )
@@ -623,6 +627,7 @@ QActor teatables context ctxtearoom{
 	Goto work
 
 	State cleanTable{
+		updateResource[# "clean" #]
 		printCurrentMessage
 		onMsg( clean : clean(N) ){
 			println("clean ${payloadArg(0)}")

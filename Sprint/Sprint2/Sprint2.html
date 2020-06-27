@@ -1473,16 +1473,22 @@ il valore atteso che si trova dentro Expected.xxx. <br>
 package test
 import Expected
 
+
+
+
 class TestWaiterTableStates {
 	var waitermind            : ActorBasic? = null
-	var waitercleaner         : ActorBasic? = null 
+	var waitercleaner         : ActorBasic? = null
 	var teatables         	  : ActorBasic? = null
+	//val mqttTest   	      = MqttUtils("test") 
 	val initDelayTime     = 1000L
 
 	val enter = MsgUtil.buildRequest("waitermind","enter","enter","waitermind")
 	val clientready = MsgUtil.buildDispatch("waitermind","clientready","clientready","waitermind")	
 	val drinkready = MsgUtil.buildDispatch("waitermind","drinkready","drinkready","waitermind")
 	val paymentready = MsgUtil.buildDispatch("waitermind","paymentready","paymentready","waitermind")
+	//val tableState = MsgUtil.buildDispatch("waitercleaner","tableState","tableState","waitercleaner")
+	//val stoptimer = MsgUtil.buildDispatch("waitercleaner","stoptimer","stoptimer","waitercleaner")
 	
 	@kotlinx.coroutines.ObsoleteCoroutinesApi
 	@kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -1508,14 +1514,14 @@ class TestWaiterTableStates {
 			assert(waitermind!!.geResourceRep()!=Expected.cleanStopped)
 	}
 	
-	fun checkPrevState(int table){	//controllo che riprenda la clean dallo stato precedente
+	fun checkPrevState(){	//controllo che riprenda la clean dallo stato precedente
 		if(teatables!=null)
-			assert(teatables!!.getState()==Expected.tablePrevState)
+			assert(teatables!!.geResourceRep()==Expected.tablePrevState)
 	}
 	
 	fun checkRemainingTime(){	//controllo che il timer segni il tempo effettivamente rimasto
 		if(waitercleaner!=null)
-			assert(waitercleaner!!.getRemainingTime()<=Expected.cleanRemainingTime)
+			assert(waitercleaner!!.geResourceRep().toInt()<Expected.cleanRemainingTime)
 	}
 	
 	@Test
@@ -1540,21 +1546,23 @@ class TestWaiterTableStates {
 			MsgUtil.sendMsg(enter,waitermind!!)	//INTERROMPO LA CLEAN
 			
 			//subito dopo l'interruzione ho bisogno di sapere lo stato a cui era rimasto il tavolo
-			Expected.tablePrevState = teatables.getState(0)	//SALVATAGGIO in Expected.tablePrevState, param: tavolo
+			Expected.tablePrevState = teatables!!.geResourceRep()	//SALVATAGGIO in Expected.tablePrevState, param: tavolo
 			//allo stesso modo salvo il tempo rimasto
-			Expected.cleanRemainingTime = waitercleaner.getRemainingTime()
+			Expected.cleanRemainingTime = waitercleaner!!.geResourceRep().toInt()
+													
  			delay(8000)
 			checkStop()	//controllo che il waiter abbia interrotto la clean
-			delay(10000)
+			
+			delay(10000)	
 			checkCleaning()	//controllo che riprenda la clean
+			checkPrevState()	//controllo che riprenda la clean dallo stato precedente
 			checkRemainingTime()//controllo che il timer segni il tempo effettivamente rimasto
-			checkPrevState(0)	//controllo che riprenda la clean dallo stato precedente
 			
-			delay(20000)
+			delay(20000) //da aggiustare in modo che corrisponda più o meno alla fine della clean
 			//controllo che una volta raggiunto sanitized NON interrompa la clean
-			MsgUtil.sendMsg(enter,waitermind!!)
+			MsgUtil.sendMsg(enter,waitermind!!)	//entra il cliente mentre la clean è in sanitized
 			checkCleaning() //controllo semplicemente se sta continuando a pulire
-			
+						
 			MsgUtil.sendMsg("end","end","end",waitermind!!)
  			if( waitermind != null ) waitermind!!.waitTermination()
   		}

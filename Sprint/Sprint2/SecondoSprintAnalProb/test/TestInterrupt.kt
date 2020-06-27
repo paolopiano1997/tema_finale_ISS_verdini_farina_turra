@@ -58,14 +58,14 @@ class TestWaiterTableStates {
 			assert(waitermind!!.geResourceRep()!=Expected.cleanStopped)
 	}
 	
-	fun checkPrevState(int table){	//controllo che riprenda la clean dallo stato precedente
+	fun checkPrevState(){	//controllo che riprenda la clean dallo stato precedente
 		if(teatables!=null)
-			assert(teatables!!.getState()==Expected.tablePrevState)
+			assert(teatables!!.geResourceRep()==Expected.tablePrevState)
 	}
 	
 	fun checkRemainingTime(){	//controllo che il timer segni il tempo effettivamente rimasto
 		if(waitercleaner!=null)
-			assert(waitercleaner!!.getRemainingTime()<=Expected.cleanRemainingTime)
+			assert(waitercleaner!!.geResourceRep().toInt()<Expected.cleanRemainingTime)
 	}
 	
 	@Test
@@ -90,16 +90,16 @@ class TestWaiterTableStates {
 			MsgUtil.sendMsg(enter,waitermind!!)	//INTERROMPO LA CLEAN
 			
 			//subito dopo l'interruzione ho bisogno di sapere lo stato a cui era rimasto il tavolo
-			Expected.tablePrevState = teatables.getState(0)	//SALVATAGGIO in Expected.tablePrevState, param: tavolo
+			Expected.tablePrevState = teatables!!.geResourceRep()	//SALVATAGGIO in Expected.tablePrevState, param: tavolo
 			//allo stesso modo salvo il tempo rimasto
-			Expected.cleanRemainingTime = waitercleaner.getRemainingTime()
+			Expected.cleanRemainingTime = waitercleaner!!.geResourceRep().toInt()
 													
  			delay(8000)
 			checkStop()	//controllo che il waiter abbia interrotto la clean
 			
 			delay(10000)	
 			checkCleaning()	//controllo che riprenda la clean
-			checkPrevState(0)	//controllo che riprenda la clean dallo stato precedente
+			checkPrevState()	//controllo che riprenda la clean dallo stato precedente
 			checkRemainingTime()//controllo che il timer segni il tempo effettivamente rimasto
 			
 			delay(20000) //da aggiustare in modo che corrisponda più o meno alla fine della clean
