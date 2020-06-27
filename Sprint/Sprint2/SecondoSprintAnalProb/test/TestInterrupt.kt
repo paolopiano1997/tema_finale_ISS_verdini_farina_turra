@@ -23,6 +23,7 @@ import Expected
 class TestWaiterTableStates {
 	var waitermind            : ActorBasic? = null
 	var waitercleaner         : ActorBasic? = null
+	var teatables         	  : ActorBasic? = null
 	//val mqttTest   	      = MqttUtils("test") 
 	val initDelayTime     = 1000L
 
@@ -30,8 +31,8 @@ class TestWaiterTableStates {
 	val clientready = MsgUtil.buildDispatch("waitermind","clientready","clientready","waitermind")	
 	val drinkready = MsgUtil.buildDispatch("waitermind","drinkready","drinkready","waitermind")
 	val paymentready = MsgUtil.buildDispatch("waitermind","paymentready","paymentready","waitermind")
-	val tableState = MsgUtil.buildDispatch("waitercleaner","tableState","tableState","waitercleaner")
-	val stoptimer = MsgUtil.buildDispatch("waitercleaner","stoptimer","stoptimer","waitercleaner")
+	//val tableState = MsgUtil.buildDispatch("waitercleaner","tableState","tableState","waitercleaner")
+	//val stoptimer = MsgUtil.buildDispatch("waitercleaner","stoptimer","stoptimer","waitercleaner")
 	
 	@kotlinx.coroutines.ObsoleteCoroutinesApi
 	@kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -57,14 +58,14 @@ class TestWaiterTableStates {
 			assert(waitermind!!.geResourceRep()!=Expected.cleanStopped)
 	}
 	
-	fun checkPrevState(){	//controllo che riprenda la clean dallo stato precedente
-		if(waitermind!=null)
-			assert(waitermind!!.geResourceRep()==Expected.tablePrevState)
+	fun checkPrevState(int table){	//controllo che riprenda la clean dallo stato precedente
+		if(teatables!=null)
+			assert(teatables!!.getState()==Expected.tablePrevState)
 	}
 	
 	fun checkRemainingTime(){	//controllo che il timer segni il tempo effettivamente rimasto
-		if(waitermind!=null)
-			assert(waitermind!!.geResourceRep()==Expected.cleanRemainingTime) //TODO CAMBIARE EXPECTED
+		if(waitercleaner!=null)
+			assert(waitercleaner!!.getRemainingTime()<=Expected.cleanRemainingTime)
 	}
 	
 	@Test
@@ -75,6 +76,7 @@ class TestWaiterTableStates {
 				delay(initDelayTime)  //time for robot to start
 				waitermind = it.unibo.kactor.sysUtil.getActor("waitermind")
 				waitercleaner = it.unibo.kactor.sysUtil.getActor("waitercleaner")
+				teatables = it.unibo.kactor.sysUtil.getActor("teatables")
  			}
 			
 			MsgUtil.sendMsg(enter,waitermind!!)
@@ -87,30 +89,24 @@ class TestWaiterTableStates {
 			delay(10000)
 			MsgUtil.sendMsg(enter,waitermind!!)	//INTERROMPO LA CLEAN
 			
-			
-			MsgUtil.sendMsg(tableState,waitercleaner!!)
-			
 			//subito dopo l'interruzione ho bisogno di sapere lo stato a cui era rimasto il tavolo
-			//RICEZIONE E SALVATAGGIO in Expected.tablePrevState
-			MsgUtil.sendMsg(stoptimer,waitercleaner!!)
-			//RICEZIONE E SALVATAGGIO
+			Expected.tablePrevState = teatables.getState(0)	//SALVATAGGIO in Expected.tablePrevState, param: tavolo
+			//allo stesso modo salvo il tempo rimasto
+			Expected.cleanRemainingTime = waitercleaner.getRemainingTime()
+													
  			delay(8000)
 			checkStop()	//controllo che il waiter abbia interrotto la clean
-			delay(10000)
-			MsgUtil.sendMsg(tableState,waitercleaner!!)	//mando un dispatch tablestate per ricevere lo stato del tavolo
-			//RICEZIONE risposta MsgUtil.???? contenente lo stato del tavolo
-			MsgUtil.sendMsg(stoptimer,waitercleaner!!) //chiedo il tempo rimasto
-			//RICEZIONE			
+			
+			delay(10000)	
 			checkCleaning()	//controllo che riprenda la clean
-			checkPrevState()	//controllo che riprenda la clean dallo stato precedente
+			checkPrevState(0)	//controllo che riprenda la clean dallo stato precedente
 			checkRemainingTime()//controllo che il timer segni il tempo effettivamente rimasto
 			
 			delay(20000) //da aggiustare in modo che corrisponda più o meno alla fine della clean
 			//controllo che una volta raggiunto sanitized NON interrompa la clean
-			MsgUtil.sendMsg(enter,waitermind!!)
+			MsgUtil.sendMsg(enter,waitermind!!)	//entra il cliente mentre la clean è in sanitized
 			checkCleaning() //controllo semplicemente se sta continuando a pulire
-			
-			
+						
 			MsgUtil.sendMsg("end","end","end",waitermind!!)
  			if( waitermind != null ) waitermind!!.waitTermination()
   		}
