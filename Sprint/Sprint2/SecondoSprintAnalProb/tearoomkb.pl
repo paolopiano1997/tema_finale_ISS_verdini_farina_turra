@@ -58,7 +58,7 @@ releaseTable(N) :-
 	
 cleanTable(N)	 :-
 	%% stdout <- println( tearoomkb_cleanTable(N) ),
-	retract( teatable( N, engaged ) ),
+	retract( teatable( N, sanitized ) ),
 	!,
 	assert( teatable( N, clean ) ).
 cleanTable(N).	

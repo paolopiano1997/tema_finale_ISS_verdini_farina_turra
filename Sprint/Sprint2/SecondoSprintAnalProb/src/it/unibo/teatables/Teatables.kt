@@ -49,9 +49,10 @@ class Teatables ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, 
 				state("release") { //this:State
 					action { //it:State
 						println("teatables   |||   release")
+						println("$name in ${currentState.stateName} | $currentMsg")
 						if( checkMsgContent( Term.createTerm("release(N)"), Term.createTerm("release(N)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
-								solve("releaseTable(N)","") //set resVar	
+								solve("releaseTable(${payloadArg(0)})","") //set resVar	
 						}
 					}
 					 transition( edgeName="goto",targetState="work", cond=doswitch() )
@@ -59,10 +60,11 @@ class Teatables ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, 
 				state("tableState") { //this:State
 					action { //it:State
 						println("teateables   |||   tableState")
+						println("$name in ${currentState.stateName} | $currentMsg")
 						if( checkMsgContent( Term.createTerm("tableState(N)"), Term.createTerm("tableState(N)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
 								 Table = payloadArg(0)  
-								solve("getState(N,S)","") //set resVar	
+								solve("getState($Table,S)","") //set resVar	
 								if( currentSolution.isSuccess() ) { E = getCurSol("S").toString()  
 								}
 								else
@@ -75,11 +77,12 @@ class Teatables ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, 
 				state("setState") { //this:State
 					action { //it:State
 						println("teatables   |||   setState")
+						println("$name in ${currentState.stateName} | $currentMsg")
 						if( checkMsgContent( Term.createTerm("setTableState(N,S)"), Term.createTerm("setTableState(N,S)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
-								solve("setState(N,S)","") //set resVar	
-								if( currentSolution.isSuccess() ) {solve("getState(N,S)","") //set resVar	
-								if( currentSolution.isSuccess() ) { 
+								solve("setState(${payloadArg(0)},${payloadArg(1)})","") //set resVar	
+								if( currentSolution.isSuccess() ) {solve("getState(${payloadArg(0)},S)","") //set resVar	
+								if( currentSolution.isSuccess() ) {
 														println(getCurSol("S").toString())
 								}
 								else
@@ -94,11 +97,12 @@ class Teatables ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, 
 				state("replyClean") { //this:State
 					action { //it:State
 						println("teatables   |||   replyClean")
+						println("$name in ${currentState.stateName} | $currentMsg")
 						if( checkMsgContent( Term.createTerm("isClean(N)"), Term.createTerm("isClean(N)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
 								 Table = payloadArg(0)  
 								println("onMsg isClean")
-								solve("getState(N,S)","") //set resVar	
+								solve("getState($Table,S)","") //set resVar	
 								if( currentSolution.isSuccess() ) { 
 													E = getCurSol("S").toString()
 													if(E == "clean")

@@ -40,8 +40,8 @@ class Waitermind ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name,
 		    val X_home			= "0"
 			val Y_home 			= "0"
 		
-			val Servicetime = 5000L
-			val CollectTime = 4000L
+			val Servicetime = 3000L
+			val CollectTime = 3000L
 			
 		return { //this:ActionBasciFsm
 				state("s0") { //this:State
@@ -80,6 +80,8 @@ class Waitermind ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name,
 				}	 
 				state("reachEntranceDoor") { //this:State
 					action { //it:State
+						updateResourceRep( "reachingEntranceDoor"  
+						)
 						println("waitermind   |||   reachEntranceDoor")
 						request("moveto", "moveto($X_Entrancedoor,$Y_Entrancedoor)" ,"waiterengine" )  
 					}
@@ -121,6 +123,8 @@ class Waitermind ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name,
 				}	 
 				state("convoyToTable1") { //this:State
 					action { //it:State
+						updateResourceRep( "convoyToTable1"  
+						)
 						println("waitermind   |||   convoyToTable1")
 						request("moveto", "moveto($X_teatable1,$Y_teatable1)" ,"waiterengine" )  
 						forward("occupy", "occupy(1)" ,"teatables" ) 
@@ -131,6 +135,8 @@ class Waitermind ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name,
 				}	 
 				state("convoyToTable2") { //this:State
 					action { //it:State
+						updateResourceRep( "convoyToTable2"  
+						)
 						println("waitermind   |||   convoyToTable2")
 						request("moveto", "moveto($X_teatable2,$Y_teatable2)" ,"waiterengine" )  
 						forward("occupy", "occupy(2)" ,"teatables" ) 
@@ -183,6 +189,7 @@ class Waitermind ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name,
 				}	 
 				state("transmit") { //this:State
 					action { //it:State
+						 readLine()  
 						println("waitermind   |||   transmit")
 						updateResourceRep( "transmit"  
 						)
@@ -191,6 +198,8 @@ class Waitermind ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name,
 				}	 
 				state("reachBarman") { //this:State
 					action { //it:State
+						updateResourceRep( "reachingBarman"  
+						)
 						println("waitermind   |||   reachBarman")
 						updateResourceRep( "reachBarman"  
 						)
@@ -200,8 +209,9 @@ class Waitermind ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name,
 				}	 
 				state("serve") { //this:State
 					action { //it:State
+						 readLine()  
 						println("waitermind   |||   serve")
-						updateResourceRep( "serve"  
+						updateResourceRep( "reachBarman"  
 						)
 						request("moveto", "moveto($X_teatable1,$Y_teatable1)" ,"waiterengine" )  
 					}
@@ -210,7 +220,7 @@ class Waitermind ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name,
 				state("reachTableCollect") { //this:State
 					action { //it:State
 						println("waitermind   |||   reachTable")
-						updateResourceRep( "reachTable"  
+						updateResourceRep( "reachTable1"  
 						)
 						request("moveto", "moveto($X_teatable1,$Y_teatable1)" ,"waiterengine" )  
 					}
@@ -218,8 +228,9 @@ class Waitermind ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name,
 				}	 
 				state("reachTableClean") { //this:State
 					action { //it:State
+						 readLine()  
 						println("waitermind   |||   reachTable")
-						updateResourceRep( "reachTable"  
+						updateResourceRep( "reachTable1Clean"  
 						)
 						request("moveto", "moveto($X_teatable1,$Y_teatable1)" ,"waiterengine" )  
 					}
@@ -227,6 +238,7 @@ class Waitermind ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name,
 				}	 
 				state("collect") { //this:State
 					action { //it:State
+						 readLine()  
 						println("waitermind   |||   collect")
 						updateResourceRep( "collect"  
 						)
@@ -247,6 +259,8 @@ class Waitermind ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name,
 				}	 
 				state("cleanTable1") { //this:State
 					action { //it:State
+						updateResourceRep( "cleanTable1"  
+						)
 						println("waitermind   |||   cleanTable1")
 						forward("startcleaner", "startcleaner(1)" ,"waitercleaner" ) 
 					}
@@ -255,6 +269,8 @@ class Waitermind ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name,
 				}	 
 				state("cleanTable2") { //this:State
 					action { //it:State
+						updateResourceRep( "cleanTable2"  
+						)
 						println("waitermind   |||   cleanTable2")
 						forward("startcleaner", "startcleaner(2)" ,"waitercleaner" ) 
 					}

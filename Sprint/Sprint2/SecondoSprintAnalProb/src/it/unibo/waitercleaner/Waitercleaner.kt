@@ -20,7 +20,6 @@ class Waitercleaner ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( na
 				var Table = ""
 				val	Cleantime = 3000L
 				var Clean = Cleantime
-				
 		return { //this:ActionBasciFsm
 				state("s0") { //this:State
 					action { //it:State
@@ -42,12 +41,14 @@ class Waitercleaner ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( na
 				}	 
 				state("timerStop") { //this:State
 					action { //it:State
+						println("waitercleaner   |||   timerStop")
 						request("stoptimer", "stoptimer(stop)" ,"timer" )  
 					}
 					 transition(edgeName="t031",targetState="stop",cond=whenReply("okStop"))
 				}	 
 				state("stop") { //this:State
 					action { //it:State
+						println("waitercleaner   |||   stop")
 						updateResourceRep( "cleanStopped"  
 						)
 						if( checkMsgContent( Term.createTerm("okStop(T)"), Term.createTerm("okStop(T)"), 
@@ -60,12 +61,14 @@ class Waitercleaner ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( na
 				}	 
 				state("replyTableStop") { //this:State
 					action { //it:State
+						println("waitercleaner   |||   replyTableStop")
 						answer("isTableStopped", "isTableStoppedDone", "isTableStoppedDone($Table)"   )  
 					}
 					 transition( edgeName="goto",targetState="stop", cond=doswitch() )
 				}	 
 				state("preStart") { //this:State
 					action { //it:State
+						println("waitercleaner   |||   preStart")
 						updateResourceRep( "nonStopped"  
 						)
 						if( checkMsgContent( Term.createTerm("startcleaner(T)"), Term.createTerm("startcleaner(T)"), 
@@ -77,6 +80,7 @@ class Waitercleaner ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( na
 				}	 
 				state("checkState") { //this:State
 					action { //it:State
+						println("waitercleaner   |||   checkState")
 						if( checkMsgContent( Term.createTerm("state(N,S)"), Term.createTerm("state(N,S)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
 								if(  payloadArg(0) == "dirty"  
@@ -120,6 +124,7 @@ class Waitercleaner ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( na
 				}	 
 				state("cleanDirty") { //this:State
 					action { //it:State
+						println("waitercleaner   |||   cleanDirty")
 						if( checkMsgContent( Term.createTerm("isTableStopped(T)"), Term.createTerm("isTableStopped(T)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
 								answer("isTableStopped", "isTableStoppedDone", "isTableStoppedDone(0)"   )  
@@ -133,6 +138,9 @@ class Waitercleaner ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( na
 				}	 
 				state("cleanUndirty") { //this:State
 					action { //it:State
+						updateResourceRep( "dirty"  
+						)
+						println("waitercleaner   |||   cleanUndirty")
 						if( checkMsgContent( Term.createTerm("isTableStopped(T)"), Term.createTerm("isTableStopped(T)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
 								answer("isTableStopped", "isTableStoppedDone", "isTableStoppedDone(0)"   )  
@@ -147,6 +155,9 @@ class Waitercleaner ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( na
 				}	 
 				state("cleanSanitized") { //this:State
 					action { //it:State
+						updateResourceRep( "undirty"  
+						)
+						println("waitercleaner   |||   cleanSanitized")
 						if( checkMsgContent( Term.createTerm("isTableStopped(T)"), Term.createTerm("isTableStopped(T)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
 								answer("isTableStopped", "isTableStoppedDone", "isTableStoppedDone(0)"   )  
@@ -161,7 +172,9 @@ class Waitercleaner ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( na
 				}	 
 				state("cleanDone") { //this:State
 					action { //it:State
-						forward("setTableState", "setTableState($Table,cleaned)" ,"teatables" ) 
+						updateResourceRep( "clean"  
+						)
+						forward("clean", "clean($Table)" ,"teatables" ) 
 						forward("cleanerdone", "cleanerdone(done)" ,"waitermind" ) 
 					}
 					 transition( edgeName="goto",targetState="wait", cond=doswitch() )

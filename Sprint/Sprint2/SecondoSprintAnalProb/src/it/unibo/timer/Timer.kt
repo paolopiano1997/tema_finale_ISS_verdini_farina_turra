@@ -29,12 +29,15 @@ class Timer ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, scop
 				}	 
 				state("wait") { //this:State
 					action { //it:State
+						println("$name in ${currentState.stateName} | $currentMsg")
 						println("timer   |||   wait")
 					}
 					 transition(edgeName="t026",targetState="start",cond=whenDispatch("starttimer"))
 				}	 
 				state("start") { //this:State
 					action { //it:State
+						println("timer   |||   start")
+						println("$name in ${currentState.stateName} | $currentMsg")
 						if( checkMsgContent( Term.createTerm("starttimer(T)"), Term.createTerm("starttimer(T)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
 								 Time = payloadArg(0).toLong()  

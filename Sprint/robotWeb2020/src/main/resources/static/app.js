@@ -100,7 +100,7 @@ function sendUpdateRequest(){
 
 function showMsg(message) {
 console.log(message );
-    $("#applmsgs").html( "<pre>"+message.replace(/\n/g,"<br/>")+"</pre>" );
+    $("#applmsgs").html( message.replace(/\n/g,"<br/>"));
     //$("#applmsgintable").append("<tr><td>" + message + "</td></tr>");
 }
 
