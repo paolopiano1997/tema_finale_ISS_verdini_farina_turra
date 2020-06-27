@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<script src="/webjars/jquery/jquery.min.js"></script>
+    <script src="/webjars/sockjs-client/sockjs.min.js"></script>
+    <script src="/webjars/stomp-websocket/stomp.min.js"></script>
+    <script src="/app.js"></script>
+    <script>connect()</script>
+<style>
+body {
+  font-family: Arial;
+  font-size: 17px;
+  padding: 8px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+.row {
+  display: -ms-flexbox; /* IE10 */
+  display: flex;
+  -ms-flex-wrap: wrap; /* IE10 */
+  flex-wrap: wrap;
+  margin: 0 -16px;
+}
+
+.col-25 {
+  -ms-flex: 25%; /* IE10 */
+  flex: 25%;
+}
+
+.col-50 {
+  -ms-flex: 50%; /* IE10 */
+  flex: 50%;
+}
+
+.col-75 {
+  -ms-flex: 75%; /* IE10 */
+  flex: 75%;
+}
+
+.col-25,
+.col-50,
+.col-75 {
+  padding: 0 16px;
+}
+
+.container {
+  background-color: #f2f2f2;
+  padding: 5px 20px 15px 20px;
+  border: 1px solid lightgrey;
+  border-radius: 3px;
+}
+
+input[type=text] {
+  width: 100%;
+  margin-bottom: 20px;
+  padding: 12px;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+}
+
+label {
+  margin-bottom: 10px;
+  display: block;
+}
+
+.icon-container {
+  margin-bottom: 20px;
+  padding: 7px 0;
+  font-size: 24px;
+}
+
+.btn {
+  background-color: #4CAF50;
+  color: white;
+  padding: 12px;
+  margin: 10px 0;
+  border: none;
+  width: 100%;
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 17px;
+}
+
+.btn:hover {
+  background-color: #45a049;
+}
+
+a {
+  color: #2196F3;
+}
+
+hr {
+  border: 1px solid lightgrey;
+}
+
+span.price {
+  float: right;
+  color: grey;
+}
+
+/* Responsive layout - when the screen is less than 800px wide, make the two columns stack on top of each other instead of next to each other (also change the direction - make the "cart" column go on top) */
+@media (max-width: 800px) {
+  .row {
+    flex-direction: column-reverse;
+  }
+  .col-25 {
+    margin-bottom: 20px;
+  }
+}
+<link href='http://fonts.googleapis.com/css?family=Bitter' rel='stylesheet' type='text/css'>
+<style type="text/css">
+.form-style-10{
+	width:450px;
+	padding:30px;
+	margin:40px auto;
+	background: #FFF;
+	border-radius: 10px;
+	-webkit-border-radius:10px;
+	-moz-border-radius: 10px;
+	box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.13);
+	-moz-box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.13);
+	-webkit-box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.13);
+}
+.form-style-10 .inner-wrap{
+	padding: 30px;
+	background: #F8F8F8;
+	border-radius: 6px;
+	margin-bottom: 15px;
+}
+.form-style-10 h1{
+	background: #2A88AD;
+	padding: 20px 30px 15px 30px;
+	margin: -30px -30px 30px -30px;
+	border-radius: 10px 10px 0 0;
+	-webkit-border-radius: 10px 10px 0 0;
+	-moz-border-radius: 10px 10px 0 0;
+	color: #fff;
+	text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.12);
+	font: normal 30px 'Bitter', serif;
+	-moz-box-shadow: inset 0px 2px 2px 0px rgba(255, 255, 255, 0.17);
+	-webkit-box-shadow: inset 0px 2px 2px 0px rgba(255, 255, 255, 0.17);
+	box-shadow: inset 0px 2px 2px 0px rgba(255, 255, 255, 0.17);
+	border: 1px solid #257C9E;
+}
+.form-style-10 h1 > span{
+	display: block;
+	margin-top: 2px;
+	font: 13px Arial, Helvetica, sans-serif;
+}
+.form-style-10 label{
+	display: block;
+	font: 13px Arial, Helvetica, sans-serif;
+	color: #888;
+	margin-bottom: 15px;
+}
+.form-style-10 input[type="text"],
+.form-style-10 input[type="date"],
+.form-style-10 input[type="datetime"],
+.form-style-10 input[type="email"],
+.form-style-10 input[type="number"],
+.form-style-10 input[type="search"],
+.form-style-10 input[type="time"],
+.form-style-10 input[type="url"],
+.form-style-10 input[type="password"],
+.form-style-10 textarea,
+.form-style-10 select {
+	display: block;
+	box-sizing: border-box;
+	-webkit-box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	width: 100%;
+	padding: 8px;
+	border-radius: 6px;
+	-webkit-border-radius:6px;
+	-moz-border-radius:6px;
+	border: 2px solid #fff;
+	box-shadow: inset 0px 1px 1px rgba(0, 0, 0, 0.33);
+	-moz-box-shadow: inset 0px 1px 1px rgba(0, 0, 0, 0.33);
+	-webkit-box-shadow: inset 0px 1px 1px rgba(0, 0, 0, 0.33);
+}
+
+.form-style-10 .section{
+	font: normal 20px 'Bitter', serif;
+	color: #2A88AD;
+	margin-bottom: 5px;
+}
+.form-style-10 .section span {
+	background: #2A88AD;
+	padding: 5px 10px 5px 10px;
+	position: absolute;
+	border-radius: 50%;
+	-webkit-border-radius: 50%;
+	-moz-border-radius: 50%;
+	border: 4px solid #fff;
+	font-size: 14px;
+	margin-left: -45px;
+	color: #fff;
+	margin-top: -3px;
+}
+.form-style-10 input[type="button"], 
+.form-style-10 input[type="submit"]{
+	background: #2A88AD;
+	padding: 8px 20px 8px 20px;
+	border-radius: 5px;
+	-webkit-border-radius: 5px;
+	-moz-border-radius: 5px;
+	color: #fff;
+	text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.12);
+	font: normal 30px 'Bitter', serif;
+	-moz-box-shadow: inset 0px 2px 2px 0px rgba(255, 255, 255, 0.17);
+	-webkit-box-shadow: inset 0px 2px 2px 0px rgba(255, 255, 255, 0.17);
+	box-shadow: inset 0px 2px 2px 0px rgba(255, 255, 255, 0.17);
+	border: 1px solid #257C9E;
+	font-size: 15px;
+}
+.form-style-10 input[type="button"]:hover, 
+.form-style-10 input[type="submit"]:hover{
+	background: #2A6881;
+	-moz-box-shadow: inset 0px 2px 2px 0px rgba(255, 255, 255, 0.28);
+	-webkit-box-shadow: inset 0px 2px 2px 0px rgba(255, 255, 255, 0.28);
+	box-shadow: inset 0px 2px 2px 0px rgba(255, 255, 255, 0.28);
+}
+.form-style-10 .privacy-policy{
+	float: right;
+	width: 250px;
+	font: 12px Arial, Helvetica, sans-serif;
+	color: #4D4D4D;
+	margin-top: 10px;
+	text-align: right;
+}
+		@import url(https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,500);
+* {
+  padding: 0;
+  margin: 0;
+  border: 0;
+  color: #888;
+  font-family: "Source Sans Pro", sans-serif;
+  font-size: 16px;
+  font-weight: 300;
+  outline: none;
+  -webkit-text-size-adjust: none;
+  -ms-text-size-adjust: none;
+  -moz-text-size-adjust: none;
+  -o-text-size-adjust: none;
+  text-size-adjust: none;
+  -webkit-box-sizing: border-box;
+  -ms-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  -o-box-sizing: border-box;
+  box-sizing: border-box;
+}
+
+html, body {
+  background-color: #333;
+}
+
+body {
+  padding: 40px;
+}
+
+.btn {
+  border: 3px solid;
+  font-weight: 600;
+  margin: 0 20px 20px 0;
+  -webkit-transition: 0.2s;
+  -ms-transition: 0.2s;
+  -moz-transition: 0.2s;
+  -o-transition: 0.2s;
+  transition: 0.2s;
+  display: table;
+  border-color: #ddd;
+  -webkit-border-radius: 50px;
+  -ms-border-radius: 50px;
+  -moz-border-radius: 50px;
+  -o-border-radius: 50px;
+  border-radius: 50px;
+  overflow: hidden;
+}
+.btn:before, .btn:after {
+  content: " ";
+  display: table;
+}
+.btn:after {
+  clear: both;
+}
+.btn span {
+  color: #ddd;
+}
+.btn:hover {
+  background-color: #ddd;
+  border-color: #b5b5b5;
+}
+.btn:hover i {
+  background-color: #b5b5b5;
+}
+.btn i {
+  background-color: #ddd;
+}
+.btn span {
+  font-size: 14px;
+  float: left;
+  text-transform: uppercase;
+  font-weight: bold;
+  padding: 10px 30px;
+  letter-spacing: 1px;
+  -webkit-transition: 0.2s;
+  -ms-transition: 0.2s;
+  -moz-transition: 0.2s;
+  -o-transition: 0.2s;
+  transition: 0.2s;
+}
+.btn:hover {
+  cursor: pointer;
+}
+.btn:hover span {
+  color: #fff;
+  padding: 10px 40px;
+}
+.btn i {
+  width: 50px;
+  height: 40px;
+  float: left;
+  -webkit-transition: 0.2s;
+  -ms-transition: 0.2s;
+  -moz-transition: 0.2s;
+  -o-transition: 0.2s;
+  transition: 0.2s;
+}
+
+.btn-green {
+  border-color: #1FC488;
+}
+.btn-green span {
+  color: #1FC488;
+}
+.btn-green:hover {
+  background-color: #1FC488;
+  border-color: #009c60;
+}
+.btn-green:hover i {
+  background-color: #009c60;
+}
+.btn-green i {
+  background-color: #1FC488;
+}
+
+
+.btn-red {
+  border-color: #C41F1F;
+}
+.btn-red span {
+  color: #C41F1F;
+}
+.btn-red:hover {
+  background-color: #C41F1F;
+  border-color: #9c0000;
+}
+.btn-red:hover i {
+  background-color: #9c0000;
+}
+.btn-red i {
+  background-color: #C41F1F;
+}
+
+.btn-blue {
+  border-color: #1F94C4;
+}
+.btn-blue span {
+  color: #1F94C4;
+}
+.btn-blue:hover {
+  background-color: #1F94C4;
+  border-color: #006c9c;
+}
+.btn-blue:hover i {
+  background-color: #006c9c;
+}
+.btn-blue i {
+  background-color: #1F94C4;
+}
+
+.btn-yellow {
+  border-color: #E7BA25;
+}
+.btn-yellow span {
+  color: #E7BA25;
+}
+.btn-yellow:hover {
+  background-color: #E7BA25;
+  border-color: #bf9200;
+}
+.btn-yellow:hover i {
+  background-color: #bf9200;
+}
+.btn-yellow i {
+  background-color: #E7BA25;
+}
+
+</style>
+</head>
+<body>
+	<div style="
+	display: block; white-space: nowrap;
+    overflow-x: auto;
+    overflow-y: hidden;
+	">
+	<audio controls id="cashaudio" style="display: none;" >
+	  <source src="cash.mp3" type="audio/mpeg">
+	Your browser does not support the audio element.
+	</audio>
+  
+	  <form style="display: inline-block; width: 33%;"></form>
+    </div>
+  
+<div class="form-style-10">
+<h1>Conferma il pagamento!</h1>
+<div class="row">
+  <div class="col-75">
+    <div class="container">
+      <form action="/action_page.php">
+      
+        <div class="row">
+          <div class="col-50">
+            <h3>Billing Address</h3>
+            <label for="fname"><i class="fa fa-user"></i> Nome e Cognome</label>
+            <input type="text" id="fname" name="firstname" placeholder="Andrea Zaccarelli">
+            <label for="email"><i class="fa fa-envelope"></i> Email</label>
+            <input type="text" id="email" name="email" placeholder="andrea@example.com">
+            <label for="adr"><i class="fa fa-address-card-o"></i> Indirizzo</label>
+            <input type="text" id="adr" name="address" placeholder="Via Saragozza 3">
+            <label for="city"><i class="fa fa-institution"></i> Città</label>
+            <input type="text" id="city" name="city" placeholder="Bologna">
+
+            <div class="row">
+              <div class="col-50">
+                <label for="state">Regione</label>
+                <input type="text" id="state" name="state" placeholder="Emilia Romagna">
+              </div>
+              <div class="col-50">
+                <label for="zip">CAP</label>
+                <input type="text" id="zip" name="zip" placeholder="40100">
+              </div>
+            </div>
+          </div>
+
+          <div class="col-50">
+            <h3>Pagamento</h3>
+            <label for="fname">Carte accettate</label>
+            <div class="icon-container">
+              <i class="fa fa-cc-visa" style="color:navy;"></i>
+              <i class="fa fa-cc-amex" style="color:blue;"></i>
+              <i class="fa fa-cc-mastercard" style="color:red;"></i>
+              <i class="fa fa-cc-discover" style="color:orange;"></i>
+            </div>
+            <label for="cname">Nome sulla carta</label>
+            <input type="text" id="cname" name="cardname" placeholder="Andrea J. Zaccarelli">
+            <label for="ccnum">Numero carta di credito</label>
+            <input type="text" id="ccnum" name="cardnumber" placeholder="1111-2222-3333-4444">
+            <label for="expmonth">Mese di scadenza</label>
+            <input type="text" id="expmonth" name="expmonth" placeholder="Luglio">
+            <div class="row">
+              <div class="col-50">
+                <label for="expyear">Anno di scadenza</label>
+                <input type="text" id="expyear" name="expyear" placeholder="2020">
+              </div>
+              <div class="col-50">
+                <label for="cvv">CVV</label>
+                <input type="text" id="cvv" name="cvv" placeholder="352">
+              </div>
+            </div>
+          </div>
+          
+        </div>
+        <label>
+          <input type="checkbox" checked="checked" name="sameadr"> Indirizzo di fatturazione corrisponde all'indirizzo dato
+        </label>
+        <button style="display: inline-block; width: 33%" id="cash" class='btn btn-green' >
+	  <image src="./cash90.png" width=25%>
+		<span>PAY</span>
+	  </button><br>
+      </form>
+    </div>
+  </div>
+  <div class="col-25">
+    <div class="container">
+      <h4>Cart <span class="price" style="color:black"><i class="fa fa-shopping-cart"></i> <b>4</b></span></h4>
+      <p><a href="#">Product 1</a> <span class="price">$15</span></p>
+      <p><a href="#">Product 2</a> <span class="price">$5</span></p>
+      <p><a href="#">Product 3</a> <span class="price">$8</span></p>
+      <p><a href="#">Product 4</a> <span class="price">$2</span></p>
+      <hr>
+      <p>Total <span class="price" style="color:black"><b>$30</b></span></p>
+    </div>
+  </div>
+</div>
+By Turra,Verdini,Farina
+<script>
+	document.getElementById("cash").addEventListener("click", function(){
+		
+		document.getElementById("cashaudio").play();
+	});
+</script>
+</body>
+</html>
