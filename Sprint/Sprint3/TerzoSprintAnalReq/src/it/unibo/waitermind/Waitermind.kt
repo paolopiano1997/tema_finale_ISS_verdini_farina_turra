@@ -55,9 +55,13 @@ class Waitermind ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name,
 				state("reachhome") { //this:State
 					action { //it:State
 						println("waitermind   |||   reachhome")
-						request("moveto", "moveto($X_home,$Y_home)" ,"waiterengine" )  
+						forward("moveto", "moveto($X_home,$Y_home)" ,"waiterengine" ) 
 					}
-					 transition(edgeName="t01",targetState="home",cond=whenReply("done"))
+					 transition(edgeName="t01",targetState="home",cond=whenDispatch("done"))
+					transition(edgeName="t02",targetState="accept",cond=whenRequest("enter"))
+					transition(edgeName="t03",targetState="take",cond=whenDispatch("clientready"))
+					transition(edgeName="t04",targetState="reachBarman",cond=whenDispatch("drinkready"))
+					transition(edgeName="t05",targetState="reachTableCollect",cond=whenDispatch("paymentready"))
 				}	 
 				state("home") { //this:State
 					action { //it:State
@@ -65,14 +69,15 @@ class Waitermind ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name,
 						updateResourceRep( "home"  
 						)
 					}
-					 transition(edgeName="t02",targetState="accept",cond=whenRequest("enter"))
-					transition(edgeName="t03",targetState="take",cond=whenDispatch("clientready"))
-					transition(edgeName="t04",targetState="reachBarman",cond=whenDispatch("drinkready"))
-					transition(edgeName="t05",targetState="reachTableCollect",cond=whenDispatch("paymentready"))
-					transition(edgeName="t06",targetState="endwork",cond=whenDispatch("end"))
+					 transition(edgeName="t06",targetState="accept",cond=whenRequest("enter"))
+					transition(edgeName="t07",targetState="take",cond=whenDispatch("clientready"))
+					transition(edgeName="t08",targetState="reachBarman",cond=whenDispatch("drinkready"))
+					transition(edgeName="t09",targetState="reachTableCollect",cond=whenDispatch("paymentready"))
+					transition(edgeName="t010",targetState="endwork",cond=whenDispatch("end"))
 				}	 
 				state("accept") { //this:State
 					action { //it:State
+						forward("stopengine", "stopengine(stop)" ,"waiterengine" ) 
 						println("waitermind   |||   accept")
 						answer("enter", "accept", "accept(idclient)"   )  
 					}
@@ -83,16 +88,16 @@ class Waitermind ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name,
 						updateResourceRep( "reachingEntranceDoor"  
 						)
 						println("waitermind   |||   reachEntranceDoor")
-						request("moveto", "moveto($X_Entrancedoor,$Y_Entrancedoor)" ,"waiterengine" )  
+						forward("moveto", "moveto($X_Entrancedoor,$Y_Entrancedoor)" ,"waiterengine" ) 
 					}
-					 transition(edgeName="t07",targetState="checkTables",cond=whenReply("done"))
+					 transition(edgeName="t011",targetState="checkTables",cond=whenDispatch("done"))
 				}	 
 				state("checkTables") { //this:State
 					action { //it:State
 						println("waitermind   |||   checkTables")
 						request("isClean", "isClean(1)" ,"teatables" )  
 					}
-					 transition(edgeName="t08",targetState="checkIsCleanDone1",cond=whenReply("isCleanDone"))
+					 transition(edgeName="t012",targetState="checkIsCleanDone1",cond=whenReply("isCleanDone"))
 				}	 
 				state("checkIsCleanDone1") { //this:State
 					action { //it:State
@@ -107,8 +112,8 @@ class Waitermind ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name,
 						}
 						 readLine()  
 					}
-					 transition(edgeName="t09",targetState="convoyToTable1",cond=whenDispatch("gototable1"))
-					transition(edgeName="t010",targetState="checkIsCleanDone2",cond=whenReply("isCleanDone"))
+					 transition(edgeName="t013",targetState="convoyToTable1",cond=whenDispatch("gototable1"))
+					transition(edgeName="t014",targetState="checkIsCleanDone2",cond=whenReply("isCleanDone"))
 				}	 
 				state("checkIsCleanDone2") { //this:State
 					action { //it:State
@@ -126,24 +131,24 @@ class Waitermind ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name,
 						updateResourceRep( "convoyToTable1"  
 						)
 						println("waitermind   |||   convoyToTable1")
-						request("moveto", "moveto($X_teatable1,$Y_teatable1)" ,"waiterengine" )  
+						forward("moveto", "moveto($X_teatable1,$Y_teatable1)" ,"waiterengine" ) 
 						forward("occupy", "occupy(1)" ,"teatables" ) 
 						println("waitermind   |||   table1 state occupied")
 						delay(5000) 
 					}
-					 transition(edgeName="t011",targetState="checkCleanHome",cond=whenReply("done"))
+					 transition(edgeName="t015",targetState="checkCleanHome",cond=whenDispatch("done"))
 				}	 
 				state("convoyToTable2") { //this:State
 					action { //it:State
 						updateResourceRep( "convoyToTable2"  
 						)
 						println("waitermind   |||   convoyToTable2")
-						request("moveto", "moveto($X_teatable2,$Y_teatable2)" ,"waiterengine" )  
+						forward("moveto", "moveto($X_teatable2,$Y_teatable2)" ,"waiterengine" ) 
 						forward("occupy", "occupy(2)" ,"teatables" ) 
 						println("waitermind   |||   table2 state occupied")
 						delay(5000) 
 					}
-					 transition(edgeName="t012",targetState="checkCleanHome",cond=whenReply("done"))
+					 transition(edgeName="t016",targetState="checkCleanHome",cond=whenDispatch("done"))
 				}	 
 				state("checkCleanHome") { //this:State
 					action { //it:State
@@ -151,7 +156,7 @@ class Waitermind ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name,
 						println("waitermind   |||   checkClean")
 						request("isTableStopped", "isTableStopped(isStopped)" ,"waitercleaner" )  
 					}
-					 transition(edgeName="t013",targetState="checkIsTableStopped",cond=whenReply("isTableStoppedDone"))
+					 transition(edgeName="t017",targetState="checkIsTableStopped",cond=whenReply("isTableStoppedDone"))
 				}	 
 				state("checkIsTableStopped") { //this:State
 					action { //it:State
@@ -168,24 +173,25 @@ class Waitermind ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name,
 								 }
 						}
 					}
-					 transition(edgeName="t014",targetState="reachhome",cond=whenDispatch("gotohome"))
-					transition(edgeName="t015",targetState="reachTable1CleanStopped",cond=whenDispatch("gototable1"))
+					 transition(edgeName="t018",targetState="reachhome",cond=whenDispatch("gotohome"))
+					transition(edgeName="t019",targetState="reachTable1CleanStopped",cond=whenDispatch("gototable1"))
 				}	 
 				state("reachTable1CleanStopped") { //this:State
 					action { //it:State
 						println("waitermind   |||   reachTable1CleanStopped")
-						request("moveto", "moveto($X_teatable1,$Y_teatable1)" ,"waiterengine" )  
+						forward("moveto", "moveto($X_teatable1,$Y_teatable1)" ,"waiterengine" ) 
 					}
-					 transition(edgeName="t016",targetState="cleanTable1",cond=whenReply("done"))
+					 transition(edgeName="t020",targetState="cleanTable1",cond=whenDispatch("done"))
 				}	 
 				state("take") { //this:State
 					action { //it:State
+						forward("stopengine", "stopengine(stop)" ,"waiterengine" ) 
 						println("waitermind   |||   take")
 						updateResourceRep( "take"  
 						)
-						request("moveto", "moveto($X_teatable1,$Y_teatable1)" ,"waiterengine" )  
+						forward("moveto", "moveto($X_teatable1,$Y_teatable1)" ,"waiterengine" ) 
 					}
-					 transition(edgeName="t017",targetState="transmit",cond=whenReply("done"))
+					 transition(edgeName="t021",targetState="transmit",cond=whenDispatch("done"))
 				}	 
 				state("transmit") { //this:State
 					action { //it:State
@@ -198,14 +204,15 @@ class Waitermind ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name,
 				}	 
 				state("reachBarman") { //this:State
 					action { //it:State
+						forward("stopengine", "stopengine(stop)" ,"waiterengine" ) 
 						updateResourceRep( "reachingBarman"  
 						)
 						println("waitermind   |||   reachBarman")
 						updateResourceRep( "reachBarman"  
 						)
-						request("moveto", "moveto($X_servicedesk,$Y_servicedesk)" ,"waiterengine" )  
+						forward("moveto", "moveto($X_servicedesk,$Y_servicedesk)" ,"waiterengine" ) 
 					}
-					 transition(edgeName="t018",targetState="serve",cond=whenReply("done"))
+					 transition(edgeName="t022",targetState="serve",cond=whenDispatch("done"))
 				}	 
 				state("serve") { //this:State
 					action { //it:State
@@ -213,18 +220,19 @@ class Waitermind ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name,
 						println("waitermind   |||   serve")
 						updateResourceRep( "reachBarman"  
 						)
-						request("moveto", "moveto($X_teatable1,$Y_teatable1)" ,"waiterengine" )  
+						forward("moveto", "moveto($X_teatable1,$Y_teatable1)" ,"waiterengine" ) 
 					}
-					 transition(edgeName="t019",targetState="reachhome",cond=whenReply("done"))
+					 transition(edgeName="t023",targetState="reachhome",cond=whenDispatch("done"))
 				}	 
 				state("reachTableCollect") { //this:State
 					action { //it:State
+						forward("stopengine", "stopengine(stop)" ,"waiterengine" ) 
 						println("waitermind   |||   reachTable")
 						updateResourceRep( "reachTable1"  
 						)
-						request("moveto", "moveto($X_teatable1,$Y_teatable1)" ,"waiterengine" )  
+						forward("moveto", "moveto($X_teatable1,$Y_teatable1)" ,"waiterengine" ) 
 					}
-					 transition(edgeName="t020",targetState="collect",cond=whenReply("done"))
+					 transition(edgeName="t024",targetState="collect",cond=whenDispatch("done"))
 				}	 
 				state("reachTableClean") { //this:State
 					action { //it:State
@@ -232,9 +240,9 @@ class Waitermind ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name,
 						println("waitermind   |||   reachTable")
 						updateResourceRep( "reachTable1Clean"  
 						)
-						request("moveto", "moveto($X_teatable1,$Y_teatable1)" ,"waiterengine" )  
+						forward("moveto", "moveto($X_teatable1,$Y_teatable1)" ,"waiterengine" ) 
 					}
-					 transition(edgeName="t021",targetState="cleanTable1",cond=whenReply("done"))
+					 transition(edgeName="t025",targetState="cleanTable1",cond=whenDispatch("done"))
 				}	 
 				state("collect") { //this:State
 					action { //it:State
@@ -251,11 +259,11 @@ class Waitermind ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name,
 						println("waitermind   |||   convoyToExitDoor")
 						updateResourceRep( "convoyToExitDoor"  
 						)
-						request("moveto", "moveto($X_Exitdoor,$Y_Exitdoor)" ,"waiterengine" )  
+						forward("moveto", "moveto($X_Exitdoor,$Y_Exitdoor)" ,"waiterengine" ) 
 						forward("release", "release(1)" ,"teatables" ) 
 						delay(5000) 
 					}
-					 transition(edgeName="t022",targetState="reachTableClean",cond=whenReply("done"))
+					 transition(edgeName="t026",targetState="reachTableClean",cond=whenDispatch("done"))
 				}	 
 				state("cleanTable1") { //this:State
 					action { //it:State
@@ -264,8 +272,8 @@ class Waitermind ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name,
 						println("waitermind   |||   cleanTable1")
 						forward("startcleaner", "startcleaner(1)" ,"waitercleaner" ) 
 					}
-					 transition(edgeName="t023",targetState="reachhome",cond=whenDispatch("cleanerdone"))
-					transition(edgeName="t024",targetState="handleEnter",cond=whenRequest("enter"))
+					 transition(edgeName="t027",targetState="reachhome",cond=whenDispatch("cleanerdone"))
+					transition(edgeName="t028",targetState="handleEnter",cond=whenRequest("enter"))
 				}	 
 				state("cleanTable2") { //this:State
 					action { //it:State
@@ -274,7 +282,7 @@ class Waitermind ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name,
 						println("waitermind   |||   cleanTable2")
 						forward("startcleaner", "startcleaner(2)" ,"waitercleaner" ) 
 					}
-					 transition(edgeName="t025",targetState="reachhome",cond=whenDispatch("cleanerdone"))
+					 transition(edgeName="t029",targetState="reachhome",cond=whenDispatch("cleanerdone"))
 				}	 
 				state("handleEnter") { //this:State
 					action { //it:State

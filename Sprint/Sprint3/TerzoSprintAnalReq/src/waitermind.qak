@@ -3,16 +3,13 @@ System tearoom
 mqttBroker "mqtt.eclipse.org" : 1883 eventTopic "mado/mado"
 
 //Movements messages
-Request moveto : moveto(X,Y)
-Reply done : done(X,Y)
+Dispatch moveto : moveto(X,Y)
+Dispatch done : done(X,Y)
 
 //Init messages
 Request start : start(S)
 Reply ready : ready(V)
 
-
-Request 	moveto : moveto(X,Y)
-Reply 		done   : done(X,Y)
 
 Request 	start  : start(S)
 Reply 		ready  : ready(V)
@@ -20,7 +17,6 @@ Request 	step       : step( TIME )
 Reply   	stepdone   : stepdone(V)
 Dispatch 	cmd        : cmd(MOVE)
 Reply   	stepfail   : stepfail(DURATION, CAUSE)
-
 
 Dispatch starttimer : starttimer(T)
 Dispatch endtime : endtime(T)
@@ -37,7 +33,8 @@ Dispatch gotodirty : gotodirty(G)
 Dispatch gotoundirty : gotoundirty(G)
 Dispatch gotosanitized : gotosanitized(G)
 
-
+//Engine
+Dispatch stopengine : stopengine(S)
 
 //Client and tearoom messages
 Request enter : enter(ID)
@@ -125,10 +122,15 @@ QActor waitermind context ctxtearoom{
 	
 	State reachhome{
 		println("waitermind   |||   reachhome")
-		request waiterengine -m moveto : moveto($X_home,$Y_home)
+		forward waiterengine -m moveto : moveto($X_home,$Y_home)
 	}
-	Transition t0 whenReply done -> home
-	
+	Transition t0   whenMsg done -> home
+					whenRequest enter -> accept
+				  	whenMsg clientready -> take
+				  	whenMsg drinkready -> reachBarman
+				  	whenMsg paymentready -> reachTableCollect
+
+
 	State home{
 		println("waitermind   |||   home")
 		updateResource [# "home" #]
@@ -140,6 +142,7 @@ QActor waitermind context ctxtearoom{
 				  whenMsg end -> endwork
 	
 	State accept {
+		forward waiterengine -m stopengine : stopengine(stop)
 		println("waitermind   |||   accept")
 		replyTo enter with accept : accept(idclient)
 	}
@@ -149,16 +152,16 @@ QActor waitermind context ctxtearoom{
 		updateResource[# "reachingEntranceDoor" #]
 		println("waitermind   |||   reachEntranceDoor")
 		//updateResource[# "reachEntranceDoor" #]
-		request waiterengine -m moveto : moveto($X_Entrancedoor, $Y_Entrancedoor)
+		forward waiterengine -m moveto : moveto($X_Entrancedoor, $Y_Entrancedoor)
 	}
-	Transition t0 whenReply done -> checkTables
+	Transition t0 whenMsg done -> checkTables
 	
 	State checkTables{
 		println("waitermind   |||   checkTables")
 		request teatables -m isClean : isClean(1)
 	}
 	Transition t0 whenReply isCleanDone -> checkIsCleanDone1
-	
+
 	State checkIsCleanDone1{
 		onMsg(isCleanDone : isCleanDone(N,E)){
 			if [# payloadArg(1)=="yes" #]{
@@ -185,26 +188,26 @@ QActor waitermind context ctxtearoom{
 	State convoyToTable1{
 		updateResource[# "convoyToTable1" #]
 		println("waitermind   |||   convoyToTable1")
-		request waiterengine -m moveto : moveto ($X_teatable1,$Y_teatable1)
+		forward waiterengine -m moveto : moveto ($X_teatable1,$Y_teatable1)
 //		[# table1.state= "occupied" #]
 		forward teatables -m occupy : occupy(1)
 		println("waitermind   |||   table1 state occupied")
 		//updateResource [# "convoyToTable1" #]
 		delay 5000
 	}
-	Transition t0 whenReply done -> checkCleanHome
+	Transition t0 whenMsg done -> checkCleanHome
 	
 	State convoyToTable2{
 		updateResource[# "convoyToTable2" #]
 		println("waitermind   |||   convoyToTable2")
-		request waiterengine -m moveto : moveto ($X_teatable2,$Y_teatable2)
+		forward waiterengine -m moveto : moveto ($X_teatable2,$Y_teatable2)
 		//[# table2.state= "occupied" #]
 		forward teatables -m occupy : occupy(2)
 		println("waitermind   |||   table2 state occupied")
 		//updateResource [# "convoyToTable2" #]
 		delay 5000
 	}
-	Transition t0 whenReply done -> checkCleanHome
+	Transition t0 whenMsg done -> checkCleanHome
 	
 	State checkCleanHome{
 		[# readLine() #]
@@ -235,16 +238,17 @@ QActor waitermind context ctxtearoom{
 	
 	State reachTable1CleanStopped{
 		println("waitermind   |||   reachTable1CleanStopped")
-		request waiterengine -m moveto : moveto ($X_teatable1,$Y_teatable1)
+		forward waiterengine -m moveto : moveto ($X_teatable1,$Y_teatable1)
 	}
-	Transition t0 whenReply done -> cleanTable1
+	Transition t0 whenMsg done -> cleanTable1
 	
 	State take{
+		forward waiterengine -m stopengine : stopengine(stop)
 		println("waitermind   |||   take")
 		updateResource [# "take" #]
-		request waiterengine -m moveto : moveto ($X_teatable1,$Y_teatable1)
+		forward waiterengine -m moveto : moveto ($X_teatable1,$Y_teatable1)
 	}
-	Transition t0 whenReply done -> transmit
+	Transition t0 whenMsg done -> transmit
 	
 	State transmit{
 		[# readLine() #]
@@ -255,36 +259,38 @@ QActor waitermind context ctxtearoom{
 	Goto reachhome
 	
 	State reachBarman{
+		forward waiterengine -m stopengine : stopengine(stop)
 		updateResource[# "reachingBarman" #]
 		println("waitermind   |||   reachBarman")
 		updateResource[# "reachBarman" #]
-		request waiterengine -m moveto: moveto($X_servicedesk,$Y_servicedesk)
+		forward waiterengine -m moveto: moveto($X_servicedesk,$Y_servicedesk)
 	}
-	Transition t0 whenReply done -> serve
+	Transition t0 whenMsg done -> serve
 	
 	State serve{
 		
 		[# readLine() #]
 		println("waitermind   |||   serve")
 		updateResource[# "reachBarman" #]
-		request waiterengine -m moveto : moveto ($X_teatable1,$Y_teatable1)
+		forward waiterengine -m moveto : moveto ($X_teatable1,$Y_teatable1)
 	}
-	Transition t0 whenReply done -> reachhome
+	Transition t0 whenMsg done -> reachhome
 	
 	State reachTableCollect {
+		forward waiterengine -m stopengine : stopengine(stop)
 		println("waitermind   |||   reachTable")
 		updateResource[# "reachTable1" #]
-		request waiterengine -m moveto : moveto ($X_teatable1,$Y_teatable1)
+		forward waiterengine -m moveto : moveto ($X_teatable1,$Y_teatable1)
 	}
-	Transition t0 whenReply done -> collect
+	Transition t0 whenMsg done -> collect
 	
 	State reachTableClean {
 		[# readLine() #]
 		println("waitermind   |||   reachTable")
 		updateResource[# "reachTable1Clean" #]
-		request waiterengine -m moveto : moveto ($X_teatable1,$Y_teatable1)
+		forward waiterengine -m moveto : moveto ($X_teatable1,$Y_teatable1)
 	}
-	Transition t0 whenReply done -> cleanTable1
+	Transition t0 whenMsg done -> cleanTable1
 	
 	State collect {
 		[# readLine() #]
@@ -297,11 +303,11 @@ QActor waitermind context ctxtearoom{
 	State convoyToExitDoor{
 		println("waitermind   |||   convoyToExitDoor")
 		updateResource[# "convoyToExitDoor" #]
-		request waiterengine -m moveto : moveto($X_Exitdoor,$Y_Exitdoor)
+		forward waiterengine -m moveto : moveto($X_Exitdoor,$Y_Exitdoor)
 		forward teatables -m release : release(1)
 		delay 5000
 	}
-	Transition t0 whenReply done -> reachTableClean
+	Transition t0 whenMsg done -> reachTableClean
 	
 	State cleanTable1{
 		updateResource[# "cleanTable1" #]
@@ -648,14 +654,15 @@ QActor waiterengine context ctxtearoom {
 		val BackTime           = 2 * StepTime / 3
 	#]
 	State s0 initial{
-		discardMsg On
+		discardMsg Off
 		run itunibo.planner.plannerUtil.initAI() //init planner entity
 		run itunibo.planner.plannerUtil.loadRoomMap( inmapname ) 		
 		run itunibo.planner.plannerUtil.showCurrentRobotState()	
 		println("waiterengine   |||   init")
 	}
 	Transition t0 whenRequest start -> started
-	
+					
+
 	State started{
 		println("waiterengine   |||   started")
 		replyTo start with ready : ready(waiterengine)
@@ -666,7 +673,8 @@ QActor waiterengine context ctxtearoom {
 		println("waiterengine   |||   wait")
 		
 	}
-	Transition t0 whenRequest moveto -> planmove
+	Transition t0 whenMsg moveto -> planmove
+				whenMsg stopengine -> wait
 
 	State planmove{
 		onMsg( moveto : moveto(X,Y) ){
@@ -678,21 +686,33 @@ QActor waiterengine context ctxtearoom {
 		}
 	}
 	Goto execPlanMove
-	
+
 	State execPlanMove{
 		[#  CurMove = itunibo.planner.plannerUtil.getNextPlannedMove() #]
 	}
+	Transition t0 whenTime 200 -> nextStep
+				whenMsg stopengine -> stop
+	
+	State nextStep{
+		
+	}
 	Goto execStep if [# CurMove == "w" #] else execMove
+
+	State stop{
+		println("waiterengine   |||   stop")
+		run itunibo.planner.plannerUtil.resetActions()
+	}
+	Goto wait
 	
 	State execStep {
-		request basicrobot -m step : step( $StepTime  )
+		request basicrobot -m step : step( $StepTime )
 	}
 	Transition t0   whenReply stepdone   -> stepDone
 					whenReply stepfail   -> stepFailed
 	
 	State stepDone{
 		updateResource [# itunibo.planner.plannerUtil.getMapOneLine() #]
-		run itunibo.planner.plannerUtil.updateMap(  "w" )
+		run itunibo.planner.plannerUtil.updateMap( "w" )
   	}
 	Goto execPlanMove if [# CurMove.length > 0 #] else endSuccess
 
@@ -721,7 +741,7 @@ QActor waiterengine context ctxtearoom {
 		updateResource [# "($XP,$YP)" #]
 		println("waiterengine   |||   endSuccess, curpos=($XP,$YP)")
 		run itunibo.planner.plannerUtil.showCurrentRobotState()
-		replyTo moveto with done : done($XP,$YP)
+		forward waitermind -m done : done($XP,$YP)
 	}
 	Goto wait
 } 

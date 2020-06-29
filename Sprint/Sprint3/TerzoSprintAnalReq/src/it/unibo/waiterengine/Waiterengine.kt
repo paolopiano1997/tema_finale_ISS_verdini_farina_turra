@@ -26,13 +26,13 @@ class Waiterengine ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( nam
 		return { //this:ActionBasciFsm
 				state("s0") { //this:State
 					action { //it:State
-						discardMessages = true
+						discardMessages = false
 						itunibo.planner.plannerUtil.initAI(  )
 						itunibo.planner.plannerUtil.loadRoomMap( inmapname  )
 						itunibo.planner.plannerUtil.showCurrentRobotState(  )
 						println("waiterengine   |||   init")
 					}
-					 transition(edgeName="t053",targetState="started",cond=whenRequest("start"))
+					 transition(edgeName="t057",targetState="started",cond=whenRequest("start"))
 				}	 
 				state("started") { //this:State
 					action { //it:State
@@ -45,7 +45,8 @@ class Waiterengine ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( nam
 					action { //it:State
 						println("waiterengine   |||   wait")
 					}
-					 transition(edgeName="t054",targetState="planmove",cond=whenRequest("moveto"))
+					 transition(edgeName="t058",targetState="planmove",cond=whenDispatch("moveto"))
+					transition(edgeName="t059",targetState="wait",cond=whenDispatch("stopengine"))
 				}	 
 				state("planmove") { //this:State
 					action { //it:State
@@ -62,18 +63,33 @@ class Waiterengine ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( nam
 				state("execPlanMove") { //this:State
 					action { //it:State
 						  CurMove = itunibo.planner.plannerUtil.getNextPlannedMove()  
+						stateTimer = TimerActor("timer_execPlanMove", 
+							scope, context!!, "local_tout_waiterengine_execPlanMove", 200.toLong() )
+					}
+					 transition(edgeName="t060",targetState="nextStep",cond=whenTimeout("local_tout_waiterengine_execPlanMove"))   
+					transition(edgeName="t061",targetState="stop",cond=whenDispatch("stopengine"))
+				}	 
+				state("nextStep") { //this:State
+					action { //it:State
 					}
 					 transition( edgeName="goto",targetState="execStep", cond=doswitchGuarded({ CurMove == "w"  
 					}) )
 					transition( edgeName="goto",targetState="execMove", cond=doswitchGuarded({! ( CurMove == "w"  
 					) }) )
 				}	 
+				state("stop") { //this:State
+					action { //it:State
+						println("waiterengine   |||   stop")
+						itunibo.planner.plannerUtil.resetActions(  )
+					}
+					 transition( edgeName="goto",targetState="wait", cond=doswitch() )
+				}	 
 				state("execStep") { //this:State
 					action { //it:State
 						request("step", "step($StepTime)" ,"basicrobot" )  
 					}
-					 transition(edgeName="t055",targetState="stepDone",cond=whenReply("stepdone"))
-					transition(edgeName="t056",targetState="stepFailed",cond=whenReply("stepfail"))
+					 transition(edgeName="t062",targetState="stepDone",cond=whenReply("stepdone"))
+					transition(edgeName="t063",targetState="stepFailed",cond=whenReply("stepfail"))
 				}	 
 				state("stepDone") { //this:State
 					action { //it:State
@@ -122,7 +138,7 @@ class Waiterengine ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( nam
 						)
 						println("waiterengine   |||   endSuccess, curpos=($XP,$YP)")
 						itunibo.planner.plannerUtil.showCurrentRobotState(  )
-						answer("moveto", "done", "done($XP,$YP)"   )  
+						forward("done", "done($XP,$YP)" ,"waitermind" ) 
 					}
 					 transition( edgeName="goto",targetState="wait", cond=doswitch() )
 				}	 
