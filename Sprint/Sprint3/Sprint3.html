@@ -241,13 +241,17 @@ Assunzioni?
 <ul>
 	<li>Problema 1: Gestione delle richieste da tavoli differenti -> 
 			C'è bisogno di tenere traccia di un'associazione cliente-tavolo, di una cliente-ordine-tavolo,
-			ovvero i barman deve sapere di chi è questo ordine e a che tavolo portarlo -> pensare a cosa introdurre per farlo.
+			ovvero i barman deve sapere di chi è questo ordine e a che tavolo portarlo -> pensare a cosa introdurre per farlo.<br>
+            Tramite prolog memorizziamo idcliente-ordine-tavolo oppure tramite scambio messaggi? 
 			</li>
-	<li>Problema 2: Se il cliente suona ma poi se ne va? -> per ora assunzione.</li>
-	<li>Problema 3: Se il cliente suona 400 volte? -> per ora assunzione.</li>
-	<li>Problema 4: L'importantissimo sensore di temperatura -> corsale, tutto suo, anche piazza</li>
+	    <li>Problema 2: Se il cliente suona ma poi se ne va? -> per ora assunzione.</li>
+	    <li>Problema 3: Se il cliente suona 400 volte? -> per ora assunzione.</li>
+	    <li>Problema 4: L'importantissimo sensore di temperatura -> corsale, tutto suo, anche piazza</li>
 	<li>Problema 5: Interrompi il clean solo se scè un altro tavolo disponibile -> probabilmente basterà un "rapido" check sullo stato dei tavoli.</li>
 	<li>Problema 6: gestire lo stato della tearoom per il manager -> capire come farla, cosa salvare, come salvarla e come recuperarla.</li>
+    <li>Problema 7: il barman potrebbe preparare due ordini insieme, presumibilmente uguali, quindi
+    il waiter potrebbe potare direttamente gli ordini ad entrambi i tavoli. <b>ASSUNZIOOONE</b>: non lo fa</li>
+    <li>Non dimenticarsi che c'è <b>MAXTIME</b></li>
 
 	<li>Opzionale: Nella hall ci può essere al più una persona -> vedremo con natali se farlo</li>
 </ul>
