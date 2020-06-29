@@ -503,7 +503,7 @@ class TestWaiterTableStates {
 	
 	fun checkRemainingTime(){	//controllo che il timer segni il tempo effettivamente rimasto
 		if(waitercleaner!=null)
-			assert(waitercleaner!!.geResourceRep().toInt()<Expected.cleanRemainingTime)
+			assert(waitercleaner!!.geResourceRep().toInt() < Expected.cleanRemainingTime)
 	}
 	
 	@Test
