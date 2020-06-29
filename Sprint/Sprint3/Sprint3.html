@@ -145,7 +145,7 @@ table, th, td {
     
 <!--<base href="https://raw.githubusercontent.com/anatali/iss2020LabBo/master/it.unibo.issLabStart/userDocs/template2020.html">--><base href=".">
    
-<title>Sprint 2</title></head>
+<title>Sprint 3</title></head>
     
 <body>
 <h2>Introduction</h2>
@@ -225,23 +225,32 @@ including some significant <bc>TestPlan</bc>. </li>
 
 
 </div>
-<h2>Requirement analysis</h2>
+<h2>Requirement Analysis</h2>
 <div class="remark">
+Assunzioni?
 <ul>
+	<li>Sistemare waitermind e waiterengine su interrompibilità di reachHome</li>
 	<li>Situazione: gestione di più clienti all'ingresso</li>
 	<li>Situazione: gestione di due tavoli contemporaneamente</li>
+	<li>Assunzione: il cliente è educato e suona una volta sola e aspetta pazientemente.</li>
 </ul>
 </div>
 
 <h2>Problem analysis</h2> 
 <div class="remark">
-	<ul>
-	<li>Problema 1: Gestione delle richieste da tavoli differenti</li>
-	<li>Problema 2: Se il cliente suona ma poi se ne va?</li>
-	<li>Problema 3: Se il cliente suona 400 volte?</li>
-	<li>Problema 4: L'importantissimo sensore di temperatura</li>
-	<li>Opzionale: Nella hall ci può essere al più una persona</li>
-	</ul>
+<ul>
+	<li>Problema 1: Gestione delle richieste da tavoli differenti -> 
+			C'è bisogno di tenere traccia di un'associazione cliente-tavolo, di una cliente-ordine-tavolo,
+			ovvero i barman deve sapere di chi è questo ordine e a che tavolo portarlo -> pensare a cosa introdurre per farlo.
+			</li>
+	<li>Problema 2: Se il cliente suona ma poi se ne va? -> per ora assunzione.</li>
+	<li>Problema 3: Se il cliente suona 400 volte? -> per ora assunzione.</li>
+	<li>Problema 4: L'importantissimo sensore di temperatura -> corsale, tutto suo, anche piazza</li>
+	<li>Problema 5: Interrompi il clean solo se scè un altro tavolo disponibile -> probabilmente basterà un "rapido" check sullo stato dei tavoli.</li>
+	<li>Problema 6: gestire lo stato della tearoom per il manager -> capire come farla, cosa salvare, come salvarla e come recuperarla.</li>
+
+	<li>Opzionale: Nella hall ci può essere al più una persona -> vedremo con natali se farlo</li>
+</ul>
 </div>	
 
 <h2>Sprint review</h2> 
