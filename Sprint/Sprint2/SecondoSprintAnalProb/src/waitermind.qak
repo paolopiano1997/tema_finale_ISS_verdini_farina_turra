@@ -214,7 +214,6 @@ QActor waitermind context ctxtearoom{
 		request waitercleaner -m isTableStopped : isTableStopped(isStopped)
 	}
 	Transition t0 whenReply isTableStoppedDone -> checkIsTableStopped
-	
 
 	State checkIsTableStopped{
 		println("waitermind   |||   checkIsTableStopped")
@@ -576,7 +575,7 @@ QActor teatables context ctxtearoom{
 		
 		printCurrentMessage
 		onMsg(setTableState : setTableState(N,S)){
-			updateResource[# "$payloadArg(1)" #]
+			updateResource[# "${payloadArg(1)}" #]
 			solve( setState($payloadArg(0),$payloadArg(1)) )
 			ifSolved{
 				solve( getState($payloadArg(0),S) )

@@ -48,6 +48,8 @@ class Teatables ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, 
 				}	 
 				state("release") { //this:State
 					action { //it:State
+						updateResourceRep( "clean"  
+						)
 						println("teatables   |||   release")
 						println("$name in ${currentState.stateName} | $currentMsg")
 						if( checkMsgContent( Term.createTerm("release(N)"), Term.createTerm("release(N)"), 
@@ -80,6 +82,8 @@ class Teatables ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, 
 						println("$name in ${currentState.stateName} | $currentMsg")
 						if( checkMsgContent( Term.createTerm("setTableState(N,S)"), Term.createTerm("setTableState(N,S)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
+								updateResourceRep( "${payloadArg(1)}"  
+								)
 								solve("setState(${payloadArg(0)},${payloadArg(1)})","") //set resVar	
 								if( currentSolution.isSuccess() ) {solve("getState(${payloadArg(0)},S)","") //set resVar	
 								if( currentSolution.isSuccess() ) {
@@ -123,6 +127,8 @@ class Teatables ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, 
 						println("$name in ${currentState.stateName} | $currentMsg")
 						if( checkMsgContent( Term.createTerm("occupy(N)"), Term.createTerm("occupy(N)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
+								updateResourceRep( "occupy"  
+								)
 								println("engageTable ${payloadArg(0)}")
 								solve("occupyTable(${payloadArg(0)})","") //set resVar	
 								solve("stateOfTeatables(S)","") //set resVar	
@@ -136,6 +142,8 @@ class Teatables ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, 
 				}	 
 				state("cleanTable") { //this:State
 					action { //it:State
+						updateResourceRep( "clean"  
+						)
 						println("$name in ${currentState.stateName} | $currentMsg")
 						if( checkMsgContent( Term.createTerm("clean(N)"), Term.createTerm("clean(N)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
