@@ -33,7 +33,7 @@ class Barman ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, sco
 						updateResourceRep( "waiting"  
 						)
 					}
-					 transition(edgeName="t060",targetState="prepare",cond=whenDispatch("order"))
+					 transition(edgeName="t065",targetState="prepare",cond=whenDispatch("order"))
 				}	 
 				state("prepare") { //this:State
 					action { //it:State
@@ -49,7 +49,7 @@ class Barman ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, sco
 						stateTimer = TimerActor("timer_prepare", 
 							scope, context!!, "local_tout_barman_prepare", Servicetime )
 					}
-					 transition(edgeName="t061",targetState="done",cond=whenTimeout("local_tout_barman_prepare"))   
+					 transition(edgeName="t066",targetState="done",cond=whenTimeout("local_tout_barman_prepare"))   
 				}	 
 				state("done") { //this:State
 					action { //it:State

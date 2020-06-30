@@ -138,8 +138,13 @@ $(function () {
     $( "#hh" ).click(function() { sendRequestData( "h") });
 
     $( "#bell" ).click(function() { sendRequestData( "enter") });
-    $( "#order" ).click(function() { sendRequestData( "order") });
+    $( "#cready" ).click(function() { sendRequestData( "clientready") })
+    $( "#order" ).click(function() { sendRequestData( "order") })
     $( "#cash" ).click(function() { sendRequestData( "payment") });
+    $( "#bell2" ).click(function() { sendRequestData( "enter2") });
+    $( "#cready2" ).click(function() { sendRequestData( "clientready2") })
+    $( "#order2" ).click(function() { sendRequestData( "order2") })
+    $( "#cash2" ).click(function() { sendRequestData( "payment2") });
     
 //USED BY POST-BASED BOUNDARY  
     $( "#start" ).click(function() { sendRequestData( "w") });
