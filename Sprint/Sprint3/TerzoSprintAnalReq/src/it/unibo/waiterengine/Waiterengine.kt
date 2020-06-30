@@ -32,7 +32,7 @@ class Waiterengine ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( nam
 						itunibo.planner.plannerUtil.showCurrentRobotState(  )
 						println("waiterengine   |||   init")
 					}
-					 transition(edgeName="t057",targetState="started",cond=whenRequest("start"))
+					 transition(edgeName="t053",targetState="started",cond=whenRequest("start"))
 				}	 
 				state("started") { //this:State
 					action { //it:State
@@ -45,8 +45,8 @@ class Waiterengine ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( nam
 					action { //it:State
 						println("waiterengine   |||   wait")
 					}
-					 transition(edgeName="t058",targetState="planmove",cond=whenDispatch("moveto"))
-					transition(edgeName="t059",targetState="wait",cond=whenDispatch("stopengine"))
+					 transition(edgeName="t054",targetState="planmove",cond=whenDispatch("moveto"))
+					transition(edgeName="t055",targetState="wait",cond=whenDispatch("stopengine"))
 				}	 
 				state("planmove") { //this:State
 					action { //it:State
@@ -66,8 +66,8 @@ class Waiterengine ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( nam
 						stateTimer = TimerActor("timer_execPlanMove", 
 							scope, context!!, "local_tout_waiterengine_execPlanMove", 200.toLong() )
 					}
-					 transition(edgeName="t060",targetState="nextStep",cond=whenTimeout("local_tout_waiterengine_execPlanMove"))   
-					transition(edgeName="t061",targetState="stop",cond=whenDispatch("stopengine"))
+					 transition(edgeName="t056",targetState="nextStep",cond=whenTimeout("local_tout_waiterengine_execPlanMove"))   
+					transition(edgeName="t057",targetState="stop",cond=whenDispatch("stopengine"))
 				}	 
 				state("nextStep") { //this:State
 					action { //it:State
@@ -88,8 +88,8 @@ class Waiterengine ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( nam
 					action { //it:State
 						request("step", "step($StepTime)" ,"basicrobot" )  
 					}
-					 transition(edgeName="t062",targetState="stepDone",cond=whenReply("stepdone"))
-					transition(edgeName="t063",targetState="stepFailed",cond=whenReply("stepfail"))
+					 transition(edgeName="t058",targetState="stepDone",cond=whenReply("stepdone"))
+					transition(edgeName="t059",targetState="stepFailed",cond=whenReply("stepfail"))
 				}	 
 				state("stepDone") { //this:State
 					action { //it:State

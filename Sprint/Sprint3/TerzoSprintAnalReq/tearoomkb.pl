@@ -5,7 +5,8 @@
 %% ------------------------------------------ 
 %% Positions
 %% ------------------------------------------ 
-pos( barman,       5, 0 ).
+pos( barman,       6, 0 ).
+pos( home,		   0, 0 ).
 pos( teatable1,    2, 2 ).
 pos( teatable2,    4, 2 ).
 pos( entrancedoor, 1, 4 ).
@@ -21,8 +22,13 @@ pos( exitdoor,     6, 4 ).
 %% clean	(not dirty)
 %% available (free and clean)	
 
-teatable( 1, clean ).
+teatable( 1, clean ). 
 teatable( 2, clean ).
+
+%%teatable con due parametri, il secondo identifica lo stato.
+%%invece di mettere un terzo parametro per il cliente, utilizziamo il secondo per inglobare
+%%l'informazione del clientID.
+%%Ovvero, teatable(1,occupy(ID))
 
 setState(N,S) :-
 	retract(teatable(N,_)),
@@ -31,8 +37,8 @@ setState(N,S) :-
 
 getState(N,S) :-
 	teatable(N,S).
-	
 
+tableclean(N) :- teatable(N, clean), !.
 
 numfreetables(N) :-
 	findall( N,teatable( N,clean ), NList),
@@ -43,12 +49,11 @@ stateOfTeatables( [teatable1(V1),teatable2(V2)] ) :-
 	teatable( 1, V1 ),
 	teatable( 2, V2 ).
 
-	
-occupyTable(N)	 :-
-	%% stdout <- println( tearoomkb_engageTable(N) ),
+occupyTable(N,ID) :-
 	retract( teatable( N, clean ) ),
 	!,
-	assert( teatable( N, occupy ) ).
+	assert( teatable( N, occupy(ID) ) ).
+occupyTable(_,_).
 
 releaseTable(N) :-
 	retract( teatable( N, occupy ) ),

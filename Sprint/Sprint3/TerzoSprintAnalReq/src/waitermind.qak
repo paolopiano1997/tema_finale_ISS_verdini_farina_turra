@@ -39,10 +39,10 @@ Dispatch stopengine : stopengine(S)
 //Client and tearoom messages
 Request enter : enter(ID)
 Reply accept : accept(C)
-Dispatch drinkready : drinkready(V)
-Dispatch clientready : clientready(C)
-Dispatch paymentready : paymentready(P)
-Dispatch order : order(O)
+Dispatch drinkready : drinkready(ID,O)
+Dispatch clientready : clientready(ID)
+Dispatch paymentready : paymentready(ID)
+Dispatch order : order(ID, O)
 Dispatch end : end (E)
 
 Dispatch starttimer : starttimer(T)
@@ -52,7 +52,7 @@ Dispatch startcleaner : startcleaner(T)
 Dispatch cleanerdone : cleanerdone(C)
 Dispatch stopcleaner : stopcleaner(C)
 
-Dispatch occupy  : occupy(N)
+Dispatch occupy  : occupy(N,ID)
 Dispatch release : release(N)
 Dispatch clean   : clean(N)
 
@@ -86,31 +86,16 @@ ExternalQActor basicrobot  context ctxbasicrobot
 
 QActor waitermind context ctxtearoom{
 [#
-//	//Coordinates of the entrance door
-	val X_Entrancedoor = "0"
-	val Y_Entrancedoor = "4"
-
-//	//Coordinates of the exit door
-	val X_Exitdoor = "6"
-	val Y_Exitdoor = "4"
 	
-//  //Coordinates of the barman
-	val X_servicedesk = "6"
-	val Y_servicedesk = "0"	
-
-//	//Coordinates Tables
-	val X_teatable1     = "2"
-	val Y_teatable1     = "2"
-
-	val X_teatable2     = "4"
-	val Y_teatable2     = "2"
-
-	//Coordinates of the home
-    val X_home			= "0"
-	val Y_home 			= "0"
-
-	val Servicetime = 3000L
 	val CollectTime = 3000L
+	
+	var CurMoveX = 0
+	var CurMoveY = 0
+	
+	var CurCID = 0
+	var CurTable = 0
+	var CurTableClean = 0
+	var CurOrder = ""
 	
 #]
 	State s0 initial {
@@ -122,7 +107,13 @@ QActor waitermind context ctxtearoom{
 	
 	State reachhome{
 		println("waitermind   |||   reachhome")
-		forward waiterengine -m moveto : moveto($X_home,$Y_home)
+		solve(pos(home, X, Y))
+		ifSolved{
+			[# CurMoveX = getCurSol("X").toString().toInt()  
+ 			   CurMoveY = getCurSol("Y").toString().toInt()  
+ 			#] 
+ 			forward waiterengine -m moveto : moveto($CurMoveX,$CurMoveY)
+		}
 	}
 	Transition t0   whenMsg done -> home
 					whenRequest enter -> accept
@@ -142,72 +133,58 @@ QActor waitermind context ctxtearoom{
 				  whenMsg end -> endwork
 	
 	State accept {
-		forward waiterengine -m stopengine : stopengine(stop)
+		//forward waiterengine -m stopengine : stopengine(stop)
 		println("waitermind   |||   accept")
-		replyTo enter with accept : accept(idclient)
+		onMsg(enter : enter(ID)){
+			[# CurCID = payloadArg(0).toString().toInt() #]
+			solve( tableclean(N) )
+			ifSolved{
+				[# CurTable = getCurSol("N").toString().toInt() #]
+				println("waitermind   |||   tableaclean=$CurTable")
+				replyTo enter with accept : accept($CurTable)
+				forward teatables -m occupy : occupy($CurTable, $CurCID)
+			}
+			else{
+				println("waitermind   |||   accept failed, $CurCID")
+ 				replyTo enter with accept : accept( 0 ) //In qualche modo dovremo informare il cliente del max time di attesa
+ 				[# CurCID = 0 #]  //no client
+	 		}
+		}
 	}
-	Goto reachEntranceDoor
+	Goto reachEntranceDoor if [# CurCID != 0 #] else checkCleanHome
 	
 	State reachEntranceDoor {
 		updateResource[# "reachingEntranceDoor" #]
 		println("waitermind   |||   reachEntranceDoor")
 		//updateResource[# "reachEntranceDoor" #]
-		forward waiterengine -m moveto : moveto($X_Entrancedoor, $Y_Entrancedoor)
-	}
-	Transition t0 whenMsg done -> checkTables
-	
-	State checkTables{
-		println("waitermind   |||   checkTables")
-		request teatables -m isClean : isClean(1)
-	}
-	Transition t0 whenReply isCleanDone -> checkIsCleanDone1
-
-	State checkIsCleanDone1{
-		onMsg(isCleanDone : isCleanDone(N,E)){
-			if [# payloadArg(1)=="yes" #]{
-				forward waitermind -m gototable1 : gototable1(table1)
-			}
-			else{
-				request teatables -m isClean : isClean(2)
-			}
-		}
-		[# readLine() #]
-	}
-	Transition t0 whenMsg gototable1 -> convoyToTable1
-				whenReply isCleanDone -> checkIsCleanDone2
-	
-	State checkIsCleanDone2{
-		onMsg(isCleanDone : isCleanDone(N,E)){
-			if [# payloadArg(1)=="yes" #]{
-				forward waitermind -m gototable2 : gototable2(table2)
-			}
+		solve(pos(entrancedoor, X, Y))
+		ifSolved{
+			[# 
+			   CurMoveX = getCurSol("X").toString().toInt()  
+ 			   CurMoveY = getCurSol("Y").toString().toInt()  
+ 			#] 
+			forward waiterengine -m moveto : moveto($CurMoveX,$CurMoveY)
 		}
 	}
-	Goto convoyToTable2
+	Transition t0 whenMsg done -> convoyToTable
 	
-	State convoyToTable1{
-		updateResource[# "convoyToTable1" #]
-		println("waitermind   |||   convoyToTable1")
-		forward waiterengine -m moveto : moveto ($X_teatable1,$Y_teatable1)
-//		[# table1.state= "occupied" #]
-		forward teatables -m occupy : occupy(1)
+	
+	State convoyToTable{
+		updateResource[# "convoyToTable$CurTable" #]
+		println("waitermind   |||   convoyToTable$CurTable")
+		solve(pos("teatable$CurTable",X,Y))
+		ifSolved{
+			[# 
+			   CurMoveX = getCurSol("X").toString().toInt()  
+ 			   CurMoveY = getCurSol("Y").toString().toInt()  
+ 			#] 
+			forward waiterengine -m moveto : moveto ($CurMoveX,$CurMoveY)
+			forward teatables -m occupy : occupy($CurTable)
+		}
 		println("waitermind   |||   table1 state occupied")
-		//updateResource [# "convoyToTable1" #]
-		delay 5000
 	}
 	Transition t0 whenMsg done -> checkCleanHome
 	
-	State convoyToTable2{
-		updateResource[# "convoyToTable2" #]
-		println("waitermind   |||   convoyToTable2")
-		forward waiterengine -m moveto : moveto ($X_teatable2,$Y_teatable2)
-		//[# table2.state= "occupied" #]
-		forward teatables -m occupy : occupy(2)
-		println("waitermind   |||   table2 state occupied")
-		//updateResource [# "convoyToTable2" #]
-		delay 5000
-	}
-	Transition t0 whenMsg done -> checkCleanHome
 	
 	State checkCleanHome{
 		[# readLine() #]
@@ -224,73 +201,145 @@ QActor waitermind context ctxtearoom{
 			}
 			else{
 				if[# payloadArg(0)=="1" #]{ //Interrotto clean table1
+					[# CurTableClean = 1 #]
 					forward waitermind -m gototable1 : gototable1(go)
 				}
 				else{
-					//forward waitermind -m gototable2 : gototable2(go)
+					[# CurTableClean = 2 #]
+					forward waitermind -m gototable2 : gototable2(go)//Interrotto clean table2
 				}
 			}
 		}
 	}
 	Transition t0 whenMsg gotohome -> reachhome
-				whenMsg gototable1 -> reachTable1CleanStopped
-				//whenMsg gototable2 -> reachTable2CleanStopped per ora il modello associa al primo cliente sempre il table1, quindi non si verifica
+				whenMsg gototable1 -> reachTableCleanStopped
 	
-	State reachTable1CleanStopped{
+	State reachTableCleanStopped{
 		println("waitermind   |||   reachTable1CleanStopped")
-		forward waiterengine -m moveto : moveto ($X_teatable1,$Y_teatable1)
+		solve(pos("teatable$CurTableClean",X,Y))
+		ifSolved{
+			[# 
+			   CurMoveX = getCurSol("X").toString().toInt()  
+ 			   CurMoveY = getCurSol("Y").toString().toInt()  
+ 			#] 
+ 			forward waiterengine -m moveto : moveto ($CurMoveX,$CurMoveY)
+ 		}
 	}
-	Transition t0 whenMsg done -> cleanTable1
+	Transition t0 whenMsg done -> cleanTable
 	
 	State take{
-		forward waiterengine -m stopengine : stopengine(stop)
+		//forward waiterengine -m stopengine : stopengine(stop)
 		println("waitermind   |||   take")
 		updateResource [# "take" #]
-		forward waiterengine -m moveto : moveto ($X_teatable1,$Y_teatable1)
+		onMsg(clientready : clientready(ID)){
+			[#
+				CurCID = payloadArg(0).toString().toInt()
+			#]
+		}
+		solve( getState(N,occupy($CurCID)))
+		ifSolved {
+			[# CurTable = getCurSol("N").toString().toInt() #]
+		}
+		solve(pos("teatable$CurTable",X,Y))
+		ifSolved{
+			[# 
+			   CurMoveX = getCurSol("X").toString().toInt()  
+ 			   CurMoveY = getCurSol("Y").toString().toInt()  
+ 			#] 
+ 			forward waiterengine -m moveto : moveto ($CurMoveX,$CurMoveY)
+ 		}
 	}
-	Transition t0 whenMsg done -> transmit
+	Transition t0 whenMsg done -> waitOrder
+	
+	State waitOrder{
+		println("waitermind   |||   waitOrder")
+	}
+	Transition t0 whenMsg order -> transmit
 	
 	State transmit{
 		[# readLine() #]
 		println("waitermind   |||   transmit")
 		updateResource [# "transmit" #]
-		//forward barman -m order : order(payloadArg(0))
+		onMsg(order : order(ID,O)){
+			forward barman -m order : order($CurCID,payloadArg(0))
+		}
 	}
-	Goto reachhome
+	Goto checkCleanHome
 	
 	State reachBarman{
-		forward waiterengine -m stopengine : stopengine(stop)
-		updateResource[# "reachingBarman" #]
-		println("waitermind   |||   reachBarman")
+		//forward waiterengine -m stopengine : stopengine(stop)
 		updateResource[# "reachBarman" #]
-		forward waiterengine -m moveto: moveto($X_servicedesk,$Y_servicedesk)
+		println("waitermind   |||   reachBarman")
+		onMsg(drinkready : drinkready(ID,O)){
+			[# CurCID = payloadArg(0).toString().toInt() #]
+		}
+		solve(pos(barman,X, Y))
+		ifSolved{
+			[# 
+			   CurMoveX = getCurSol("X").toString().toInt()  
+ 			   CurMoveY = getCurSol("Y").toString().toInt()  
+ 			#] 
+ 			forward waiterengine -m moveto : moveto ($CurMoveX,$CurMoveY)
+		}
 	}
 	Transition t0 whenMsg done -> serve
 	
 	State serve{
-		
 		[# readLine() #]
 		println("waitermind   |||   serve")
-		updateResource[# "reachBarman" #]
-		forward waiterengine -m moveto : moveto ($X_teatable1,$Y_teatable1)
+		solve( getState(N,occupy($CurCID)))
+		ifSolved {
+			[# CurTable = getCurSol("N").toString().toInt() #]
+		}
+		updateResource[# "reachTable${CurTable}Serve" #]
+		solve(pos("teatable$CurTable",X,Y))
+		ifSolved{
+			[# 
+			   CurMoveX = getCurSol("X").toString().toInt()  
+ 			   CurMoveY = getCurSol("Y").toString().toInt()  
+ 			#] 
+ 			forward waiterengine -m moveto : moveto ($CurMoveX,$CurMoveY)
+ 		}
 	}
-	Transition t0 whenMsg done -> reachhome
+	Transition t0 whenMsg done -> checkCleanHome
 	
 	State reachTableCollect {
-		forward waiterengine -m stopengine : stopengine(stop)
-		println("waitermind   |||   reachTable")
-		updateResource[# "reachTable1" #]
-		forward waiterengine -m moveto : moveto ($X_teatable1,$Y_teatable1)
+		//forward waiterengine -m stopengine : stopengine(stop)
+		println("waitermind   |||   reachTableCollect")
+		onMsg(paymentready : paymentready(ID)){
+			[# CurCID = payloadArg(0).toString().toInt() #]
+		}
+		solve( getState(N,occupy($CurCID)))
+		ifSolved {
+			[# CurTable = getCurSol("N").toString().toInt() #]
+		}
+		updateResource[# "reachTable$CurTable" #]
+		solve(pos("teatable$CurTable",X,Y))
+		ifSolved{
+			[# 
+			   CurMoveX = getCurSol("X").toString().toInt()  
+ 			   CurMoveY = getCurSol("Y").toString().toInt()  
+ 			#] 
+ 			forward waiterengine -m moveto : moveto ($CurMoveX,$CurMoveY)
+ 		}
 	}
 	Transition t0 whenMsg done -> collect
 	
 	State reachTableClean {
 		[# readLine() #]
 		println("waitermind   |||   reachTable")
-		updateResource[# "reachTable1Clean" #]
-		forward waiterengine -m moveto : moveto ($X_teatable1,$Y_teatable1)
+		updateResource[# "reachTableClean" #]
+		[# CurTableClean = CurTable #]
+		solve(pos("teatable$CurTable",X,Y))
+		ifSolved{
+			[# 
+			   CurMoveX = getCurSol("X").toString().toInt()  
+ 			   CurMoveY = getCurSol("Y").toString().toInt()  
+ 			#] 
+ 			forward waiterengine -m moveto : moveto ($CurMoveX,$CurMoveY)
+ 		}
 	}
-	Transition t0 whenMsg done -> cleanTable1
+	Transition t0 whenMsg done -> cleanTable
 	
 	State collect {
 		[# readLine() #]
@@ -303,26 +352,27 @@ QActor waitermind context ctxtearoom{
 	State convoyToExitDoor{
 		println("waitermind   |||   convoyToExitDoor")
 		updateResource[# "convoyToExitDoor" #]
-		forward waiterengine -m moveto : moveto($X_Exitdoor,$Y_Exitdoor)
-		forward teatables -m release : release(1)
+		[# CurCID = 0 #]
+		solve(pos(exitdoor, X, Y))
+		ifSolved{
+			[# 
+			   CurMoveX = getCurSol("X").toString().toInt()  
+ 			   CurMoveY = getCurSol("Y").toString().toInt()  
+ 			#] 
+ 			forward waiterengine -m moveto : moveto ($CurMoveX,$CurMoveY)
+ 		}
+		forward teatables -m release : release($CurTable)
 		delay 5000
 	}
 	Transition t0 whenMsg done -> reachTableClean
 	
-	State cleanTable1{
-		updateResource[# "cleanTable1" #]
-		println("waitermind   |||   cleanTable1")
-		forward waitercleaner -m startcleaner : startcleaner(1)
-	}
-	Transition t0 whenMsg cleanerdone -> reachhome //Qua non posso ricevere altri messaggi per l'assunzione fatta
-				whenRequest enter -> handleEnter
-	
-	State cleanTable2{
-		updateResource[# "cleanTable2" #]
-		println("waitermind   |||   cleanTable2")
-		forward waitercleaner -m startcleaner : startcleaner(2)
+	State cleanTable{
+		updateResource[# "cleanTable$CurTableClean" #]
+		println("waitermind   |||   cleanTable$CurTableClean")
+		forward waitercleaner -m startcleaner : startcleaner($CurTableClean)
 	}
 	Transition t0 whenMsg cleanerdone -> reachhome
+				whenRequest enter -> handleEnter
 	
 	State handleEnter {
 		forward waitercleaner -m stopcleaner : stopcleaner(stop)
@@ -617,10 +667,10 @@ QActor teatables context ctxtearoom{
 					
 	State engageTable{
 		printCurrentMessage
-		onMsg( occupy : occupy(N) ){
+		onMsg( occupy : occupy(N,ID) ){
 			updateResource[# "occupy" #]
-			println("engageTable ${payloadArg(0)}")
-			solve( occupyTable( $payloadArg(0) ) )	//could do anything
+			println("engageTable ${payloadArg(0)}, ${payloadArg(1)}")
+			solve( occupyTable( $payloadArg(0), $payloadArg(1)) )	//could do anything
 			solve( stateOfTeatables(S) )
 			[# StateOfTables = getCurSol("S").toString() #]  
 			println("teatables engageTable ${payloadArg(0)}: $StateOfTables")
@@ -745,6 +795,44 @@ QActor waiterengine context ctxtearoom {
 	}
 	Goto wait
 } 
+
+QActor barman context ctxtearoom {
+	
+	[# 
+		val Servicetime = 3000L
+		var CurOrder = ""
+		var CurCID = 0
+	#]
+	State s0 initial{
+		println("barman   |||   init")
+	}
+	Goto wait
+	
+	State wait{
+		println("barman   |||   wait")
+		updateResource[# "waiting" #]
+	}
+	Transition t0 whenMsg order -> prepare
+	
+	State prepare{
+		println("barman   |||   prepare")
+		updateResource[# "preparing" #]
+		onMsg(order : order(ID,O)){
+			[#
+				CurCID = payloadArg(0).toString().toInt()
+				CurOrder = payloadArg(1).toString()	
+			#]
+		}
+	}
+	Transition t0 whenTimeVar Servicetime -> done
+	
+	State done{
+		println("barman   |||   drinkReady")
+		updateResource[# "drinkready" #]
+		forward waitermind -m drinkready : drinkready($CurCID,$CurOrder)
+	}
+	Goto wait
+}
 
 //QActor client context ctxtearoom {
 //	State s0 initial{

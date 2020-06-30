@@ -39,12 +39,12 @@ class Teatables ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, 
 						updateResourceRep( StateOfTables  
 						)
 					}
-					 transition(edgeName="t051",targetState="engageTable",cond=whenDispatch("occupy"))
-					transition(edgeName="t052",targetState="cleanTable",cond=whenDispatch("clean"))
-					transition(edgeName="t053",targetState="release",cond=whenDispatch("release"))
-					transition(edgeName="t054",targetState="replyClean",cond=whenRequest("isClean"))
-					transition(edgeName="t055",targetState="setState",cond=whenDispatch("setTableState"))
-					transition(edgeName="t056",targetState="tableState",cond=whenRequest("tableState"))
+					 transition(edgeName="t047",targetState="engageTable",cond=whenDispatch("occupy"))
+					transition(edgeName="t048",targetState="cleanTable",cond=whenDispatch("clean"))
+					transition(edgeName="t049",targetState="release",cond=whenDispatch("release"))
+					transition(edgeName="t050",targetState="replyClean",cond=whenRequest("isClean"))
+					transition(edgeName="t051",targetState="setState",cond=whenDispatch("setTableState"))
+					transition(edgeName="t052",targetState="tableState",cond=whenRequest("tableState"))
 				}	 
 				state("release") { //this:State
 					action { //it:State
@@ -125,12 +125,12 @@ class Teatables ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, 
 				state("engageTable") { //this:State
 					action { //it:State
 						println("$name in ${currentState.stateName} | $currentMsg")
-						if( checkMsgContent( Term.createTerm("occupy(N)"), Term.createTerm("occupy(N)"), 
+						if( checkMsgContent( Term.createTerm("occupy(N,ID)"), Term.createTerm("occupy(N,ID)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
 								updateResourceRep( "occupy"  
 								)
-								println("engageTable ${payloadArg(0)}")
-								solve("occupyTable(${payloadArg(0)})","") //set resVar	
+								println("engageTable ${payloadArg(0)}, ${payloadArg(1)}")
+								solve("occupyTable(${payloadArg(0)},${payloadArg(1)})","") //set resVar	
 								solve("stateOfTeatables(S)","") //set resVar	
 								 StateOfTables = getCurSol("S").toString()  
 								println("teatables engageTable ${payloadArg(0)}: $StateOfTables")
