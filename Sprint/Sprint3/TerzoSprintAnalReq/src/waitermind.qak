@@ -59,6 +59,12 @@ Dispatch clean   : clean(N)
 Request isClean : isClean(N)
 Reply isCleanDone : isCleanDone(N,E)
 
+Request tableClean : tableClean(N)
+Reply table : table(N)
+
+Request getTable : getTable(ID)
+Reply tableId : tableId(N)
+
 Request isTableStopped : isTableStopped(T)
 Reply isTableStoppedDone : isTableStoppedDone(E)
 
@@ -100,6 +106,7 @@ QActor waitermind context ctxtearoom{
 #]
 	State s0 initial {
 		discardMsg Off
+		solve( consult("tearoomkb.pl")	 )
 		println("waitermind   |||   init")
 		request waiterengine -m start : start(id)
 	}
@@ -137,19 +144,25 @@ QActor waitermind context ctxtearoom{
 		println("waitermind   |||   accept")
 		onMsg(enter : enter(ID)){
 			[# CurCID = payloadArg(0).toString().toInt() #]
-			solve( tableclean(N) )
-			ifSolved{
-				[# CurTable = getCurSol("N").toString().toInt() #]
-				println("waitermind   |||   tableaclean=$CurTable")
-				replyTo enter with accept : accept($CurTable)
-				forward teatables -m occupy : occupy($CurTable, $CurCID)
-			}
-			else{
-				println("waitermind   |||   accept failed, $CurCID")
- 				replyTo enter with accept : accept( 0 ) //In qualche modo dovremo informare il cliente del max time di attesa
- 				[# CurCID = 0 #]  //no client
-	 		}
+			request teatables -m tableClean : tableClean(n)
 		}
+	}
+	Transition t0 whenReply table -> checkTables
+	
+	State checkTables{
+		onMsg(table : table(N)){
+			[# CurTable = payloadArg(0).toString().toInt() #]
+		}
+		if[# CurTable != 0 #]{
+			println("waitermind   |||   tableclean=$CurTable")
+			replyTo enter with accept : accept($CurTable)
+			forward teatables -m occupy : occupy($CurTable, $CurCID)
+		}
+		else{
+			println("waitermind   |||   accept failed, $CurCID")
+			replyTo enter with accept : accept( 0 ) //In qualche modo dovremo informare il cliente del max time di attesa
+			[# CurCID = 0 #]  //no client
+ 		}
 	}
 	Goto reachEntranceDoor if [# CurCID != 0 #] else checkCleanHome
 	
@@ -236,20 +249,26 @@ QActor waitermind context ctxtearoom{
 				CurCID = payloadArg(0).toString().toInt()
 			#]
 		}
-		solve( getState(N,occupy($CurCID)))
-		ifSolved {
-			[# CurTable = getCurSol("N").toString().toInt() #]
+		request teatables -m getTable : getTable($CurCID)
+	}
+	Transition t0 whenReply tableId -> checkTake
+		
+	
+	State checkTake{
+		onMsg(tableId : tableId(N)){
+			[# CurTable = payloadArg(0).toString().toInt() #]
+			solve(pos("teatable$CurTable",X,Y))
+			ifSolved{
+				[# 
+				   CurMoveX = getCurSol("X").toString().toInt()  
+	 			   CurMoveY = getCurSol("Y").toString().toInt()  
+	 			#] 
+	 			forward waiterengine -m moveto : moveto ($CurMoveX,$CurMoveY)
+ 			}
 		}
-		solve(pos("teatable$CurTable",X,Y))
-		ifSolved{
-			[# 
-			   CurMoveX = getCurSol("X").toString().toInt()  
- 			   CurMoveY = getCurSol("Y").toString().toInt()  
- 			#] 
- 			forward waiterengine -m moveto : moveto ($CurMoveX,$CurMoveY)
- 		}
 	}
 	Transition t0 whenMsg done -> waitOrder
+	
 	
 	State waitOrder{
 		println("waitermind   |||   waitOrder")
@@ -287,19 +306,36 @@ QActor waitermind context ctxtearoom{
 	State serve{
 		[# readLine() #]
 		println("waitermind   |||   serve")
-		solve( getState(N,occupy($CurCID)))
-		ifSolved {
-			[# CurTable = getCurSol("N").toString().toInt() #]
+		request teatables -m getTable : getTable($CurCID)
+		
+//		solve( getState(N,occupy($CurCID)))
+//		ifSolved {
+//			[# CurTable = getCurSol("N").toString().toInt() #]
+//		}
+//		updateResource[# "reachTable${CurTable}Serve" #]
+//		solve(pos("teatable$CurTable",X,Y))
+//		ifSolved{
+//			[# 
+//			   CurMoveX = getCurSol("X").toString().toInt()  
+// 			   CurMoveY = getCurSol("Y").toString().toInt()  
+// 			#] 
+// 			forward waiterengine -m moveto : moveto ($CurMoveX,$CurMoveY)
+// 		}
+	}
+	Transition t0 whenReply tableId -> checkTableId
+	
+	State checkTableId{
+		onMsg(tableId : tableId(N)){
+			[# CurTable = payloadArg(0).toString().toInt() #]
+			solve(pos("teatable$CurTable",X,Y))
+			ifSolved{
+				[# 
+				   CurMoveX = getCurSol("X").toString().toInt()  
+	 			   CurMoveY = getCurSol("Y").toString().toInt()  
+	 			#] 
+	 			forward waiterengine -m moveto : moveto ($CurMoveX,$CurMoveY)
+	 		}
 		}
-		updateResource[# "reachTable${CurTable}Serve" #]
-		solve(pos("teatable$CurTable",X,Y))
-		ifSolved{
-			[# 
-			   CurMoveX = getCurSol("X").toString().toInt()  
- 			   CurMoveY = getCurSol("Y").toString().toInt()  
- 			#] 
- 			forward waiterengine -m moveto : moveto ($CurMoveX,$CurMoveY)
- 		}
 	}
 	Transition t0 whenMsg done -> checkCleanHome
 	
@@ -362,7 +398,6 @@ QActor waitermind context ctxtearoom{
  			forward waiterengine -m moveto : moveto ($CurMoveX,$CurMoveY)
  		}
 		forward teatables -m release : release($CurTable)
-		delay 5000
 	}
 	Transition t0 whenMsg done -> reachTableClean
 	
@@ -384,8 +419,6 @@ QActor waitermind context ctxtearoom{
 		terminate 0
 	}
 }
-
-
 
 QActor timer context ctxtearoom {
 	[# 
@@ -594,11 +627,35 @@ QActor teatables context ctxtearoom{
 	}
 	Transition t0  whenMsg occupy -> engageTable
 					whenMsg clean -> cleanTable
+					whenRequest getTable -> getTable
+					whenRequest tableClean -> tableClean
 					whenMsg release -> release
 				whenRequest isClean -> replyClean
 					whenMsg setTableState -> setState
 					whenRequest tableState -> tableState
 					
+	State getTable{
+		onMsg(getTable : getTable(ID)){
+			solve( getState(N, occupy($payloadArg(0))))
+			ifSolved{
+				[# Table = getCurSol("N").toString() #]
+				replyTo getTable with tableId : tableId($Table)
+			}
+		}
+	}
+	Goto work
+	
+	State tableClean{
+		solve(tableclean(N))
+		ifSolved{
+			[# Table = getCurSol("N").toString() #]
+			replyTo tableClean with table : table($Table)
+		}
+		else{
+			replyTo tableClean with table : table(0)
+		}
+	}
+	Goto work
 					
 	State release {
 		updateResource[# "clean" #]
@@ -740,7 +797,7 @@ QActor waiterengine context ctxtearoom {
 	State execPlanMove{
 		[#  CurMove = itunibo.planner.plannerUtil.getNextPlannedMove() #]
 	}
-	Transition t0 whenTime 200 -> nextStep
+	Transition t0 whenTime 50 -> nextStep
 				whenMsg stopengine -> stop
 	
 	State nextStep{

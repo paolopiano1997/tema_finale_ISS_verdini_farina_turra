@@ -22,13 +22,13 @@ pos( exitdoor,     6, 4 ).
 %% clean	(not dirty)
 %% available (free and clean)	
 
-teatable( 1, clean ). 
-teatable( 2, clean ).
-
 %%teatable con due parametri, il secondo identifica lo stato.
 %%invece di mettere un terzo parametro per il cliente, utilizziamo il secondo per inglobare
 %%l'informazione del clientID.
 %%Ovvero, teatable(1,occupy(ID))
+
+teatable( 1, clean ). 
+teatable( 2, clean ).
 
 setState(N,S) :-
 	retract(teatable(N,_)),
@@ -38,7 +38,8 @@ setState(N,S) :-
 getState(N,S) :-
 	teatable(N,S).
 
-tableclean(N) :- teatable(N, clean), !.
+tableclean(N) :- teatable( N, clean), !.
+tableclean(N).
 
 numfreetables(N) :-
 	findall( N,teatable( N,clean ), NList),

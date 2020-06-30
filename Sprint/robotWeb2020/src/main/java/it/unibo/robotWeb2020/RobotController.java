@@ -124,18 +124,38 @@ public class RobotController {
 	/*
 	 * INTERACTION WITH THE BUSINESS LOGIC			
 	 */
-	protected void doBusinessJob( String moveName, Model viewmodel) {
+	protected void doBusinessJob( String moveName, Model viewmodel) {//SISTEMARE ID DEL CLIENTE E TIPO DI ORDINE
 		try {
 			if( moveName.equalsIgnoreCase("enter")) {
-				ApplMessage msg = MsgUtil.buildRequest("web", "enter", "enter("+configurator.getStepsize()+")", configurator.getQakdest() );
+				ApplMessage msg = MsgUtil.buildRequest("web", "enter", "enter(1)", configurator.getQakdest() );
 				connQakSupport.request( msg );				
 			}
-			else if (moveName.equalsIgnoreCase("order")){
-				ApplMessage msg = MsgUtil.buildDispatch("web", "clientready", "clientready("+configurator.getStepsize()+")", configurator.getQakdest() );
+			else if (moveName.equalsIgnoreCase("order")) {
+				ApplMessage msg = MsgUtil.buildDispatch("web", "order", "order(1,greentea)", configurator.getQakdest() );
+				connQakSupport.forward( msg );
+			}
+			else if (moveName.equalsIgnoreCase("clientready")){
+				ApplMessage msg = MsgUtil.buildDispatch("web", "clientready", "clientready(1)", configurator.getQakdest() );
+				connQakSupport.forward( msg );
+			}
+			else if (moveName.equalsIgnoreCase("payment")){
+				ApplMessage msg = MsgUtil.buildDispatch("web", "paymentready", "paymentready(1)", configurator.getQakdest() );
+				connQakSupport.forward( msg );
+			}
+			else if( moveName.equalsIgnoreCase("enter2")) {
+				ApplMessage msg = MsgUtil.buildRequest("web", "enter", "enter(2)", configurator.getQakdest() );
+				connQakSupport.request( msg );				
+			}
+			else if (moveName.equalsIgnoreCase("order2")) {
+				ApplMessage msg = MsgUtil.buildDispatch("web", "order", "order(2,greentea)", configurator.getQakdest() );
+				connQakSupport.forward( msg );
+			}
+			else if (moveName.equalsIgnoreCase("clientready2")){
+				ApplMessage msg = MsgUtil.buildDispatch("web", "clientready", "clientready(2)", configurator.getQakdest() );
 				connQakSupport.forward( msg );
 			}
 			else {
-				ApplMessage msg = MsgUtil.buildDispatch("web", "paymentready", "paymentready("+configurator.getStepsize()+")", configurator.getQakdest() );
+				ApplMessage msg = MsgUtil.buildDispatch("web", "paymentready", "paymentready(2)", configurator.getQakdest() );
 				connQakSupport.forward( msg );
 			}
 			//WAIT for command completion ...
