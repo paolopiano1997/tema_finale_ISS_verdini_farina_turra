@@ -32,7 +32,7 @@ class Waiterengine ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( nam
 						itunibo.planner.plannerUtil.showCurrentRobotState(  )
 						println("waiterengine   |||   init")
 					}
-					 transition(edgeName="t054",targetState="started",cond=whenRequest("start"))
+					 transition(edgeName="t062",targetState="started",cond=whenRequest("start"))
 				}	 
 				state("started") { //this:State
 					action { //it:State
@@ -45,8 +45,8 @@ class Waiterengine ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( nam
 					action { //it:State
 						println("waiterengine   |||   wait")
 					}
-					 transition(edgeName="t055",targetState="planmove",cond=whenDispatch("moveto"))
-					transition(edgeName="t056",targetState="wait",cond=whenDispatch("stopengine"))
+					 transition(edgeName="t063",targetState="planmove",cond=whenDispatch("moveto"))
+					transition(edgeName="t064",targetState="wait",cond=whenDispatch("stopengine"))
 				}	 
 				state("planmove") { //this:State
 					action { //it:State
@@ -64,10 +64,10 @@ class Waiterengine ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( nam
 					action { //it:State
 						  CurMove = itunibo.planner.plannerUtil.getNextPlannedMove()  
 						stateTimer = TimerActor("timer_execPlanMove", 
-							scope, context!!, "local_tout_waiterengine_execPlanMove", 50.toLong() )
+							scope, context!!, "local_tout_waiterengine_execPlanMove", 100.toLong() )
 					}
-					 transition(edgeName="t057",targetState="nextStep",cond=whenTimeout("local_tout_waiterengine_execPlanMove"))   
-					transition(edgeName="t058",targetState="stop",cond=whenDispatch("stopengine"))
+					 transition(edgeName="t065",targetState="nextStep",cond=whenTimeout("local_tout_waiterengine_execPlanMove"))   
+					transition(edgeName="t066",targetState="stop",cond=whenDispatch("stopengine"))
 				}	 
 				state("nextStep") { //this:State
 					action { //it:State
@@ -88,8 +88,8 @@ class Waiterengine ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( nam
 					action { //it:State
 						request("step", "step($StepTime)" ,"basicrobot" )  
 					}
-					 transition(edgeName="t059",targetState="stepDone",cond=whenReply("stepdone"))
-					transition(edgeName="t060",targetState="stepFailed",cond=whenReply("stepfail"))
+					 transition(edgeName="t067",targetState="stepDone",cond=whenReply("stepdone"))
+					transition(edgeName="t068",targetState="stepFailed",cond=whenReply("stepfail"))
 				}	 
 				state("stepDone") { //this:State
 					action { //it:State
@@ -125,7 +125,7 @@ class Waiterengine ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( nam
 					action { //it:State
 						forward("cmd", "cmd($CurMove)" ,"basicrobot" ) 
 						itunibo.planner.plannerUtil.updateMap( "$CurMove"  )
-						delay(200) 
+						delay(100) 
 					}
 					 transition( edgeName="goto",targetState="execPlanMove", cond=doswitchGuarded({ CurMove.length > 0  
 					}) )
