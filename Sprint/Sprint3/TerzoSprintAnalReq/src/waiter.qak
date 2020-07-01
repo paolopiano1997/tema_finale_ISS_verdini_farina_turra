@@ -204,7 +204,7 @@ QActor waitermind context ctxtearoom{
 	State checkIsTableStopped{
 		println("waitermind   |||   checkIsTableStopped")
 		onMsg( isTableStoppedDone : isTableStoppedDone(E)){
-			if [# payloadArg(0)=="0" #]{ //0 non è interrotto nessun clean
+			if [# payloadArg(0)=="0" #]{ //0 non ï¿½ interrotto nessun clean
 				forward waitermind -m gotohome : gotohome(go)
 				[# CurTableClean = 0 #]
 			}
@@ -567,7 +567,7 @@ QActor waitercleaner context ctxtearoom {
 			replyTo isTableStopped with isTableStoppedDone : isTableStoppedDone(0)
 		}
 		else{
-			forward teatables -m setTableState : setTableState($Table,undirty) //I forward andrebbero fatti solo una volta, così
+			forward teatables -m setTableState : setTableState($Table,undirty) //I forward andrebbero fatti solo una volta, cosï¿½
 			//invece vengono fatti ogni volta che resumiamo.
 			forward timer -m starttimer : starttimer($Clean)
 		}
@@ -881,6 +881,48 @@ QActor barman context ctxtearoom {
 		println("barman   |||   drinkReady")
 		updateResource[# "drinkready" #]
 		forward waitermind -m drinkready : drinkready($CurCID,$CurOrder)
+	}
+	Goto wait
+}
+
+QActor smartbell context ctxtearoom{
+	[#
+		val tmax = 37.5
+		var IDRange = 1
+		var CTemp:Double = 0.0
+	#]
+	State s0 initial{
+		println("smartbell   |||   init")
+	}
+	Goto wait
+	
+	State wait{
+		println("smartbell   |||   wait")
+	}
+	Transition t0 whenRequest enter -> checkTemperature
+	
+	State checkTemperature{
+		[# CTemp = kotlin.random.Random.nextDouble(35.0,40.0) #]
+		if[# CTemp < tmax #]{
+			println("smartbell   |||   temp = $CTemp, client accepted")
+			request waitermind -m enter : enter($IDRange)
+			[# IDRange++ #]
+		} else {
+			println("smartbell   |||   temp = $CTemp, client rejected")
+		}
+	}
+	Transition t0 whenReply accept -> done
+	
+	State done{
+		onMsg(accept : accept(C)){
+			if[# payloadArg(0) == "0" #]{
+				println("smartbell   |||   tearoom is full, please wait...")
+				replyTo enter with accept : accept(0)
+			} else {
+				println("smartbell   |||   welcome!")
+				replyTo enter with accept : accept($payloadArg(0))
+			}
+		}
 	}
 	Goto wait
 }
