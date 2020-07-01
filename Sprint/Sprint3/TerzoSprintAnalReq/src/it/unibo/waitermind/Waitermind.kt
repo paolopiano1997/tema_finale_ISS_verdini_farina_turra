@@ -19,7 +19,7 @@ class Waitermind ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name,
 		
 			
 			val CollectTime = 3000L
-			
+		
 			var CurMoveX = 0
 			var CurMoveY = 0
 			
