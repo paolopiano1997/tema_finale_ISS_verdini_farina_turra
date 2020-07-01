@@ -69,6 +69,7 @@ class Waitermind ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name,
 				state("accept") { //this:State
 					action { //it:State
 						println("waitermind   |||   accept")
+						println("$name in ${currentState.stateName} | $currentMsg")
 						if( checkMsgContent( Term.createTerm("enter(ID)"), Term.createTerm("enter(ID)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
 								 CurCID = payloadArg(0).toString().toInt()  
@@ -79,6 +80,8 @@ class Waitermind ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name,
 				}	 
 				state("checkTables") { //this:State
 					action { //it:State
+						println("$name in ${currentState.stateName} | $currentMsg")
+						println("waitermind   |||   checkTables")
 						if( checkMsgContent( Term.createTerm("table(N)"), Term.createTerm("table(N)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
 								 CurTable = payloadArg(0).toString().toInt()  
@@ -107,6 +110,7 @@ class Waitermind ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name,
 						updateResourceRep( "reachingEntranceDoor"  
 						)
 						println("waitermind   |||   reachEntranceDoor")
+						println("$name in ${currentState.stateName} | $currentMsg")
 						solve("pos(entrancedoor,X,Y)","") //set resVar	
 						if( currentSolution.isSuccess() ) { 
 									   CurMoveX = getCurSol("X").toString().toInt()  
@@ -138,6 +142,7 @@ class Waitermind ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name,
 				}	 
 				state("checkCleanHome") { //this:State
 					action { //it:State
+						println("$name in ${currentState.stateName} | $currentMsg")
 						 readLine()  
 						println("waitermind   |||   checkClean")
 						request("isTableStopped", "isTableStopped(isStopped)" ,"waitercleaner" )  
@@ -293,23 +298,31 @@ class Waitermind ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name,
 						                        currentMsg.msgContent()) ) { //set msgArgList
 								 CurCID = payloadArg(0).toString().toInt()  
 						}
-						solve("getState(N,occupy($CurCID))","") //set resVar	
-						if( currentSolution.isSuccess() ) { CurTable = getCurSol("N").toString().toInt()  
-						}
-						else
-						{}
-						updateResourceRep( "reachTable$CurTable"  
-						)
-						solve("pos('teatable$CurTable',X,Y)","") //set resVar	
-						if( currentSolution.isSuccess() ) { 
-									   CurMoveX = getCurSol("X").toString().toInt()  
-						 			   CurMoveY = getCurSol("Y").toString().toInt()  
-						forward("moveto", "moveto($CurMoveX,$CurMoveY)" ,"waiterengine" ) 
-						}
-						else
-						{}
+						request("getTable", "getTable($CurCID)" ,"teatables" )  
 					}
-					 transition(edgeName="t024",targetState="collect",cond=whenDispatch("done"))
+					 transition(edgeName="t024",targetState="checkCollect",cond=whenReply("tableId"))
+				}	 
+				state("checkCollect") { //this:State
+					action { //it:State
+						if( checkMsgContent( Term.createTerm("tableId(N)"), Term.createTerm("tableId(N)"), 
+						                        currentMsg.msgContent()) ) { //set msgArgList
+								if( currentSolution.isSuccess() ) { CurTable = payloadArg(0).toString().toInt()  
+								}
+								else
+								{}
+								updateResourceRep( "reachTable$CurTable"  
+								)
+								solve("pos('teatable$CurTable',X,Y)","") //set resVar	
+								if( currentSolution.isSuccess() ) { 
+												   CurMoveX = getCurSol("X").toString().toInt()  
+									 			   CurMoveY = getCurSol("Y").toString().toInt()  
+								forward("moveto", "moveto($CurMoveX,$CurMoveY)" ,"waiterengine" ) 
+								}
+								else
+								{}
+						}
+					}
+					 transition(edgeName="t025",targetState="collect",cond=whenDispatch("done"))
 				}	 
 				state("reachTableClean") { //this:State
 					action { //it:State
@@ -327,7 +340,7 @@ class Waitermind ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name,
 						else
 						{}
 					}
-					 transition(edgeName="t025",targetState="cleanTable",cond=whenDispatch("done"))
+					 transition(edgeName="t026",targetState="cleanTable",cond=whenDispatch("done"))
 				}	 
 				state("collect") { //this:State
 					action { //it:State
@@ -354,7 +367,7 @@ class Waitermind ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name,
 						{}
 						forward("release", "release($CurTable)" ,"teatables" ) 
 					}
-					 transition(edgeName="t026",targetState="reachTableClean",cond=whenDispatch("done"))
+					 transition(edgeName="t027",targetState="reachTableClean",cond=whenDispatch("done"))
 				}	 
 				state("cleanTable") { //this:State
 					action { //it:State
@@ -363,11 +376,11 @@ class Waitermind ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name,
 						println("waitermind   |||   cleanTable$CurTableClean")
 						forward("startcleaner", "startcleaner($CurTableClean)" ,"waitercleaner" ) 
 					}
-					 transition(edgeName="t027",targetState="reachhome",cond=whenDispatch("cleanerdone"))
-					transition(edgeName="t028",targetState="accept",cond=whenRequest("enter"))
-					transition(edgeName="t029",targetState="take",cond=whenDispatch("clientready"))
-					transition(edgeName="t030",targetState="reachBarman",cond=whenDispatch("drinkready"))
-					transition(edgeName="t031",targetState="reachTableCollect",cond=whenDispatch("paymentready"))
+					 transition(edgeName="t028",targetState="reachhome",cond=whenDispatch("cleanerdone"))
+					transition(edgeName="t029",targetState="accept",cond=whenRequest("enter"))
+					transition(edgeName="t030",targetState="take",cond=whenDispatch("clientready"))
+					transition(edgeName="t031",targetState="reachBarman",cond=whenDispatch("drinkready"))
+					transition(edgeName="t032",targetState="reachTableCollect",cond=whenDispatch("paymentready"))
 				}	 
 				state("endwork") { //this:State
 					action { //it:State

@@ -31,7 +31,7 @@ class Smartbell ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, 
 					action { //it:State
 						println("smartbell   |||   wait")
 					}
-					 transition(edgeName="t071",targetState="checkTemperature",cond=whenRequest("enter"))
+					 transition(edgeName="t072",targetState="checkTemperature",cond=whenRequest("enter"))
 				}	 
 				state("checkTemperature") { //this:State
 					action { //it:State
@@ -46,8 +46,8 @@ class Smartbell ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, 
 						 forward("reject", "reject(acasa)" ,"smartbell" ) 
 						 }
 					}
-					 transition(edgeName="t072",targetState="rejected",cond=whenDispatch("reject"))
-					transition(edgeName="t073",targetState="done",cond=whenReply("accept"))
+					 transition(edgeName="t073",targetState="rejected",cond=whenDispatch("reject"))
+					transition(edgeName="t074",targetState="done",cond=whenReply("accept"))
 				}	 
 				state("done") { //this:State
 					action { //it:State

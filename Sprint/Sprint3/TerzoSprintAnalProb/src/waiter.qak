@@ -148,6 +148,7 @@ QActor waitermind context ctxtearoom{
 				  
 	State accept {
 		println("waitermind   |||   accept")
+		printCurrentMessage
 		onMsg(enter : enter(ID)){
 			[# CurCID = payloadArg(0).toString().toInt() #]
 			request teatables -m tableClean : tableClean(n)
@@ -156,6 +157,8 @@ QActor waitermind context ctxtearoom{
 	Transition t0 whenReply table -> checkTables
 	
 	State checkTables{
+		printCurrentMessage
+		println("waitermind   |||   checkTables")
 		onMsg(table : table(N)){
 			[# CurTable = payloadArg(0).toString().toInt() #]
 		}
@@ -178,6 +181,7 @@ QActor waitermind context ctxtearoom{
 	State reachEntranceDoor {
 		updateResource[# "reachingEntranceDoor" #]
 		println("waitermind   |||   reachEntranceDoor")
+		printCurrentMessage
 		//updateResource[# "reachEntranceDoor" #]
 		solve(pos(entrancedoor, X, Y))
 		ifSolved{
@@ -209,6 +213,7 @@ QActor waitermind context ctxtearoom{
 	
 	
 	State checkCleanHome{
+		printCurrentMessage
 		[# readLine() #]
 		println("waitermind   |||   checkClean")
 		request waitercleaner -m isTableStopped : isTableStopped(isStopped)
@@ -320,20 +325,6 @@ QActor waitermind context ctxtearoom{
 		[# readLine() #]
 		println("waitermind   |||   serve")
 		request teatables -m getTable : getTable($CurCID)
-		
-//		solve( getState(N,occupy($CurCID)))
-//		ifSolved {
-//			[# CurTable = getCurSol("N").toString().toInt() #]
-//		}
-//		updateResource[# "reachTable${CurTable}Serve" #]
-//		solve(pos("teatable$CurTable",X,Y))
-//		ifSolved{
-//			[# 
-//			   CurMoveX = getCurSol("X").toString().toInt()  
-// 			   CurMoveY = getCurSol("Y").toString().toInt()  
-// 			#] 
-// 			forward waiterengine -m moveto : moveto ($CurMoveX,$CurMoveY)
-// 		}
 	}
 	Transition t0 whenReply tableId -> checkTableId
 	
@@ -360,18 +351,24 @@ QActor waitermind context ctxtearoom{
 		onMsg(paymentready : paymentready(ID)){
 			[# CurCID = payloadArg(0).toString().toInt() #]
 		}
-		solve( getState(N,occupy($CurCID)))
-		ifSolved {
-			[# CurTable = getCurSol("N").toString().toInt() #]
-		}
-		updateResource[# "reachTable$CurTable" #]
-		solve(pos("teatable$CurTable",X,Y))
-		ifSolved{
-			[# 
-			   CurMoveX = getCurSol("X").toString().toInt()  
- 			   CurMoveY = getCurSol("Y").toString().toInt()  
- 			#] 
- 			forward waiterengine -m moveto : moveto ($CurMoveX,$CurMoveY)
+		request teatables -m getTable : getTable($CurCID)
+	}
+	Transition t0 whenReply tableId -> checkCollect
+
+	State checkCollect{
+		onMsg(tableId : tableId(N)){
+			ifSolved {
+				[# CurTable = payloadArg(0).toString().toInt() #]
+			}
+			updateResource[# "reachTable$CurTable" #]
+			solve(pos("teatable$CurTable",X,Y))
+			ifSolved{
+				[# 
+				   CurMoveX = getCurSol("X").toString().toInt()  
+	 			   CurMoveY = getCurSol("Y").toString().toInt()  
+	 			#] 
+	 			forward waiterengine -m moveto : moveto ($CurMoveX,$CurMoveY)
+	 		}
  		}
 	}
 	Transition t0 whenMsg done -> collect
@@ -478,6 +475,7 @@ QActor waitercleaner context ctxtearoom {
 		var Table = ""
 		val	Cleantime = 3000L
 		var Clean = Cleantime
+		var TableState = ""
 	#]
 	State s0 initial{// Accettazione richieste/dispatch
 		println("waitercleaner   |||   init")
@@ -522,7 +520,8 @@ QActor waitercleaner context ctxtearoom {
 		println("waitercleaner   |||   preStart")
 		updateResource[# "nonStopped" #]
 		onMsg(startcleaner : startcleaner(T)){
-			request teatables -m tableState : tableState(payloadArg(0))
+			[# TableState = payloadArg(0) #]
+			request teatables -m tableState : tableState($TableState)
 		}
 	}
 	Transition t0 whenReply state -> checkState
@@ -624,7 +623,7 @@ QActor teatables context ctxtearoom{
 [#
 	var StateOfTables = ""
 	var E = ""
-	var Table = ""
+	var Table = 0
 #]
 	State s0 initial{
 		println("teatables START")
@@ -651,7 +650,7 @@ QActor teatables context ctxtearoom{
 		onMsg(getTable : getTable(ID)){
 			solve( getState(N, occupy($payloadArg(0))))
 			ifSolved{
-				[# Table = getCurSol("N").toString() #]
+				[# Table = getCurSol("N").toString().toInt() #]
 				replyTo getTable with tableId : tableId($Table)
 			}
 		}
@@ -661,7 +660,7 @@ QActor teatables context ctxtearoom{
 	State tableClean{
 		solve(tableclean(N))
 		ifSolved{
-			[# Table = getCurSol("N").toString() #]
+			[# Table = getCurSol("N").toString().toInt() #]
 			replyTo tableClean with table : table($Table)
 		}
 		else{
@@ -684,7 +683,7 @@ QActor teatables context ctxtearoom{
 		println("teateables   |||   tableState")
 		printCurrentMessage
 		onMsg(tableState : tableState(N)){
-			[# Table = payloadArg(0) #]
+			[# Table = payloadArg(0).toString().toInt() #]
 			solve( getState($Table,S))
 			ifSolved{
 				[# E = getCurSol("S").toString() #]
@@ -717,7 +716,7 @@ QActor teatables context ctxtearoom{
 		println("teatables   |||   replyClean")
 		printCurrentMessage
 		onMsg(isClean : isClean(N)){
-			[# Table = payloadArg(0) #]
+			[# Table = payloadArg(0).toString().toInt() #]
 			println("onMsg isClean")
 			solve( getState($Table,S) )
 			ifSolved{

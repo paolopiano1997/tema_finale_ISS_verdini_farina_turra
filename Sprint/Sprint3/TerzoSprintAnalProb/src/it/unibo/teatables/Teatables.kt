@@ -19,7 +19,7 @@ class Teatables ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, 
 		
 			var StateOfTables = ""
 			var E = ""
-			var Table = ""
+			var Table = 0
 		return { //this:ActionBasciFsm
 				state("s0") { //this:State
 					action { //it:State
@@ -39,21 +39,21 @@ class Teatables ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, 
 						updateResourceRep( StateOfTables  
 						)
 					}
-					 transition(edgeName="t054",targetState="engageTable",cond=whenDispatch("occupy"))
-					transition(edgeName="t055",targetState="cleanTable",cond=whenDispatch("clean"))
-					transition(edgeName="t056",targetState="getTable",cond=whenRequest("getTable"))
-					transition(edgeName="t057",targetState="tableClean",cond=whenRequest("tableClean"))
-					transition(edgeName="t058",targetState="release",cond=whenDispatch("release"))
-					transition(edgeName="t059",targetState="replyClean",cond=whenRequest("isClean"))
-					transition(edgeName="t060",targetState="setState",cond=whenDispatch("setTableState"))
-					transition(edgeName="t061",targetState="tableState",cond=whenRequest("tableState"))
+					 transition(edgeName="t055",targetState="engageTable",cond=whenDispatch("occupy"))
+					transition(edgeName="t056",targetState="cleanTable",cond=whenDispatch("clean"))
+					transition(edgeName="t057",targetState="getTable",cond=whenRequest("getTable"))
+					transition(edgeName="t058",targetState="tableClean",cond=whenRequest("tableClean"))
+					transition(edgeName="t059",targetState="release",cond=whenDispatch("release"))
+					transition(edgeName="t060",targetState="replyClean",cond=whenRequest("isClean"))
+					transition(edgeName="t061",targetState="setState",cond=whenDispatch("setTableState"))
+					transition(edgeName="t062",targetState="tableState",cond=whenRequest("tableState"))
 				}	 
 				state("getTable") { //this:State
 					action { //it:State
 						if( checkMsgContent( Term.createTerm("getTable(ID)"), Term.createTerm("getTable(ID)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
 								solve("getState(N,occupy(${payloadArg(0)}))","") //set resVar	
-								if( currentSolution.isSuccess() ) { Table = getCurSol("N").toString()  
+								if( currentSolution.isSuccess() ) { Table = getCurSol("N").toString().toInt()  
 								answer("getTable", "tableId", "tableId($Table)"   )  
 								}
 								else
@@ -65,7 +65,7 @@ class Teatables ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, 
 				state("tableClean") { //this:State
 					action { //it:State
 						solve("tableclean(N)","") //set resVar	
-						if( currentSolution.isSuccess() ) { Table = getCurSol("N").toString()  
+						if( currentSolution.isSuccess() ) { Table = getCurSol("N").toString().toInt()  
 						answer("tableClean", "table", "table($Table)"   )  
 						}
 						else
@@ -93,7 +93,7 @@ class Teatables ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, 
 						println("$name in ${currentState.stateName} | $currentMsg")
 						if( checkMsgContent( Term.createTerm("tableState(N)"), Term.createTerm("tableState(N)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
-								 Table = payloadArg(0)  
+								 Table = payloadArg(0).toString().toInt()  
 								solve("getState($Table,S)","") //set resVar	
 								if( currentSolution.isSuccess() ) { E = getCurSol("S").toString()  
 								}
@@ -132,7 +132,7 @@ class Teatables ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, 
 						println("$name in ${currentState.stateName} | $currentMsg")
 						if( checkMsgContent( Term.createTerm("isClean(N)"), Term.createTerm("isClean(N)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
-								 Table = payloadArg(0)  
+								 Table = payloadArg(0).toString().toInt()  
 								println("onMsg isClean")
 								solve("getState($Table,S)","") //set resVar	
 								if( currentSolution.isSuccess() ) { 

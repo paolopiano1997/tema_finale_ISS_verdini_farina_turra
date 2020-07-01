@@ -39,7 +39,6 @@ getState(N,S) :-
 	teatable(N,S).
 
 tableclean(N) :- teatable( N, clean), !.
-tableclean(N).
 
 numfreetables(N) :-
 	findall( N,teatable( N,clean ), NList),

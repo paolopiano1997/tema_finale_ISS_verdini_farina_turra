@@ -30,8 +30,8 @@ class Maxstaytimer ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( nam
 					action { //it:State
 						println("maxstaytimer   |||   wait")
 					}
-					 transition(edgeName="t074",targetState="doTimerAction",cond=whenDispatch("doTimerAction"))
-					transition(edgeName="t075",targetState="timePassed",cond=whenDispatch("timePassed"))
+					 transition(edgeName="t075",targetState="doTimerAction",cond=whenDispatch("doTimerAction"))
+					transition(edgeName="t076",targetState="timePassed",cond=whenDispatch("timePassed"))
 				}	 
 				state("doTimerAction") { //this:State
 					action { //it:State
