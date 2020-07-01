@@ -80,6 +80,8 @@ Dispatch gototable2 : gototable2(T)
 Request tableState : tableState(N)
 Reply state : state(N,S)
 
+Dispatch timeroff : timeroff(T) 
+
 //SMARTBELL
 Dispatch reject : reject(R)
 
@@ -947,15 +949,123 @@ QActor maxstaytimer context ctxtearoom { //BROKERRRRRRR DEVE SPARTIRE LE RICHIES
 }
 
 QActor staytimertable1 context ctxtearoom{ //Timer table 1
-	State s0 initial{
-		
+	[# 
+		val MaxStayTime = 60*10L //In secondi
+		var TimePassed = 0L
+		var Time: Long = 0
+		var StartTime : Long = 0	
+		var Duration : Long	= 0
+	#]
+	State s0 initial {
+		println("staytimertable1   |||   init")
 	}
+	Goto wait
+	
+	State wait {
+		printCurrentMessage
+		println("staytimertable1   |||   wait")
+	}
+	Transition t0 whenMsg starttimer -> start //Ci sarà un dispatch senza parametri, in cui i vari timer sanno già a priori la maxstaytime (oppure se la leggono su prolog, meglio)
+	
+	State start{
+		println("staytimertable1   |||   start")
+		printCurrentMessage
+		[# TimePassed++ #]
+		if[# TimePassed>=MaxStayTime #]{
+			forward staytimertable1 -m endtime : endtime($TimePassed)
+		}
+//		onMsg(starttimer : starttimer(T)) {
+//			[# Time = payloadArg(0).toLong() #]
+//			memoCurrentTime StartTime
+//		}
+	}
+//	Transition t0 whenTimeVar Time -> timeFinish
+//				whenRequest stoptimer -> stop
+	Transition t0 whenTime 1000 -> start
+				whenRequest stoptimer -> stop//Qua gestione automsg
+				//Deve gestire un opportuno messaggio di "end" per andare a fanculo ( deve resettare il TimePAssed)
+				whenMsg endtime -> timeFinish
+				whenMsg timeroff -> end
+				
+	State stop{
+//		setDuration Duration from StartTime
+		//Va fatto nello stato di "end" forzato dall'esterno
+		replyTo stoptimer with okStop : okStop($Duration)
+	}
+	Goto wait
+	
+	State end{
+		[# TimePassed = 0L #]
+		println("staytimertable1   |||   ended")
+	}
+	Goto wait
+	
+	State timeFinish{
+//		forward waitercleaner -m endtime : endtime(endtime)
+		[# TimePassed = 0L #]
+		emit timePassed : timePassed(3)
+	}
+	Goto wait
 }
 
 QActor staytimertable2 context ctxtearoom{ //Timer table 2
-	State s0 initial{
-		
+	[# 
+		val MaxStayTime = 60*10L //In secondi
+		var TimePassed = 0L
+		var Time: Long = 0
+		var StartTime : Long = 0	
+		var Duration : Long	= 0
+	#]
+	State s0 initial {
+		println("staytimertable2   |||   init")
 	}
+	Goto wait
+	
+	State wait {
+		printCurrentMessage
+		println("staytimertable2   |||   wait")
+	}
+	Transition t0 whenMsg starttimer -> start //Ci sarà un dispatch senza parametri, in cui i vari timer sanno già a priori la maxstaytime (oppure se la leggono su prolog, meglio)
+	
+	State start{
+		println("staytimertable2   |||   start")
+		printCurrentMessage
+		[# TimePassed++ #]
+		if[# TimePassed>=MaxStayTime #]{
+			forward staytimertable2 -m endtime : endtime($TimePassed)
+		}
+//		onMsg(starttimer : starttimer(T)) {
+//			[# Time = payloadArg(0).toLong() #]
+//			memoCurrentTime StartTime
+//		}
+	}
+//	Transition t0 whenTimeVar Time -> timeFinish
+//				whenRequest stoptimer -> stop
+	Transition t0 whenTime 1000 -> start
+				whenRequest stoptimer -> stop//Qua gestione automsg
+				//Deve gestire un opportuno messaggio di "end" per andare a fanculo ( deve resettare il TimePAssed)
+				whenMsg endtime -> timeFinish
+				whenMsg timeroff -> end
+				
+	State stop{
+//		setDuration Duration from StartTime
+		//Va fatto nello stato di "end" forzato dall'esterno
+		replyTo stoptimer with okStop : okStop($Duration)
+	}
+	Goto wait
+	
+	State end{
+		[# TimePassed = 0L #]
+		println("staytimertable2   |||   ended")
+	}
+	Goto wait
+	
+	State timeFinish{
+//		forward waitercleaner -m endtime : endtime(endtime)
+		[# TimePassed = 0L #]
+		emit timePassed : timePassed(2)
+	}
+	Goto wait
 }
 
 //QActor client context ctxtearoom {
