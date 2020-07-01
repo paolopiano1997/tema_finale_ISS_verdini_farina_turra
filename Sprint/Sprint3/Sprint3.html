@@ -223,7 +223,6 @@ including some significant <bc>TestPlan</bc>. </li>
 <li>The team must present (in synthetic, schematic way) the specific activity of each team-component.</li>
 </ol>	
 
-
 </div>
 <h2>Requirement Analysis</h2>
 <div class="remark">
@@ -266,6 +265,22 @@ Il secondo cliente non interagisce.</li>
      <br><br>-> capire come farla, cosa salvare, come salvarla e come recuperarla. (<b>HARD</b>)</li><br>
     <li><b>Problema 4</b>: il cliente non ha ancora fatto l'ordinazione ma esaurisce il <em>maxstaytime</em>.
     Paga euro 0 e viene accompagnato all'uscita</li>
+	<li>
+	<b>Da sistemare questo discorso</b> --> Problema 5: il tempo viene fatto trascorrere solo quando è responsabilità del cliente. Il problema che nasce
+		è che nel caso in cui il cliente faccia l'ordine mentre il waiter sta facendo un task, la richiesta sarà gestita solo quando il task
+		corrente si conclude. Questo vuol dire che il tempo viene fermato solo dopo aver ultimato quel task, ovvero del tempo viene sprecato prima di arrivare alla gestione della richiesta.
+		Questa cosa può essere trascurabile, in quanto il cliente è già agevolato sul fatto di far scorrere il tempo solo quando è "colpa" sua.
+	</li>
+	<li>Problema 6: Come gestire il timer per ciascun cliente? Quali scenari possono esserci?
+		Se i due clienti sono entrati e non ordinano, i timer sono entrambi attivi -> gestire più "entità" timer contemporaneamente.
+		Se hanno ordinato entrambi e non è ancora pronto l'ordine, entrambi i timer sono "spenti".
+		Problema -> situazione in cui i timer sono entrambi attivi. Come risolvere?
+		1. Tante entità quanti tavoli -> <b>molto poco scalabile</b>, ma funzionante.
+		Basandoci sul qak, l'introduzione di "molti" attori non è troppo pesante sull'utilizzo di ram/cpu etc..
+		COMMENTO: If you are using Akka, you can create an actor per request. Akka is extremely slim on resources and you can 
+		create literarily millions of actors on an pretty ordinary JVM heap. Also, they will only consume cpu/stack/threads when they actually do something.
+	</li>
+		
 </ul>
 <b>SVILUPPI FUTURI</b>
 <ol>

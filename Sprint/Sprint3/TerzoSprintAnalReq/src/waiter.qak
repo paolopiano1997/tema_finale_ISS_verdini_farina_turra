@@ -427,7 +427,7 @@ QActor timer context ctxtearoom {
 		println("timer   |||   init")
 	}
 	Goto wait
-	
+
 	State wait {
 		printCurrentMessage
 		println("timer   |||   wait")
@@ -447,7 +447,7 @@ QActor timer context ctxtearoom {
 				
 	State stop{
 		setDuration Duration from StartTime
-		replyTo stoptimer with okStop : okTop($Duration)
+		replyTo stoptimer with okStop : okStop($Duration)
 	}
 	Goto wait
 	
