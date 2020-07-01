@@ -80,6 +80,9 @@ Dispatch gototable2 : gototable2(T)
 Request tableState : tableState(N)
 Reply state : state(N,S)
 
+//SMARTBELL
+Dispatch reject : reject(R)
+
 Context ctxbasicrobot     ip [host="localhost"   port=8020]
 
 Context ctxtearoom   ip [host="127.0.0.1" port=8050]  
@@ -909,9 +912,11 @@ QActor smartbell context ctxtearoom{
 			[# IDRange++ #]
 		} else {
 			println("smartbell   |||   temp = $CTemp, client rejected")
+			forward smartbell -m reject : reject(acasa)
 		}
 	}
-	Transition t0 whenReply accept -> done
+	Transition t0 whenMsg reject -> rejected
+			      whenReply accept -> done
 	
 	State done{
 		onMsg(accept : accept(C)){
@@ -923,6 +928,13 @@ QActor smartbell context ctxtearoom{
 				replyTo enter with accept : accept($payloadArg(0))
 			}
 		}
+	}
+	Goto wait
+
+	State rejected{
+		println("smartbell   |||   client temperatur is >= 37.5, go home!")
+		[# CTemp = -1.0 #]
+		replyTo enter with accept : accept($CTemp)
 	}
 	Goto wait
 }
