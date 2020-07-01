@@ -447,7 +447,7 @@ QActor timer context ctxtearoom {
 				
 	State stop{
 		setDuration Duration from StartTime
-		replyTo stoptimer with okStop : okTop($Duration)
+		replyTo stoptimer with okStop : okStop($Duration)
 	}
 	Goto wait
 	
@@ -937,6 +937,25 @@ QActor smartbell context ctxtearoom{
 		replyTo enter with accept : accept($CTemp)
 	}
 	Goto wait
+}
+
+QActor maxstaytimer context ctxtearoom { //BROKERRRRRRR DEVE SPARTIRE LE RICHIESTE
+	State s0 initial{
+		
+	}
+	
+}
+
+QActor staytimertable1 context ctxtearoom{ //Timer table 1
+	State s0 initial{
+		
+	}
+}
+
+QActor staytimertable2 context ctxtearoom{ //Timer table 2
+	State s0 initial{
+		
+	}
 }
 
 //QActor client context ctxtearoom {

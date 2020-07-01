@@ -279,7 +279,11 @@ Il secondo cliente non interagisce.</li>
 		Basandoci sul qak, l'introduzione di "molti" attori non è troppo pesante sull'utilizzo di ram/cpu etc..
 		COMMENTO: If you are using Akka, you can create an actor per request. Akka is extremely slim on resources and you can 
 		create literarily millions of actors on an pretty ordinary JVM heap. Also, they will only consume cpu/stack/threads when they actually do something.
-	</li>
+		</br>
+		Diventa opportuno introdurre un'entità "centrale", la quale spartisce le interazioni tra waitermind e i vari timer di ciascun cliente. Così facendo,
+		introduciamo un livello intermedio che "spartisce" le richiesta dal waitermind alle varie entità timer -> maggiore scalabilità e riusabilità di waitermind etc.
+		
+		</li>
 		
 </ul>
 <b>SVILUPPI FUTURI</b>
