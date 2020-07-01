@@ -11,7 +11,7 @@ Request start : start(S)
 Reply ready : ready(V)
 
 
-Request 	start  : start(S)
+Request     start  : start(S)
 Reply 		ready  : ready(V)
 Request 	step       : step( TIME )
 Reply   	stepdone   : stepdone(V)
