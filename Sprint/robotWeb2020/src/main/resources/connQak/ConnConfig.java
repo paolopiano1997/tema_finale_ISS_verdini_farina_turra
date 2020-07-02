@@ -2,7 +2,7 @@ package connQak;
 
 public class ConnConfig {
 	
-	public static final String mqtthostAddr    	= "mqtt.eclipse.org";
+	public static final String mqtthostAddr    	= "localhost";
 	public static final String mqttport    		= "1883";
 //Page
  

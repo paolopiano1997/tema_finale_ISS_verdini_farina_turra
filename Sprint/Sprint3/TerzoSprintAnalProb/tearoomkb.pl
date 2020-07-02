@@ -9,7 +9,7 @@ pos( barman,       6, 0 ).
 pos( home,		   0, 0 ).
 pos( teatable1,    2, 2 ).
 pos( teatable2,    4, 2 ).
-pos( entrancedoor, 1, 4 ).
+pos( entrancedoor, 0, 4 ).
 pos( exitdoor,     6, 4 ).
 
 
@@ -78,7 +78,6 @@ cleanTable(N).
 %%	cleaning( table(N) )
 
 waiter( athome ).	
-
 
 %% ------------------------------------------ 
 %% ServiceDesk

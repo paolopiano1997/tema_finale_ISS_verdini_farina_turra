@@ -29,7 +29,7 @@ class Waitermind ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name,
 			//Table corrente e table da pulire corrente
 			var CurTable = 0
 			var CurTableClean = 0
-			
+		
 			//Se un cliente suona e non ci sono posti, lo salviamo qua
 			var CurEnterCID = 0
 		

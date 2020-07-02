@@ -1,6 +1,6 @@
 System tearoom
 
-mqttBroker "mqtt.eclipse.org" : 1883 eventTopic "mado/mado"
+mqttBroker "localhost" : 1883 eventTopic "event/topic"
 
 //Movements messages
 Dispatch moveto : moveto(X,Y)
@@ -119,7 +119,7 @@ QActor waitermind context ctxtearoom{
 	//Table corrente e table da pulire corrente
 	var CurTable = 0
 	var CurTableClean = 0
-	
+
 	//Se un cliente suona e non ci sono posti, lo salviamo qua
 	var CurEnterCID = 0
 
@@ -142,7 +142,8 @@ QActor waitermind context ctxtearoom{
 		println("waitermind   |||   reachhome")
 		solve(pos(home, X, Y))
 		ifSolved{
-			[# CurMoveX = getCurSol("X").toString().toInt()  
+			[# 
+			   CurMoveX = getCurSol("X").toString().toInt()  
  			   CurMoveY = getCurSol("Y").toString().toInt()  
  			#] 
  			forward waiterengine -m moveto : moveto($CurMoveX,$CurMoveY)
