@@ -256,7 +256,9 @@ Il secondo cliente non interagisce.</li>
 <h2>Problem analysis</h2> 
 <div class="remark">
 </br>
-
+Reminder: problema gestione stato room. E' necessaria un'entità che gestisca lo stato sulla base di conoscenza.
+Quindi, poichè abbiamo modellato i teatables che gestisse lo stato dei tavoli, è opportuno rimodellare tale entità, inglobando la gestione degli stati
+anche del waiter e del barman, per avere un quadro completo di tutta la situazione.
 </br></br>
 <ul>
 	<!--//se c'è un cliente che suona e non viene fatto entrare, assumiamo che i clienti in coda dietro al primo cliente in coda non suonino e dopo ogni ingresso di un cliente, 
