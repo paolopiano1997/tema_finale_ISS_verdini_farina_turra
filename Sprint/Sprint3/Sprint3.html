@@ -250,6 +250,8 @@ Il secondo cliente non interagisce.</li>
 <h2>Problem analysis</h2> 
 <div class="remark">
 <ul>
+	//se c'è un cliente che suona e non viene fatto entrare, assumiamo che i clienti in coda dietro al primo cliente in coda non suonino e dopo ogni ingresso di un cliente, 
+	il secondo cliente in coda suona e viene informato del tempo di attesa
 	<li><b>Problema 1</b>: Gestione delle richieste da tavoli differenti:
             Il waiter ha la necessità di sapere a che tavolo portare l'ordinazione. Necessità di tenere traccia dell'importo
             da pagare per ciascun cliente.<br><br>
@@ -284,7 +286,16 @@ Il secondo cliente non interagisce.</li>
 		</br>-->
 		Diventa opportuno introdurre un'entità intermedia, la quale spartisce le interazioni tra waitermind e i vari timer di ciascun cliente. Così facendo,
 		introduciamo un livello a metà che gestisce le richiesta dal waitermind alle varie entità timer, ciò risulta in maggiore scalabilità e riusabilità di waitermind
-		</li>
+	</li>
+	<li>
+	<b>Problema 7</b>: Gestione dei tempi di attesa per l'azione di <em>inform</em> a seguito del rilassamento sui vincoli sul numero di clienti presenti nel sistema (interni ed esterni alla tearoom). 
+		Esistono 3 situazioni in cui si può trovare la tearoom,<br>
+		   &ensp;&ensp;- Due tavoli non sanitized : min{cleaningTimeTable1,cleaningTimeTable2}<br>
+		   &ensp;&ensp;- Un tavolo non sanitized e un ciente dentro : min{cleaningTimeTable,remainingClientTime}<br>
+		   &ensp;&ensp;- Due cienti dentro la tearoom : min{remainingClientTime1,remainingClientTime2} <br>
+		   cleaningTimeTable definito come il tempo residuo per la pulizia del tavolo, <br>
+		   remainingClientTime definito come il tempo residuo del cliente per il suo staytime.
+	</li>
 		
 </ul>
 <b>SVILUPPI FUTURI</b>
