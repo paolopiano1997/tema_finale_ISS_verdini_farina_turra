@@ -17,6 +17,31 @@
 			document.getElementById("waiter-m").style.display = "none";
 		}
 	}
+  var table1State = 0
+  var table2State = 0
+  function changeTable1State(){
+    if(document.getElementById("t1").value.includes("occupied")){
+      document.getElementById('t1img').src='table1-red.png';
+    }
+    else if(document.getElementById("t1").value.includes("dirty")){
+      document.getElementById('t1img').src='table1-yellow.png';
+    }
+    else if(document.getElementById("t1").value.includes("clean")){
+      document.getElementById('t1img').src='table1.png';
+    }
+      
+  }
+  function changeTable2State(){
+    if(document.getElementById("t2").value.includes("occupied")){
+      document.getElementById('t2img').src='table1-red.png';
+    }
+    else if(document.getElementById("t2").value.includes("dirty")){
+      document.getElementById('t2img').src='table1-yellow.png';
+    }
+    else if(document.getElementById("t2").value.includes("clean")){
+      document.getElementById('t2img').src='table1.png';
+    }
+  }
 	</script>
     
     
@@ -245,14 +270,16 @@ body {
 	<div class="dueColonne">
    <h2>Tavolo 1</h2>
    <br>
-	<img src="table1.png" width=33%> 
-	<textarea id="applmsgs" name="w3review" style="font-size: 20px; resize: none; background: #555;">
+	<img id="t1img" src="table1.png" width=33%> 
+  <textarea id="t1" name="w3review" style="font-size: 20px; resize: none; background: #555;"
+            onChange="changeTable1State()">
 		clean
     </textarea>
    <h2>Tavolo2</h2>
    <br>
-   <img src="table1.png" width=33%>
-   <textarea id="applmsgs" name="w3review" style="font-size: 20px; resize: none; background: #555;">
+   <img id="t2img" src="table1.png" width=33%>
+   <textarea id="t2" name="w3review" style="font-size: 20px; resize: none; background: #555;"
+            onChange="changeTable2State()">
 		clean
     </textarea>
 </div>
