@@ -22,6 +22,7 @@ class Staytimertable2 ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( 
 		return { //this:ActionBasciFsm
 				state("s0") { //this:State
 					action { //it:State
+						discardMessages = true
 						println("staytimertable2   |||   init")
 					}
 					 transition( edgeName="goto",targetState="wait", cond=doswitch() )
@@ -31,12 +32,14 @@ class Staytimertable2 ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( 
 						println("$name in ${currentState.stateName} | $currentMsg")
 						println("staytimertable2   |||   wait")
 					}
-					 transition(edgeName="t082",targetState="start",cond=whenDispatch("starttimer"))
+					 transition(edgeName="t085",targetState="start",cond=whenDispatch("starttimer"))
 				}	 
 				state("start") { //this:State
 					action { //it:State
-						println("staytimertable2   |||   start")
-						println("$name in ${currentState.stateName} | $currentMsg")
+						if( checkMsgContent( Term.createTerm("starttimer(T)"), Term.createTerm("starttimer(T)"), 
+						                        currentMsg.msgContent()) ) { //set msgArgList
+								println("staytimertable2   |||   start")
+						}
 						 TimePassed++  
 						if(  TimePassed>=MaxStayTime  
 						 ){forward("endtime", "endtime($TimePassed)" ,"staytimertable2" ) 
@@ -44,10 +47,10 @@ class Staytimertable2 ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( 
 						stateTimer = TimerActor("timer_start", 
 							scope, context!!, "local_tout_staytimertable2_start", 1000.toLong() )
 					}
-					 transition(edgeName="t083",targetState="start",cond=whenTimeout("local_tout_staytimertable2_start"))   
-					transition(edgeName="t084",targetState="wait",cond=whenDispatch("stopstaytimer"))
-					transition(edgeName="t085",targetState="timeFinish",cond=whenDispatch("endtime"))
-					transition(edgeName="t086",targetState="end",cond=whenDispatch("timeroff"))
+					 transition(edgeName="t086",targetState="start",cond=whenTimeout("local_tout_staytimertable2_start"))   
+					transition(edgeName="t087",targetState="wait",cond=whenDispatch("stopstaytimer"))
+					transition(edgeName="t088",targetState="timeFinish",cond=whenDispatch("endtime"))
+					transition(edgeName="t089",targetState="end",cond=whenDispatch("timeroff"))
 				}	 
 				state("end") { //this:State
 					action { //it:State

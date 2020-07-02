@@ -25,6 +25,7 @@ Reply   	stepdone   : stepdone(V)
 Dispatch 	cmd        : cmd(MOVE)
 Reply   	stepfail   : stepfail(DURATION, CAUSE)
 
+
 Dispatch starttimer : starttimer(T)
 Dispatch endtime : endtime(T)
 
@@ -46,6 +47,8 @@ Dispatch stopengine : stopengine(S)
 //Client and tearoom messages
 Request enter : enter(ID)
 Reply accept : accept(C)
+//Inform
+Reply inform : inform(T)
 Dispatch drinkready : drinkready(ID,O)
 Dispatch clientready : clientready(ID)
 Dispatch paymentready : paymentready(ID)
@@ -100,14 +103,23 @@ ExternalQActor basicrobot  context ctxbasicrobot
 
 QActor waitermind context ctxtearoom{
 [#
-	
 	val CollectTime = 3000L
 
+	//Posizione corrente da raggiungere
 	var CurMoveX = 0
 	var CurMoveY = 0
+
+	//ID corrente del cliente
 	var CurCID = 0
+
+	//Table corrente e table da pulire corrente
 	var CurTable = 0
 	var CurTableClean = 0
+	
+	//Se un cliente suona e non ci sono posti, lo salviamo qua
+	var CurEnterCID = 0
+
+	//Ordine corrente
 	var CurOrder = ""
 	
 #]
@@ -131,6 +143,7 @@ QActor waitermind context ctxtearoom{
 	}
 	Transition t0   whenMsg done -> home
 					whenRequest enter -> accept
+					whenMsg timePassed -> reachTableCollect
 				  	whenMsg clientready -> take
 				  	whenMsg drinkready -> reachBarman
 				  	whenMsg paymentready -> reachTableCollect
@@ -142,6 +155,7 @@ QActor waitermind context ctxtearoom{
 	}
 	Transition t0 whenRequest enter -> accept
 				  whenMsg clientready -> take
+				  whenMsg timePassed -> timeEndTable
 				  whenMsg drinkready -> reachBarman
 				  whenMsg paymentready -> reachTableCollect
 				  whenMsg end -> endwork
@@ -172,7 +186,8 @@ QActor waitermind context ctxtearoom{
 		}
 		else{
 			println("waitermind   |||   accept failed, $CurCID")
-			replyTo enter with accept : accept( 0 ) //In qualche modo dovremo informare il cliente del max time di attesa
+			replyTo enter with inform : inform( "maxTime" ) //DIRE AL CLIENTE IL MAX TEMPO DI ATTESA
+			[# CurEnterCID = CurCID #] //save enter client request
 			[# CurCID = 0 #]  //no client
  		}
 	}
@@ -206,6 +221,7 @@ QActor waitermind context ctxtearoom{
  			#] 
 			forward waiterengine -m moveto : moveto ($CurMoveX,$CurMoveY)
 			forward teatables -m occupy : occupy($CurTable)
+			forward maxstaytimer -m doTimerAction : doTimerAction($CurTable,start)
 		}
 		println("waitermind   |||   table1 state occupied")
 	}
@@ -223,7 +239,7 @@ QActor waitermind context ctxtearoom{
 	State checkIsTableStopped{
 		println("waitermind   |||   checkIsTableStopped")
 		onMsg( isTableStoppedDone : isTableStoppedDone(E)){
-			if [# payloadArg(0)=="0" #]{ //0 non ï¿½ interrotto nessun clean
+			if [# payloadArg(0)=="0" #]{ //0 non è interrotto nessun clean
 				forward waitermind -m gotohome : gotohome(go)
 				[# CurTableClean = 0 #]
 			}
@@ -273,6 +289,7 @@ QActor waitermind context ctxtearoom{
 	State checkTake{
 		onMsg(tableId : tableId(N)){
 			[# CurTable = payloadArg(0).toString().toInt() #]
+			forward maxstaytimer -m doTimerAction : doTimerAction($CurTable,stop)
 			solve(pos("teatable$CurTable",X,Y))
 			ifSolved{
 				[# 
@@ -331,6 +348,7 @@ QActor waitermind context ctxtearoom{
 	State checkTableId{
 		onMsg(tableId : tableId(N)){
 			[# CurTable = payloadArg(0).toString().toInt() #]
+			forward maxstaytimer -m doTimerAction : doTimerAction($CurTable,start)
 			solve(pos("teatable$CurTable",X,Y))
 			ifSolved{
 				[# 
@@ -342,6 +360,13 @@ QActor waitermind context ctxtearoom{
 		}
 	}
 	Transition t0 whenMsg done -> checkCleanHome
+	
+	State timeEndTable{
+		onMsg(timePassed : timePassed(N)){
+			[# CurTable = payloadArg(0).toString().toInt() #]
+		}
+	}
+	Goto checkCollect
 	
 	State reachTableCollect {
 		forward waiterengine -m stopengine : stopengine(stop)
@@ -360,15 +385,16 @@ QActor waitermind context ctxtearoom{
 			ifSolved {
 				[# CurTable = payloadArg(0).toString().toInt() #]
 			}
-			updateResource[# "reachTable$CurTable" #]
-			solve(pos("teatable$CurTable",X,Y))
-			ifSolved{
-				[# 
-				   CurMoveX = getCurSol("X").toString().toInt()  
-	 			   CurMoveY = getCurSol("Y").toString().toInt()  
-	 			#] 
-	 			forward waiterengine -m moveto : moveto ($CurMoveX,$CurMoveY)
-	 		}
+ 		}
+ 		forward maxstaytimer -m doTimerAction : doTimerAction($CurTable,end)
+		updateResource[# "reachTable$CurTable" #]
+		solve(pos("teatable$CurTable",X,Y))
+		ifSolved{
+			[#
+			   CurMoveX = getCurSol("X").toString().toInt()  
+ 			   CurMoveY = getCurSol("Y").toString().toInt()  
+ 			#] 
+ 			forward waiterengine -m moveto : moveto ($CurMoveX,$CurMoveY)
  		}
 	}
 	Transition t0 whenMsg done -> collect
@@ -417,11 +443,28 @@ QActor waitermind context ctxtearoom{
 		println("waitermind   |||   cleanTable$CurTableClean")
 		forward waitercleaner -m startcleaner : startcleaner($CurTableClean)
 	}
-	Transition t0 whenMsg cleanerdone -> reachhome
+	Transition t0 whenMsg cleanerdone -> checkQueue
 				whenRequest enter -> accept
 				whenMsg clientready -> take
+				whenMsg timePassed -> reachTableCollect
 				whenMsg drinkready -> reachBarman
 				whenMsg paymentready -> reachTableCollect
+	
+	State checkQueue{
+		println("waitermind   |||   checkQueue")
+		if[# CurEnterCID != 0 #]{
+			[# 
+				CurCID = CurEnterCID
+				CurEnterCID = 0
+			#]	
+			request teatables -m tableClean : tableClean(n)
+		}
+		else{
+			forward waitermind -m gotohome : gotohome(go)
+		}
+	}
+	Transition t0 whenReply table -> checkTables
+				whenMsg gotohome -> reachhome
 	
 	State endwork{
 		println("waitermind   |||   end")
@@ -678,7 +721,7 @@ QActor teatables context ctxtearoom{
 		}
 	}
 	Goto work
-	
+
 	State tableState{
 		println("teateables   |||   tableState")
 		printCurrentMessage
@@ -926,7 +969,7 @@ QActor smartbell context ctxtearoom{
 			[# IDRange++ #]
 		} else {
 			println("smartbell   |||   temp = $CTemp, client rejected")
-			forward smartbell -m reject : reject(acasa)
+			forward smartbell -m reject : reject(reject)
 		}
 	}
 	Transition t0 whenMsg reject -> rejected
@@ -953,7 +996,7 @@ QActor smartbell context ctxtearoom{
 	Goto wait
 }
 
-QActor maxstaytimer context ctxtearoom { //BROKERRRRRRR DEVE SPARTIRE LE RICHIESTE
+QActor maxstaytimer context ctxtearoom {
 	[# 
 		var Table = 0
 		var Action = ""
@@ -962,13 +1005,13 @@ QActor maxstaytimer context ctxtearoom { //BROKERRRRRRR DEVE SPARTIRE LE RICHIES
 		println("maxstaytimer   |||   init")
 	}
 	Goto wait
-	
+
 	State wait{
 		println("maxstaytimer   |||   wait")
 	}
 	Transition t0 whenMsg doTimerAction -> doTimerAction
 					whenMsg timePassed -> timePassed
-	
+
 	State doTimerAction{
 		println("maxstaytimer   |||   doTimerAction")
 		onMsg(doTimerAction : doTimerAction(N,A)){
@@ -1022,6 +1065,7 @@ QActor staytimertable1 context ctxtearoom{ //Timer table 1
 		var TimePassed = 0L
 	#]
 	State s0 initial {
+		discardMsg On
 		println("staytimertable1   |||   init")
 	}
 	Goto wait
@@ -1033,8 +1077,9 @@ QActor staytimertable1 context ctxtearoom{ //Timer table 1
 	Transition t0 whenMsg starttimer -> start //Ci sarà  un dispatch senza parametri, in cui i vari timer sanno già  a priori la maxstaytime (oppure se la leggono su prolog, meglio)
 	
 	State start{
-		println("staytimertable1   |||   start")
-		printCurrentMessage
+		onMsg(starttimer : starttimer(T)){
+			println("staytimertable1   |||   start")
+		}
 		[# TimePassed++ #]
 		if[# TimePassed>=MaxStayTime #]{
 			forward staytimertable1 -m endtime : endtime($TimePassed)
@@ -1066,6 +1111,7 @@ QActor staytimertable2 context ctxtearoom{ //Timer table 2
 		var TimePassed = 0L
 	#]
 	State s0 initial {
+		discardMsg On
 		println("staytimertable2   |||   init")
 	}
 	Goto wait
@@ -1074,11 +1120,12 @@ QActor staytimertable2 context ctxtearoom{ //Timer table 2
 		printCurrentMessage
 		println("staytimertable2   |||   wait")
 	}
-	Transition t0 whenMsg starttimer -> start //Ci sarÃ  un dispatch senza parametri, in cui i vari timer sanno giÃ  a priori la maxstaytime (oppure se la leggono su prolog, meglio)
+	Transition t0 whenMsg starttimer -> start //Ci sarà un dispatch senza parametri, in cui i vari timer sanno già  a priori la maxstaytime (oppure se la leggono su prolog, meglio)
 	
 	State start{
-		println("staytimertable2   |||   start")
-		printCurrentMessage
+		onMsg(starttimer : starttimer(T)){
+			println("staytimertable2   |||   start")
+		}
 		[# TimePassed++ #]
 		if[# TimePassed>=MaxStayTime #]{
 			forward staytimertable2 -m endtime : endtime($TimePassed)

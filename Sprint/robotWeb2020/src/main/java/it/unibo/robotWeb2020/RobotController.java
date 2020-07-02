@@ -127,7 +127,7 @@ public class RobotController {
 	protected void doBusinessJob( String moveName, Model viewmodel) {//SISTEMARE ID DEL CLIENTE E TIPO DI ORDINE
 		try {
 			if( moveName.equalsIgnoreCase("enter")) {
-				ApplMessage msg = MsgUtil.buildRequest("web", "enter", "enter(1)", configurator.getQakdest() );
+				ApplMessage msg = MsgUtil.buildRequest("web", "enter", "enter(1)", "smartbell" );
 				connQakSupport.request( msg );				
 			}
 			else if (moveName.equalsIgnoreCase("order")) {
@@ -143,7 +143,7 @@ public class RobotController {
 				connQakSupport.forward( msg );
 			}
 			else if( moveName.equalsIgnoreCase("enter2")) {
-				ApplMessage msg = MsgUtil.buildRequest("web", "enter", "enter(2)", configurator.getQakdest() );
+				ApplMessage msg = MsgUtil.buildRequest("web", "enter", "enter(2)", "smartbell" );
 				connQakSupport.request( msg );				
 			}
 			else if (moveName.equalsIgnoreCase("order2")) {

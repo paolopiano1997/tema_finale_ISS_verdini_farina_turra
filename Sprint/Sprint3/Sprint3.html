@@ -290,14 +290,18 @@ Il secondo cliente non interagisce.</li>
 	<li>
 	<b>Problema 7</b>: Gestione dei tempi di attesa per l'azione di <em>inform</em> a seguito del rilassamento sui vincoli sul numero di clienti presenti nel sistema (interni ed esterni alla tearoom). 
 		Esistono 3 situazioni in cui si può trovare la tearoom,<br>
-		   &ensp;&ensp;- Due tavoli non sanitized : min{cleaningTimeTable1,cleaningTimeTable2}<br>
-		   &ensp;&ensp;- Un tavolo non sanitized e un ciente dentro : min{cleaningTimeTable,remainingClientTime}<br>
-		   &ensp;&ensp;- Due cienti dentro la tearoom : min{remainingClientTime1,remainingClientTime2} <br>
+		   &ensp;&ensp;- Due tavoli non cleaned : min{cleaningTimeTable1,cleaningTimeTable2}<br>
+		   &ensp;&ensp;- Un tavolo non cleaned e un cliente dentro : min{cleaningTimeTable,remainingClientTime}<br>
+		   &ensp;&ensp;- Due clienti dentro la tearoom : min{remainingClientTime1,remainingClientTime2} <br>
 		   cleaningTimeTable definito come il tempo residuo per la pulizia del tavolo, <br>
 		   remainingClientTime definito come il tempo residuo del cliente per il suo staytime.
 	</li>
-		
+	
 </ul>
+</br>
+</br> Per ottenere lo stato della stanza completo, potrebbe essere necessario introdurre un attore che lo inglobi.
+Ad ogni cambiamento, messaggio a questo attore. Questo attore fa "updateResource" dello stato. Poi è accessibile tramite COAP.
+(Letto nella documentazione di QAK).
 <b>SVILUPPI FUTURI</b>
 <ol>
     <li>Il barman potrebbe preparare due ordini insieme, presumibilmente uguali, quindi

@@ -39,14 +39,14 @@ class Teatables ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, 
 						updateResourceRep( StateOfTables  
 						)
 					}
-					 transition(edgeName="t055",targetState="engageTable",cond=whenDispatch("occupy"))
-					transition(edgeName="t056",targetState="cleanTable",cond=whenDispatch("clean"))
-					transition(edgeName="t057",targetState="getTable",cond=whenRequest("getTable"))
-					transition(edgeName="t058",targetState="tableClean",cond=whenRequest("tableClean"))
-					transition(edgeName="t059",targetState="release",cond=whenDispatch("release"))
-					transition(edgeName="t060",targetState="replyClean",cond=whenRequest("isClean"))
-					transition(edgeName="t061",targetState="setState",cond=whenDispatch("setTableState"))
-					transition(edgeName="t062",targetState="tableState",cond=whenRequest("tableState"))
+					 transition(edgeName="t058",targetState="engageTable",cond=whenDispatch("occupy"))
+					transition(edgeName="t059",targetState="cleanTable",cond=whenDispatch("clean"))
+					transition(edgeName="t060",targetState="getTable",cond=whenRequest("getTable"))
+					transition(edgeName="t061",targetState="tableClean",cond=whenRequest("tableClean"))
+					transition(edgeName="t062",targetState="release",cond=whenDispatch("release"))
+					transition(edgeName="t063",targetState="replyClean",cond=whenRequest("isClean"))
+					transition(edgeName="t064",targetState="setState",cond=whenDispatch("setTableState"))
+					transition(edgeName="t065",targetState="tableState",cond=whenRequest("tableState"))
 				}	 
 				state("getTable") { //this:State
 					action { //it:State
