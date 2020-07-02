@@ -8,7 +8,7 @@ context(ctxtearoom, "127.0.0.1",  "TCP", "8050").
   qactor( waitermind, ctxtearoom, "it.unibo.waitermind.Waitermind").
   qactor( timer, ctxtearoom, "it.unibo.timer.Timer").
   qactor( waitercleaner, ctxtearoom, "it.unibo.waitercleaner.Waitercleaner").
-  qactor( teatables, ctxtearoom, "it.unibo.teatables.Teatables").
+  qactor( tearoomstate, ctxtearoom, "it.unibo.tearoomstate.Tearoomstate").
   qactor( waiterengine, ctxtearoom, "it.unibo.waiterengine.Waiterengine").
   qactor( barman, ctxtearoom, "it.unibo.barman.Barman").
   qactor( smartbell, ctxtearoom, "it.unibo.smartbell.Smartbell").

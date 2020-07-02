@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
+import org.eclipse.californium.core.CoapClient;
 import org.eclipse.californium.core.CoapHandler;
 import org.eclipse.californium.core.CoapResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -105,18 +106,28 @@ public class RobotController {
 	
  
 	private void peparePageUpdating() {
-//		CoapObserver()
-    	connQakSupport.getClient().observe(new CoapHandler() {
+		CoapClient client = new CoapClient( );
+		String url =  "coap://" + configurator.getHostAddr() + ":" + configurator.getPort() + 
+				"/" + configurator.getCtxqadest() + "/tearoomstate";
+		System.out.println("CoapObserver | url=" + "url.toString()");
+	    client.setURI(url.toString());
+		client.setTimeout( 1000L );
+	    CoapResponse respGet  = client.get( ); //CoapResponse
+		if( respGet != null )
+			System.out.println("CoapObserver | createConnection doing  get | CODE=  ${respGet.code} content=${respGet.getResponseText()}");
+		else
+			System.out.println("CoapObserver | url= " + url.toString() + " FAILURE");
+    	client.observe(new CoapHandler() {
 			@Override
 			public void onLoad(CoapResponse response) {
-				System.out.println("RobotController --> CoapClient changed ->" + response.getResponseText());
+				System.out.println("RobotController --> TearoomState changed ->" + response.getResponseText());
 				simpMessagingTemplate.convertAndSend(WebSocketConfig.topicForClient, 
 						new ResourceRep("" + HtmlUtils.htmlEscape(response.getResponseText())  ));
 			}
 			
 			@Override
 			public void onError() {
-				System.out.println("RobotController --> CoapClient error!");
+				System.out.println("RobotController --> TearoomState error!");
 			}
 		});
 	}

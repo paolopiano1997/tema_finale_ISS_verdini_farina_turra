@@ -11,7 +11,7 @@ object CoapObserver {
 	
 	private val ipaddr      = "localhost:8050"		//5683 default
 	private val context     = "ctxtearoom"
- 	private val destactor   = "waitermind"
+ 	private val destactor   = "tearoomstate"
 //	private val msgId       = "cmd"
 
 	fun init(){

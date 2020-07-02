@@ -77,21 +77,31 @@ cleanTable(N).
 %%	movingto( CELL )
 %%	cleaning( table(N) )
 
-waiter( athome ).	
+waiter( athome ).
+
+setWaiter(S) :-
+	retract(waiter(_)),
+	!,
+	assert(waiter(S)).
 
 %% ------------------------------------------ 
-%% ServiceDesk
+%% barman
 %% ------------------------------------------ 
 %% idle
 %% preparing( CLIENTID )
 %% ready( CLIENTID )
 
-servicedesk( idle ).
+barman( idle ).
+
+setBarman(S) :-
+	retract(barman(_)),
+	!,
+	assert(barman(S)).
 
 %% ------------------------------------------ 
 %% Room as a whole
 %% ------------------------------------------ 
-roomstate(  waiter(S), stateOfTeatables(V), servicedesk(D) ):-
-	 waiter(S), stateOfTeatables(V), servicedesk(D).
+roomstate(  waiter(S), stateOfTeatables(V), barman(D) ):-
+	 waiter(S), stateOfTeatables(V), barman(D).
 	 
 	

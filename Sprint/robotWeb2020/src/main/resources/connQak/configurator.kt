@@ -12,7 +12,7 @@ object configurator{
 
 //MQTT broker	
 //	@JvmStatic var mqtthostAddr    	= "broker.hivemq.com"
-	@JvmStatic var mqtthostAddr    	= "mqtt.eclipse.org"
+	@JvmStatic var mqtthostAddr    	= "localhost"
 	@JvmStatic var mqttport    		= "1883"
 //
 	@JvmStatic var stepsize			= "350" 
@@ -20,7 +20,7 @@ object configurator{
 //Basicrobot application
 	@JvmStatic var hostAddr   	    = "127.0.0.1";  //"192.168.1.5";		
 	@JvmStatic var port    			= "8050";
-	@JvmStatic var qakdest	     	= "waitermind";
+	@JvmStatic var qakdest	     	= "tearoomstate";
 	@JvmStatic var ctxqadest 		= "ctxtearoom";
 	
 //Domains application

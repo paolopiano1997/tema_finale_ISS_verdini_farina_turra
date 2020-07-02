@@ -30,10 +30,11 @@ class Barman ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, sco
 				state("wait") { //this:State
 					action { //it:State
 						println("barman   |||   wait")
+						forward("setBarmanState", "setBarmanState(idle)" ,"tearoomstate" ) 
 						updateResourceRep( "waiting"  
 						)
 					}
-					 transition(edgeName="t076",targetState="prepare",cond=whenDispatch("order"))
+					 transition(edgeName="t078",targetState="prepare",cond=whenDispatch("order"))
 				}	 
 				state("prepare") { //this:State
 					action { //it:State
@@ -45,15 +46,17 @@ class Barman ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, sco
 								
 												CurCID = payloadArg(0).toString().toInt()
 												CurOrder = payloadArg(1).toString()	
+								forward("setBarmanState", "setBarmanState(preparing($CurCID,$CurOrder))" ,"tearoomstate" ) 
 						}
 						stateTimer = TimerActor("timer_prepare", 
 							scope, context!!, "local_tout_barman_prepare", Servicetime )
 					}
-					 transition(edgeName="t077",targetState="done",cond=whenTimeout("local_tout_barman_prepare"))   
+					 transition(edgeName="t079",targetState="done",cond=whenTimeout("local_tout_barman_prepare"))   
 				}	 
 				state("done") { //this:State
 					action { //it:State
 						println("barman   |||   drinkReady")
+						forward("setBarmanState", "setBarmanState(driknready)" ,"tearoomstate" ) 
 						updateResourceRep( "drinkready"  
 						)
 						forward("drinkready", "drinkready($CurCID,$CurOrder)" ,"waitermind" ) 

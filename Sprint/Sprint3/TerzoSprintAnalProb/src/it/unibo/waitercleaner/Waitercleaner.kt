@@ -77,7 +77,7 @@ class Waitercleaner ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( na
 						if( checkMsgContent( Term.createTerm("startcleaner(T)"), Term.createTerm("startcleaner(T)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
 								 TableState = payloadArg(0)  
-								request("tableState", "tableState($TableState)" ,"teatables" )  
+								request("tableState", "tableState($TableState)" ,"tearoomstate" )  
 						}
 					}
 					 transition(edgeName="t048",targetState="checkState",cond=whenReply("state"))
@@ -149,7 +149,7 @@ class Waitercleaner ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( na
 						                        currentMsg.msgContent()) ) { //set msgArgList
 								answer("isTableStopped", "isTableStoppedDone", "isTableStoppedDone(0)"   )  
 						}else{
-							forward("setTableState", "setTableState($Table,undirty)" ,"teatables" ) 
+							forward("setTableState", "setTableState($Table,undirty)" ,"tearoomstate" ) 
 							forward("starttimer", "starttimer($Clean)" ,"timer" ) 
 						}
 					}
@@ -166,7 +166,7 @@ class Waitercleaner ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( na
 						                        currentMsg.msgContent()) ) { //set msgArgList
 								answer("isTableStopped", "isTableStoppedDone", "isTableStoppedDone(0)"   )  
 						}else{
-							forward("setTableState", "setTableState($Table,sanitized)" ,"teatables" ) 
+							forward("setTableState", "setTableState($Table,sanitized)" ,"tearoomstate" ) 
 							forward("starttimer", "starttimer($Clean)" ,"timer" ) 
 						}
 					}
@@ -178,7 +178,7 @@ class Waitercleaner ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( na
 					action { //it:State
 						updateResourceRep( "clean"  
 						)
-						forward("clean", "clean($Table)" ,"teatables" ) 
+						forward("clean", "clean($Table)" ,"tearoomstate" ) 
 						forward("cleanerdone", "cleanerdone(done)" ,"waitermind" ) 
 					}
 					 transition( edgeName="goto",targetState="wait", cond=doswitch() )
