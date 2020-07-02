@@ -227,7 +227,6 @@ including some significant <bc>TestPlan</bc>. </li>
 <h2>Requirement Analysis</h2>
 <div class="remark">
 <ul>
-	<li>//Sistemare waitermind e waiterengine su interrompibilità di reachHome</li>
 	<li>Situazione 1: gestione di più clienti all'ingresso</li>
 	<li>Situazione 2: gestione di due tavoli contemporaneamente</li>
     <li>Situazione 3: un cliente non viene ammesso perchè la sua temperatura è superiore a 37,5°</li>
@@ -250,29 +249,29 @@ Il secondo cliente non interagisce.</li>
 <h2>Problem analysis</h2> 
 <div class="remark">
 <ul>
-	//se c'è un cliente che suona e non viene fatto entrare, assumiamo che i clienti in coda dietro al primo cliente in coda non suonino e dopo ogni ingresso di un cliente, 
-	il secondo cliente in coda suona e viene informato del tempo di attesa
+	<!--//se c'è un cliente che suona e non viene fatto entrare, assumiamo che i clienti in coda dietro al primo cliente in coda non suonino e dopo ogni ingresso di un cliente, 
+	il secondo cliente in coda suona e viene informato del tempo di attesa-->
 	<li><b>Problema 1</b>: Gestione delle richieste da tavoli differenti:
             Il waiter ha la necessità di sapere a che tavolo portare l'ordinazione. Necessità di tenere traccia dell'importo
-            da pagare per ciascun cliente.<br><br>
-			//C'è bisogno di tenere traccia di un'associazione cliente-tavolo, di una cliente-ordine-tavolo,
+            da pagare per ciascun cliente.
+			<!--//C'è bisogno di tenere traccia di un'associazione cliente-tavolo, di una cliente-ordine-tavolo,
 			ovvero i barman deve sapere di chi è questo ordine e a che tavolo portarlo<br>
-            Tramite prolog memorizziamo idcliente-ordine-tavolo oppure tramite scambio messaggi? (<b>MEDIUM - Quasi fato</b>)
-			</li><br>
+            Tramite prolog memorizziamo idcliente-ordine-tavolo oppure tramite scambio messaggi? 
+			--></li>
 	    
 	<li><b>Problema 2</b>: Interruzione del clean solo se c'è un altro tavolo disponibile: nello sprint precedente abbiamo assunto
     che vi fosse solo un cliente alla volta nella tearoom, quindi questo problema non si presentava.
-    Task clean -> diventa interrompibile se sto pulendo il tavolo e l'altro è occupato.(<b>EZ</b>)</li>
+    Task clean -> diventa interrompibile se sto pulendo il tavolo e l'altro è occupato.</li>
 	<li><b>Problema 3</b>: gestire lo stato della tearoom per il manager: quali dati mostrare al manager e come immagazzinarli.
-     <br><br>-> capire come farla, cosa salvare, come salvarla e come recuperarla. (<b>HARD</b>)</li><br>
+    </li>
     <li><b>Problema 4</b>: il cliente non ha ancora fatto l'ordinazione ma esaurisce il <em>maxstaytime</em>.
     Il cliente viene accompagnato all'uscita</li>
 	<li>
 	<b>Problema 5</b>: il tempo trascorre solo quando è responsabilità del cliente ovvero nel suo turno.
-		Per tale motivo sorge la problematica in cui il cliente richiede o di ordinare o il conto mentre il waiter sta gia facendo un'azione <u>task</u>, 
-		La richiesta sarà gestita solo quando l'azione <u>task</u> corrente si conclude e quindi il tempo viene fermato solo dopo aver ultimato quell'azione <u>task</u>.
+		Per tale motivo sorge la problematica in cui il cliente richiede o di ordinare o il conto mentre il waiter sta gia facendo un'azione , 
+		La richiesta sarà gestita solo quando l'azione corrente si conclude e quindi il tempo viene fermato solo dopo aver ultimato quell'azione.
 		Il tempo che intercorre tra la richiesta del cliente e l'azione del waiter in risposta alla richiesta viene considerato trascurabile, 
-		<u>aggiungere il maxstaytime nello stato che vede il manager nella sua gui</u>
+		<!--<u>aggiungere il maxstaytime nello stato che vede il manager nella sua gui</u>-->
 	</li>
 	<li>
 	<b>Problema 6</b>: <!--<u>Come gestire il timer per ciascun cliente? Quali scenari possono esserci?</u>-->
@@ -291,7 +290,7 @@ Il secondo cliente non interagisce.</li>
 	<b>Problema 7</b>: Gestione dei tempi di attesa per l'azione di <em>inform</em> a seguito del rilassamento sui vincoli sul numero di clienti presenti nel sistema (interni ed esterni alla tearoom). 
 		Esistono 3 situazioni in cui si può trovare la tearoom,<br>
 		   &ensp;&ensp;- Due tavoli non cleaned : min{cleaningTimeTable1,cleaningTimeTable2}<br>
-		   &ensp;&ensp;- Un tavolo non cleaned e un cliente dentro : min{cleaningTimeTable,remainingClientTime}<br>
+		   &ensp;&ensp;- Un tavolo non cleaned e un cliente dentro : azione del waiter rivolte ai clienti più prioritari, remainingClientTime<br>
 		   &ensp;&ensp;- Due clienti dentro la tearoom : min{remainingClientTime1,remainingClientTime2} <br>
 		   cleaningTimeTable definito come il tempo residuo per la pulizia del tavolo, <br>
 		   remainingClientTime definito come il tempo residuo del cliente per il suo staytime.
@@ -301,7 +300,7 @@ Il secondo cliente non interagisce.</li>
 </br>
 </br> Per ottenere lo stato della stanza completo, potrebbe essere necessario introdurre un attore che lo inglobi.
 Ad ogni cambiamento, messaggio a questo attore. Questo attore fa "updateResource" dello stato. Poi è accessibile tramite COAP.
-(Letto nella documentazione di QAK).
+(Letto nella documentazione di QAK). <br>
 <b>SVILUPPI FUTURI</b>
 <ol>
     <li>Il barman potrebbe preparare due ordini insieme, presumibilmente uguali, quindi
