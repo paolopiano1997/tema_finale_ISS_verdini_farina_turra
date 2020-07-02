@@ -19,6 +19,8 @@ class Maxstaytimer ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( nam
 		 
 				var Table = 0
 				var Action = ""
+				var RemTime1 = 0
+				var RemTime2 = 0
 		return { //this:ActionBasciFsm
 				state("s0") { //this:State
 					action { //it:State
@@ -30,8 +32,9 @@ class Maxstaytimer ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( nam
 					action { //it:State
 						println("maxstaytimer   |||   wait")
 					}
-					 transition(edgeName="t078",targetState="doTimerAction",cond=whenDispatch("doTimerAction"))
-					transition(edgeName="t079",targetState="timePassed",cond=whenDispatch("timePassed"))
+					 transition(edgeName="t081",targetState="doTimerAction",cond=whenDispatch("doTimerAction"))
+					transition(edgeName="t082",targetState="remTime1",cond=whenRequest("getRemainingTime"))
+					transition(edgeName="t083",targetState="timePassed",cond=whenDispatch("timePassed"))
 				}	 
 				state("doTimerAction") { //this:State
 					action { //it:State
@@ -66,6 +69,37 @@ class Maxstaytimer ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( nam
 								   {forward("timeroff", "timeroff(off)" ,"staytimertable2" ) 
 								   }
 								  }
+								 }
+						}
+					}
+					 transition( edgeName="goto",targetState="wait", cond=doswitch() )
+				}	 
+				state("remTime1") { //this:State
+					action { //it:State
+						request("getRemainingTime", "getRemainingTime(time)" ,"staytimertable1" )  
+					}
+					 transition(edgeName="t084",targetState="remTime2",cond=whenReply("remainingTime"))
+				}	 
+				state("remTime2") { //this:State
+					action { //it:State
+						if( checkMsgContent( Term.createTerm("remainingTime(T)"), Term.createTerm("remainingTime(T)"), 
+						                        currentMsg.msgContent()) ) { //set msgArgList
+								 RemTime1 = payloadArg(0).toString().toInt()  
+						}
+						request("getRemainingTime", "getRemainingTime(time)" ,"staytimertable2" )  
+					}
+					 transition(edgeName="t085",targetState="forwardRemainingTime",cond=whenReply("remainingTime"))
+				}	 
+				state("forwardRemainingTime") { //this:State
+					action { //it:State
+						if( checkMsgContent( Term.createTerm("remainingTime(T)"), Term.createTerm("remainingTime(T)"), 
+						                        currentMsg.msgContent()) ) { //set msgArgList
+								 RemTime2 = payloadArg(0).toString().toInt()  
+								if(  RemTime1 <= RemTime2  
+								 ){answer("getRemainingTime", "remainingTime", "remainingTime($RemTime1)"   )  
+								}
+								else
+								 {answer("getRemainingTime", "remainingTime", "remainingTime($RemTime2)"   )  
 								 }
 						}
 					}

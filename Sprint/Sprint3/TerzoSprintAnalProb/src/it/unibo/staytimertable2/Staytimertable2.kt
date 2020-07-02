@@ -19,6 +19,7 @@ class Staytimertable2 ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( 
 		 
 				val MaxStayTime = 60*10L //In secondi
 				var TimePassed = 0L
+				var RemTime = 0L
 		return { //this:ActionBasciFsm
 				state("s0") { //this:State
 					action { //it:State
@@ -32,7 +33,7 @@ class Staytimertable2 ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( 
 						println("$name in ${currentState.stateName} | $currentMsg")
 						println("staytimertable2   |||   wait")
 					}
-					 transition(edgeName="t085",targetState="start",cond=whenDispatch("starttimer"))
+					 transition(edgeName="t093",targetState="start",cond=whenDispatch("starttimer"))
 				}	 
 				state("start") { //this:State
 					action { //it:State
@@ -47,14 +48,26 @@ class Staytimertable2 ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( 
 						stateTimer = TimerActor("timer_start", 
 							scope, context!!, "local_tout_staytimertable2_start", 1000.toLong() )
 					}
-					 transition(edgeName="t086",targetState="start",cond=whenTimeout("local_tout_staytimertable2_start"))   
-					transition(edgeName="t087",targetState="wait",cond=whenDispatch("stopstaytimer"))
-					transition(edgeName="t088",targetState="timeFinish",cond=whenDispatch("endtime"))
-					transition(edgeName="t089",targetState="end",cond=whenDispatch("timeroff"))
+					 transition(edgeName="t094",targetState="start",cond=whenTimeout("local_tout_staytimertable2_start"))   
+					transition(edgeName="t095",targetState="replyTimeStart",cond=whenRequest("getRemainingTime"))
+					transition(edgeName="t096",targetState="wait",cond=whenDispatch("stopstaytimer"))
+					transition(edgeName="t097",targetState="timeFinish",cond=whenDispatch("endtime"))
+					transition(edgeName="t098",targetState="end",cond=whenDispatch("timeroff"))
+				}	 
+				state("replyTimeStart") { //this:State
+					action { //it:State
+						if( checkMsgContent( Term.createTerm("getRemainingTime(N)"), Term.createTerm("getRemainingTime(N)"), 
+						                        currentMsg.msgContent()) ) { //set msgArgList
+								 RemTime = MaxStayTime - TimePassed  
+								answer("getRemainingTime", "remainingTime", "remainingTime($RemTime)"   )  
+						}
+					}
+					 transition( edgeName="goto",targetState="start", cond=doswitch() )
 				}	 
 				state("end") { //this:State
 					action { //it:State
 						 TimePassed = 0L  
+						 RemTime = 0L  
 						println("staytimertable2   |||   end")
 					}
 					 transition( edgeName="goto",targetState="wait", cond=doswitch() )
@@ -62,6 +75,7 @@ class Staytimertable2 ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( 
 				state("timeFinish") { //this:State
 					action { //it:State
 						println("staytimertable2   |||   timeFinish")
+						 RemTime = 0L  
 						 TimePassed = 0L  
 						forward("timePassed", "timePassed(2)" ,"maxstaytimer" ) 
 					}

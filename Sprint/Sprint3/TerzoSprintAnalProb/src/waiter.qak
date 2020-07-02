@@ -13,6 +13,10 @@ Reply ready : ready(V)
 //Event for maxstaytime
 Dispatch timePassed : timePassed(N)
 
+//Get remaining time
+Request getRemainingTime : getRemainingTime(N)
+Reply remainingTime : remainingTime(T)
+
 
 //Dispatch for maxstaytimer
 Dispatch doTimerAction : doTimerAction(N,A)
@@ -122,6 +126,9 @@ QActor waitermind context ctxtearoom{
 	//Ordine corrente
 	var CurOrder = ""
 	
+	//Tempo rimanente minimo clienti
+	var RemCTime = 15 //Secondi
+	
 #]
 	State s0 initial {
 		discardMsg Off
@@ -186,12 +193,26 @@ QActor waitermind context ctxtearoom{
 		}
 		else{
 			println("waitermind   |||   accept failed, $CurCID")
-			replyTo enter with inform : inform( "maxTime" ) //DIRE AL CLIENTE IL MAX TEMPO DI ATTESA
+			request maxstaytimer -m getRemainingTime : getRemainingTime(time)
 			[# CurEnterCID = CurCID #] //save enter client request
 			[# CurCID = 0 #]  //no client
  		}
 	}
-	Goto reachEntranceDoor if [# CurCID != 0 #] else checkCleanHome
+	Goto reachEntranceDoor if [# CurCID != 0 #] else checkInform
+	
+	State checkInform{
+		println("waitermind   |||   checkInform")
+	}
+	Transition t0 whenReply remainingTime -> inform
+	
+	State inform{
+		println("waitermind   |||   inform")
+		onMsg(remainingTime : remainingTime(T)){
+			[# RemCTime = payloadArg(0).toString().toInt() #]
+			replyTo enter with inform : inform( $RemCTime ) 
+		}
+	}
+	Goto checkCleanHome
 	
 	State reachEntranceDoor {
 		updateResource[# "reachingEntranceDoor" #]
@@ -519,6 +540,7 @@ QActor waitercleaner context ctxtearoom {
 		val	Cleantime = 3000L
 		var Clean = Cleantime
 		var TableState = ""
+		var CurState = "dirty"
 	#]
 	State s0 initial{// Accettazione richieste/dispatch
 		println("waitercleaner   |||   init")
@@ -1000,6 +1022,8 @@ QActor maxstaytimer context ctxtearoom {
 	[# 
 		var Table = 0
 		var Action = ""
+		var RemTime1 = 0
+		var RemTime2 = 0
 	#]
 	State s0 initial{
 		println("maxstaytimer   |||   init")
@@ -1010,6 +1034,7 @@ QActor maxstaytimer context ctxtearoom {
 		println("maxstaytimer   |||   wait")
 	}
 	Transition t0 whenMsg doTimerAction -> doTimerAction
+					whenRequest getRemainingTime -> remTime1
 					whenMsg timePassed -> timePassed
 
 	State doTimerAction{
@@ -1049,6 +1074,33 @@ QActor maxstaytimer context ctxtearoom {
 	}
 	Goto wait
 	
+	State remTime1{
+		request staytimertable1 -m getRemainingTime : getRemainingTime(time)
+			
+	}
+	Transition t0 whenReply remainingTime -> remTime2
+
+	State remTime2{
+		onMsg(remainingTime : remainingTime(T)){
+			[# RemTime1 = payloadArg(0).toString().toInt() #]
+		}
+		request staytimertable2 -m getRemainingTime : getRemainingTime(time)
+	}
+	Transition t0 whenReply remainingTime -> forwardRemainingTime
+	
+	State forwardRemainingTime{
+		onMsg(remainingTime : remainingTime(T)){
+			[# RemTime2 = payloadArg(0).toString().toInt() #]
+			if[# RemTime1 <= RemTime2 #]{
+				replyTo getRemainingTime with remainingTime : remainingTime($RemTime1)
+			}
+			else{
+				replyTo getRemainingTime with remainingTime : remainingTime($RemTime2)
+			}
+		}
+	}
+	Goto wait
+	
 	State timePassed{
 		println("maxstaytimer   |||   timePassed")
 		onMsg(timePassed : timePassed(N)){
@@ -1059,10 +1111,11 @@ QActor maxstaytimer context ctxtearoom {
 	Goto wait
 }
 
-QActor staytimertable1 context ctxtearoom{ //Timer table 1
+QActor staytimertable1 context ctxtearoom{
 	[# 
 		val MaxStayTime = 60*10L //In secondi
 		var TimePassed = 0L
+		var RemTime = 0L
 	#]
 	State s0 initial {
 		discardMsg On
@@ -1072,10 +1125,16 @@ QActor staytimertable1 context ctxtearoom{ //Timer table 1
 	
 	State wait {
 		printCurrentMessage
+		onMsg(getRemainingTime : getRemainingTime(N)){
+			[# RemTime = MaxStayTime - TimePassed #]
+			replyTo getRemainingTime with remainingTime : remainingTime($RemTime)
+		}
 		println("staytimertable1   |||   wait")
 	}
-	Transition t0 whenMsg starttimer -> start //Ci sarà  un dispatch senza parametri, in cui i vari timer sanno già  a priori la maxstaytime (oppure se la leggono su prolog, meglio)
-	
+	Transition t0 
+			whenMsg starttimer -> start
+			whenRequest getRemainingTime -> wait
+			
 	State start{
 		onMsg(starttimer : starttimer(T)){
 			println("staytimertable1   |||   start")
@@ -1087,17 +1146,28 @@ QActor staytimertable1 context ctxtearoom{ //Timer table 1
 	}
 
 	Transition t0 whenTime 1000 -> start
+				whenRequest getRemainingTime -> replyTimeStart
 				whenMsg stopstaytimer -> wait
 				whenMsg endtime -> timeFinish
 				whenMsg timeroff -> end
+				
+	State replyTimeStart{
+		onMsg(getRemainingTime : getRemainingTime(N)){
+			[# RemTime = MaxStayTime - TimePassed #]
+			replyTo getRemainingTime with remainingTime : remainingTime($RemTime)
+		}
+	}
+	Goto start
 	
 	State end{
+		[# RemTime = 0L #]
 		[# TimePassed = 0L #]
 		println("staytimertable1   |||   ended")
 	}
 	Goto wait
 	
 	State timeFinish{
+		[# RemTime = 0L #]
 		[# TimePassed = 0L #]
 		println("maxstaytimer   |||   timeFinish")
 		forward maxstaytimer -m timePassed : timePassed(1)
@@ -1105,10 +1175,11 @@ QActor staytimertable1 context ctxtearoom{ //Timer table 1
 	Goto wait
 }
 
-QActor staytimertable2 context ctxtearoom{ //Timer table 2
+QActor staytimertable2 context ctxtearoom{
 	[# 
 		val MaxStayTime = 60*10L //In secondi
 		var TimePassed = 0L
+		var RemTime = 0L
 	#]
 	State s0 initial {
 		discardMsg On
@@ -1120,7 +1191,7 @@ QActor staytimertable2 context ctxtearoom{ //Timer table 2
 		printCurrentMessage
 		println("staytimertable2   |||   wait")
 	}
-	Transition t0 whenMsg starttimer -> start //Ci sarà un dispatch senza parametri, in cui i vari timer sanno già  a priori la maxstaytime (oppure se la leggono su prolog, meglio)
+	Transition t0 whenMsg starttimer -> start
 	
 	State start{
 		onMsg(starttimer : starttimer(T)){
@@ -1132,19 +1203,29 @@ QActor staytimertable2 context ctxtearoom{ //Timer table 2
 		}
 	}
 	Transition t0 whenTime 1000 -> start
+				whenRequest getRemainingTime -> replyTimeStart
 				whenMsg stopstaytimer -> wait
 				whenMsg endtime -> timeFinish
 				whenMsg timeroff -> end
 				
+	State replyTimeStart{
+		onMsg(getRemainingTime : getRemainingTime(N)){
+			[# RemTime = MaxStayTime - TimePassed #]
+			replyTo getRemainingTime with remainingTime : remainingTime($RemTime)
+		}
+	}
+	Goto start
 	
 	State end{
 		[# TimePassed = 0L #]
+		[# RemTime = 0L #]
 		println("staytimertable2   |||   end")
 	}
 	Goto wait
 	
 	State timeFinish{
 		println("staytimertable2   |||   timeFinish")
+		[# RemTime = 0L #]
 		[# TimePassed = 0L #]
 		forward maxstaytimer -m timePassed : timePassed(2)
 	}
