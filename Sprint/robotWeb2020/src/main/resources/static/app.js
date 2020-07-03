@@ -22,32 +22,32 @@ function sendRequestData( params, method) {
 }
 
 
-function postJQuery(themove){
-var form = new FormData();
-form.append("name",  "move");
-form.append("value", "r");
-
-let myForm = document.getElementById('myForm');
-let formData = new FormData(myForm);
-
-
-var settings = {
-  "url": "http://localhost:8080/move",
-  "method": "POST",
-  "timeout": 0,
-  "headers": {
-       "Content-Type": "text/plain"
-   },
-  "processData": false,
-  "mimeType": "multipart/form-data",
-  "contentType": false,
-  "data": form
-};
-
-$.ajax(settings).done(function (response) {
-  //console.log(response);  //The web page
-  console.log("done move:" + themove );
-});
+function postJQuery(params){
+	var form = new FormData();
+	form.append("name",  "move");
+	form.append("value", params);
+	
+	//let myForm = document.getElementById('myForm');
+	//let formData = new FormData(myForm);
+	
+	
+	var settings = {
+	  "url": "http://localhost:8080/move",
+	  "method": "POST",
+	  "timeout": 0,
+	  "headers": {
+	       "Content-Type": "text/plain"
+	   },
+	  "processData": false,
+	  "mimeType": "multipart/form-data",
+	  "contentType": false,
+	  "data": form
+	};
+	
+	$.ajax(settings).done(function (response) {
+	  console.log("AJAX: " + response);  //The web page
+	  console.log("done move:" + themove );
+	});
 
 }
 
@@ -101,6 +101,12 @@ function sendUpdateRequest(){
 function showMsg(message) {
 console.log(message );
     $("#applmsgs").html( message);
+    document.getElementById("applmsgs").value = message
+    //$("#applmsgs").onchange();
+    //document.getElementById("applmsgs").onchange();
+    document.getElementById("applmsgs").dispatchEvent(new Event('change'));
+   // $("#applmsgs").val(message);
+   // $("#applmsgs").trigger("change");
     //$("#applmsgintable").append("<tr><td>" + message + "</td></tr>");
 }
 

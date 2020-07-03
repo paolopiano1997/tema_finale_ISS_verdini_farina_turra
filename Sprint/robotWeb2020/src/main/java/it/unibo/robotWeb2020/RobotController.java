@@ -85,6 +85,7 @@ public class RobotController {
   @ResponseBody
   public String getApplicationModel(Model viewmodel) {
   	  ResourceRep rep = getWebPageRep();
+  	  viewmodel.addAttribute("state",rep.getContent());
 	  return rep.getContent();
   }     
   
