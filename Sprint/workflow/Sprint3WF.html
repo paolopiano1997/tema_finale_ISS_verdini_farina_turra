@@ -293,22 +293,24 @@ Se riusciamo, COAP request via browser/plugin da fargli vedere
 		del waiter e del barman, per avere un unico punto di accesso per le informazioni.
 	</li><br></ul>
 	<b> Descrizione formale delle entità a seguito della descrizione delle problematiche</b><br><br>
-		<ul>Valore maxstaytime: valore utilizzato per rappresentare la quantità massima di tmpo a cui un cliente è permesso soggiornare nella tearoom. 
+		<ul>
+		<u>Valore maxstaytime</u>: valore utilizzato per rappresentare la quantità massima di tmpo a cui un cliente è permesso soggiornare nella tearoom. 
 		Questo valore è incrementale nel tempo ed è rappresentato simil contatore il cui valore massimo che potrà raggiungere sarà maxstaytime. 
 		Durante il turno di decisione del cliente, il contatore verrà attivato e contestualmente verrà bloccato una volta fatta la richiesta da ciente a waiter.
 		Per semplificare l'accesso al valore maxstaytime di ogni cliente è stato introdotto un attore (broker) chiamato <i>maxstaytimer</i> il quale gestirà la 
 		terminazione del tempo concesso ad ogni cliente inviando al waitermind un dispatch di transizione verso lo stato di <em>collect</em>.
 		L'attore <i>maxstaytimer</i> si avvale di due attori, ciascuno dei quali gestisce a sua volta il tempo trascorso per ogni cliente nella tearoom. (Problema 3 e Problema 4)<br><br>
 		
-		Entità smartbell: viene modellata come un attore qak, vedi scelta modelli in <a href="./../SprintIniziale/SprintIniziale.html"><b>considerazioni iniziali</b></a> che 
+		<u>Entità smartbell</u>: viene modellata come un attore qak, vedi scelta modelli in <a href="./../SprintIniziale/SprintIniziale.html"><b>considerazioni iniziali</b></a> che 
 		invia una request al waiter per l'ingresso di un cliente, il waiter risponderà con una reply in caso di accettazione di richiesta o in caso contrario 
 		(rifiuto per mancanza di tavoli liberi e puliti) con un inform rappresentante il tempo di attesa prima di un ingresso.<br><br>
-		Identificativo clientidentifier: valore numerico univoco per cliente, generato da smartbell a seguito di una richiesta di ingresso di un cliente.<br><br>
 		
-		Inform: task che consiste in una reply fatta a seguito di una richiesta di ingresso da parte di un cliente in caso di tearoom sprovvista di tavoli cleaned.
+		<u>Identificativo clientidentifier</u>: valore numerico univoco per cliente, generato da smartbell a seguito di una richiesta di ingresso di un cliente.<br><br>
+		
+		<u>Task inform</u>: task che consiste in una reply fatta a seguito di una richiesta di ingresso da parte di un cliente in caso di tearoom sprovvista di tavoli cleaned.
 		La reply del waiter contiene al suo interno un valore numerico corrispondente ai secondi di attesa massima per l'ingresso del cliente. (Problema 5) <br> <br>
 		
-		Current state: stato della tearoom ricavato dall'attore <i>tearoomstate</i>, il quale interagisce tra le varie entità del sistema e la base di conoscenza.
+		<u>Current state</u>: stato della tearoom ricavato dall'attore <i>tearoomstate</i>, il quale interagisce tra le varie entità del sistema e la base di conoscenza.
 		I dispatch in ingresso a <i>tearoomstate</i> sono provenenti dal <em>waiter</em> e dal <em>barman</em> e contengono le informazioni relative allo stato dei tavoli, del waiter e del barman. <br>
 		L'attore <i>tearoomstate</i> interagisce mediante updateresource per comunicare alla webapp lo stato della tearoom.<!--Accesso alle risorse mediante COAP request via browser/plugin <u>perchè</u>--> (Problema 6)  <br><br>
 		</ul>

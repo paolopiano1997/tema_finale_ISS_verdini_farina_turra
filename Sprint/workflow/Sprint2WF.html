@@ -228,10 +228,6 @@ including some significant <bc>TestPlan</bc>. </li>
 <div class="remark">
 <em>clean</em>: Task per la pulizia dei tavoli, un tavolo sporco non può venire assegnato a nessun nuovo cliente. 
 Il waiter deve eseguire una fase di clean per riportare il tavolo in uno stato in cui il cliente può usufruirne.<br><br>
-<!--<em>COSA2</em>: .<br><br>
-<em>COSA3</em>: .<br><br>
-QUI DA METTERCI LE COSE A LIVELLO DI DIZIONARIO CHE PRIMA NON AVEVAMO PRESO IN CONSIDERAZIONE SIA ENTITà CHE AZIONI
--->
 
 <b>VECCHIE ASSUNZIONI</b> 
 <ul>
@@ -263,72 +259,54 @@ Simuliamo l'interrombipilità dei task (clean/go home) per l'esecuzione di <a hr
 			periodiche che impediscono al task clean di terminare se ricominciasse all'inizio del task al ogni ripresa di esecuzione.<br>
 			<i>es.</i> primo sottotask clean in esecuzione e costanti interruzioni dovute a richieste relativi a clienti non comporterebbe la sua terminazione.
 		</li>
-	<br>    
-	<li><b>Problema 2</b>: introduzione di un'entità Timer: //FORSE LO METTEREI SOTTO A SUPPORTO DELLA SOLUZIONE DEL PROBLEMA DEI SOTTOTASK<br>
-			È necessario introdurre una gestione relativa al tempo passato e rimanente di ciascuna fase dei sottotask del clean per una corretta gestione delle transizioni di stato.
-			A tal fine è stata modellata una nuova entità <i>timer</i> a supporto dell'attore waitercleaner.
-			Grazie a questa nuova entità (SCRIVI COS'è AL POSTO DI ENTITà) è possibile inoltre riprendere l'esecuzione al secondo esatto di interruzione del task clean a seguito di una richiesta più prioritaria 
-			(vedi <a href="./../SprintIniziale/SprintIniziale.html"><b>considerazioni iniziali</b></a> per la lista di task).
-		</li><br>
-	<li><b>Problema 3</b>: Rimodellazione dello stato del tavolo:<br>
+	<br>  <br>  
+	<li><b>Problema 2</b>: Rimodellazione dello stato del tavolo:<br>
 			A differenza del primo sprint è necessario rendere l'entità tavolo autonoma e non modellato come un oggetto per rendere il sistema più snello e meno vincolante.
 			Di fatto il tavolo è modellato come un attore con un relativo stato il quale a sua volta avrà interazioni con il <em>waiter</em>. 
 
 	</li><br>
-	
-	
-    <!--<li><b>Problema 4</b>: introduzione di un'entità Timer:</li><br>
-	<li><b>Problema 5</b>: introduzione di un'entità Timer:</li><br>
-	<li><b>Problema 6</b>: introduzione di un'entità Timer:</li><br>-->
 </ul>
 	<b> Descrizione formale delle soluzioni a seguito della descrizione delle problematiche</b><br><br>
-		Task clean: stato relativo ad un tavolo della tearoom suddiviso in modo da avere una gestione più leggibile da un manager e per risolvere problematiche relative date dalla sua natura di task interrompibile.
-		A supporto è stato creato un nuovo attore waitermind interno al waiter, il quale interagisce con il waitermind e gestisce le interruzioni e riprese di esecuzione dei sottotask introdotti.
-		Questa gestione interna è stata modellata mediante messaggi di dispatch dal waitermind al waitercleaner in caso di avvio del task clean, dispatch dal waitercleaner al waitermind per indicare che il tavolo è stato pulito,
-		<b>interazioni</b> (SCRIVERE CHE TIPO DI MESSAGGI) con <b>l'entità</b> (SCRIVERE COS'è NELLO SPECIFICO) timer per sapere precisamente quanto tempo è passato e quindi quanto tempo simulare alla prossima ripresa del sottotask di clean.
+		<u>Task clean</u>: stato relativo ad un tavolo della tearoom suddiviso in modo da avere una gestione più leggibile da un manager e per risolvere problematiche relative date dalla sua natura di task interrompibile.
+		A supporto è stato creato un nuovo attore <i>waitercleaner</i> interno al <em>waiter</em>, il quale interagisce con il <i>waitermind</i> e gestisce le interruzioni e riprese di esecuzione dei sottotask introdotti.
+		Questa gestione interna è stata modellata mediante messaggi di dispatch dal waitermind al waitercleaner in caso di avvio del task clean, dispatch dal <i>waitercleaner</i> al <i>waitermind</i> per indicare che il tavolo è stato pulito,
+		dispatch con l'attore <i>timer</i> per sapere precisamente quanto tempo è passato e quindi quanto tempo simulare alla prossima ripresa del sottotask di clean.
 		<br><br>
-		<!-- prima lo avevo inserito nel problema 3 ma lo vedo più adatto qui dato che è una soluzione-->
-		Entità tavolo: Per ovviare al problema della rappresentazione del tavolo e della gestione del suo stato interno sono emersi <a href="./../Sprint2/Sprint2.html"><b>tre scenari</b></a>.
+		<u>Entità timer</u>: È necessario introdurre una gestione relativa al tempo passato e rimanente di ciascuna fase dei sottotask del clean per una corretta gestione delle transizioni di stato.
+			A tal fine è stata modellata una nuova entità <i>timer</i> a supporto dell'attore waitercleaner.
+			Grazie a questa nuovo attore è possibile inoltre riprendere l'esecuzione al secondo esatto di interruzione del task clean a seguito di una richiesta più prioritaria 
+			(vedi <a href="./../SprintIniziale/SprintIniziale.html"><b>considerazioni iniziali</b></a> per la lista di task).
+		<br><br>
+		<u>Entità tavolo</u>: Per ovviare al problema della rappresentazione del tavolo e della gestione del suo stato interno sono emersi <a href="./../Sprint2/Sprint2.html"><b>tre scenari</b></a>.
 		Il migliore è risultato modellare l'entità tavolo come attore, <i>teatables</i>, inoltre è necessario introdurre 
 		una gestione sia dell'interazione con il waiter che con gli stati dei tavoli. Gli stati dei tavoli sono memorizzati in un file di <u>kwnoledge base</u> scritto in Prolog (supportato dai QAK), in modo tale da ottimizzare 
 		l'utilizzo dell'attore <i>teatables</i>.Da questa modellazione è possibile mandare dei dispatch da waitermind a teatables per effettuare le principali operazioni, ovvero un dispatch per occupare un determinato tavolo, 
 		un dispatch per aggiornare lo stato di un tavolo a <i>cleaned</i>, un dispatch per aggiornare lo stato di un tavolo quando il cliente paga ed esce dalla tearoom.
 <br><br>
+Dato il rilassamento delle assunzioni rispetto agli sprint precedenti, sorte nuove situazioni:
+<ul>
+	<li>Situazione 1:  </li>
+    <li>Situazione 2:  </li>
+    <li>Situazione 3:  </li>
+	<br>
+</ul>
 <b>SVILUPPI FUTURI</b>
 <ol>
-    <li>Il barman potrebbe preparare due ordini insieme, presumibilmente uguali, quindi
-    il waiter potrebbe portare direttamente gli ordini ad entrambi i tavoli.</li>
-    <li>Opzionale: Nella hall ci può essere al più una persona</li>
-    <li>Problema 1: Se il cliente suona ma poi se ne va?</li>
-    <li>Problema 2: Se il cliente suona 400 volte?</li>
-    <li>Tenere una cassa: dove i pagamenti dei clienti si sommano e si mostra il guadagno giornaliero.</li>
-    <li>Tenere un menù con la lista dei prezzi e in base all'ordine variare la somma da pagare</li>
+    <li></li>
+    <li></li>
+    <li></li>
+    <li></li>
+    <li></li>
+    <li></li>
 </ol>
-<ul>
-Dato il rilassamento delle assunzioni rispetto agli sprint precedenti, sorte nuove situazioni 
-	<li>Situazione 1: Gestione dell'ingresso di un nuovo cliente durante una probabile azione delwaiter rivolta al </li>
-    <li>Situazione 3: un cliente non viene ammesso perchè la sua temperatura è superiore a 37,5°</li>
-    <li>Situazione 4: un cliente esaurisce il <em>maxstaytime</em> e quindi viene richiesto 
-    il pagamento dal waiter e viene accompagnato all'uscita</li><br>
-</ul>
-<b>TEST PLAN</b><br>
-Testiamo la corretta funzione delle situazioni 1,2,3 e 4. Vedi analisi requisiti.
-<ul>
-<li>Simuliamo più clienti che richiedono l'accesso alla <em>tearoom</em> e alla fine dell'esecuzione l'ingresso si deve essere
-svuotato.</li>
-<li>Verifichiamo che venga portata a termine la catena completa degli eventi per due clienti nella tearoom contemporaneamente</li>
-<li>Verifichiamo che se un cliente ha temperatura > 37,5° non venga accettato nella <em>tearoom</em></li>
-<li>Simuliamo un cliente che esaurisca il <em>maxstaytime</em> e di conseguenza verifichiamo che il waiter
-richieda il pagamento e lo accompagni fuori.</li>
-</ul>
 </div>	
 
 <h2>Sprint review</h2> 
 <div class="remark">
 Problema:<br>
-- Non gestione del secondo cliente.<br>
-- Non gestione degli ordini/pagamenti ecc del tavolo 2. <br>
-- Attori in contesti separati. <br>
+ Non gestione del secondo cliente.<br>
+ Non gestione degli ordini/pagamenti ecc del tavolo 2. <br>
+ Attori in contesti separati. <br>
 </div>
 
 <h2>Sprint retrospective</h2> 
