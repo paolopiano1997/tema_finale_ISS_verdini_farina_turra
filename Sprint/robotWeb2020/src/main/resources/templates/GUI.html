@@ -1,13 +1,30 @@
-<html>
+<html xmlns:th="http://www.thymeleaf.org">
 <head>
 <script src="/webjars/jquery/jquery.min.js"></script>
     <script src="/webjars/sockjs-client/sockjs.min.js"></script>
     <script src="/webjars/stomp-websocket/stomp.min.js"></script>
     <script src="/app.js"></script>
-    
+    <script type="text/javascript" src="/javascript.js"></script>
     <script>connect()</script>
 
 	<style>
+	.dueColonne {
+    /*Numero di colonne*/
+    column-count: 2;
+    /* Distanza tra le colonne*/
+    column-gap: 30px;
+    /*Stile per il bordo delle colonne*/
+    column-rule: 1px solid #666;
+
+    /*Amplifica il supporto alle vecchie versioni di Firefox e Chrome/Safari */
+    -moz-column-count: 2;
+    -moz-column-gap: 30px;
+    -moz-column-rule: 1px solid #666;
+
+    -webkit-column-count: 2;
+    -webkit-column-gap: 30px;
+    -webkit-column-rule: 1px solid #666;
+    }
 		@import url(https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,500);
 * {
   padding: 0;
@@ -31,7 +48,7 @@
 }
 
 html, body {
-  background-color: #333;
+  background-color: #555;
 }
 
 body {
@@ -180,7 +197,7 @@ body {
 </head>
 
 
-<body>
+<body onLoad="load();">
 
 	<div style="
 	display: block; white-space: nowrap;
@@ -197,7 +214,7 @@ body {
 	</audio>
 	<h2> CLIENTE 1</h2>
 		<form style="display: inline-block; width: 20%;"><button style="display: inline-block;
-    " class='btn btn-yellow'  id="bell">
+    " class='btn btn-yellow'  id="bell" onClick="loadbell();">
 		<image src="./bell90.png" width=25%  />
 		<span>ENTER</span>
 	  </button></form>
@@ -214,7 +231,7 @@ body {
 		<span>ORDER</span>
 	  </button></form>
   
-	  <form style="display: inline-block; width: 20%;"><button style="display: inline-block;" id="cash" class='btn btn-green' >
+	  <form style="display: inline-block; width: 20%;"><button  onClick="loadcash();" style="display: inline-block;" id="cash" class='btn btn-green' >
 	  <image src="./cash90.png" width=25% />
 		<span>PAY</span>
 	  </button></form>
@@ -222,7 +239,7 @@ body {
 	 </br></br>
 	 <h2> CLIENTE 2</h2>
 		<form style="display: inline-block; width: 20%;"><button style="display: inline-block;
-    " class='btn btn-yellow'  id="bell2">
+    " class='btn btn-yellow'  id="bell2" onclick="loadbell();">
 		<image src="./bell90.png" width=25%  />
 		<span>ENTER</span>
 	  </button></form>
@@ -239,28 +256,69 @@ body {
 		<span>ORDER</span>
 	  </button></form>
   
-	  <form style="display: inline-block; width: 20%;"><button style="display: inline-block;" id="cash2" class='btn btn-green' >
+	  <form style="display: inline-block; width: 20%;"><button onClick="loadcash();" style="display: inline-block;" id="cash2" class='btn btn-green' >
 	  <image src="./cash90.png" width=25% />
 		<span> PAY </span>
 	  </button></form>
     </div>
     </br>
-    <textarea id="applmsgs" name="w3review" rows="6" cols="50" style="font-size: 20px; resize: none;">
-		home
+	
+	<div style="
+	display: block; white-space: nowrap;
+    overflow-x: auto;
+    overflow-y: hidden;
+	">
+	
+	
+	
+	<div class="dueColonne">
+  <h2>Stato della tearoom:</h2> </br></br>
+    <textarea readonly id="waiterstate" name="w3review" 
+	style="font-size: 30px; resize: none; background: #555;" 
+	onChange="showGif()">
+	</textarea>
+   <h2>Stato del waiter</h2>
+   </br>
+   <img id="waiter-f" src="waiter-floating.gif" width=20%>
+   <img id="waiter-m" src="waiter-new.gif" width=20% style="display: none;">
+</div>
+	
+	<br><br>
+	<div class="dueColonne">
+   <h2>Tavolo 1</h2>
+   </br>
+	<img id="t1img" src="table1.png" width=33%> 
+  <textarea readonly id="t1" name="w3review" style="font-size: 20px; resize: none; background: #555;"
+            onChange="changeTable1State()">
+		clean
+    </textarea>
+   <h2>Tavolo2</h2>
+   </br>
+   <img id="t2img" src="table1.png" width=33%>
+   <textarea readonly id="t2" name="w3review" style="font-size: 20px; resize: none; background: #555;"
+            onChange="changeTable2State()">
+		clean
+    </textarea>
+</div>
+</br>
+    <img id="t2img" src="barman.png" width=15%>
+   <textarea readonly id="barman" name="w3review" style="font-size: 20px; resize: none; background: #555;"
+            onChange="changeTable2State()">
+		working
+    </textarea>
+</br>
+<!-- dueColonne-->
+
+</div>
+    <textarea id="applmsgs" name="w3review" rows="6" cols="70" style="font-size: 20px; resize: none;" onChange="loadstate();" onInput="loadstate();"
+    th:text="${state}">
+    
     </textarea>
     </br></br>
+	
+	<footer>
   By Turra,Verdini,Farina
-
-<script>
-	document.getElementById("bell").addEventListener("click", function(){
-		
-		document.getElementById("audio").play();
-	});
-	document.getElementById("cash").addEventListener("click", function(){
-		
-		document.getElementById("cashaudio").play();
-	});
-</script>
+  </footer>
 
 </body>
 
