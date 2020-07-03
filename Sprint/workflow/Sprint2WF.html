@@ -245,14 +245,7 @@ QUI DA METTERCI LE COSE A LIVELLO DI DIZIONARIO CHE PRIMA NON AVEVAMO PRESO IN C
 <li>Nessun ulteriore cliente suona alla smartbell, nessun messaggio di inform in quanto tavoli per assunzione almeno un tavolo libero.</li>
 <li>Nessuna necessità di gestione di ordinazioni con identificativo del cliente.</li>
 </ul>
-SImuliamo l'interrombipilità dei task (clean/go home) per l'esecuzione di <a href="./ConsiderazioniIniziali.html"><b>task più prioritari</b></a> <br><br>
-//Analizzare le nuove casistiche in cui ci troviamo, non descrizione delle situazioni<br>
-Reminder: ricordiamoci di effettuare <b>l'analisi dei termini dei requisiti.</b></br>
-Introduciamo una piccola analisi su come le entità dovrebbero essere.</br>
-Link ai QAK di nuovo anche se già lo abbiamo fatto.</br>
-Spiegare il perchè attori.</br>
-Se riusciamo, COAP request via browser/plugin da fargli vedere
-</br></br>
+Simuliamo l'interrombipilità dei task (clean/go home) per l'esecuzione di <a href="./ConsiderazioniIniziali.html"><b>task più prioritari</b></a> <br><br>
 
 </div>
 
@@ -311,33 +304,38 @@ Se riusciamo, COAP request via browser/plugin da fargli vedere
     <li>Tenere una cassa: dove i pagamenti dei clienti si sommano e si mostra il guadagno giornaliero.</li>
     <li>Tenere un menù con la lista dei prezzi e in base all'ordine variare la somma da pagare</li>
 </ol>
+<ul>
+Dato il rilassamento delle assunzioni rispetto agli sprint precedenti, sorte nuove situazioni 
+	<li>Situazione 1: Gestione dell'ingresso di un nuovo cliente durante una probabile azione delwaiter rivolta al </li>
+    <li>Situazione 3: un cliente non viene ammesso perchè la sua temperatura è superiore a 37,5°</li>
+    <li>Situazione 4: un cliente esaurisce il <em>maxstaytime</em> e quindi viene richiesto 
+    il pagamento dal waiter e viene accompagnato all'uscita</li><br>
+</ul>
 <b>TEST PLAN</b><br>
 Testiamo la corretta funzione delle situazioni 1,2,3 e 4. Vedi analisi requisiti.
 <ul>
 <li>Simuliamo più clienti che richiedono l'accesso alla <em>tearoom</em> e alla fine dell'esecuzione l'ingresso si deve essere
 svuotato.</li>
-<li>??Verifichiamo che venga portata a termine la catena completa degli eventi per due clienti nella tearoom contemporaneamente</li>
+<li>Verifichiamo che venga portata a termine la catena completa degli eventi per due clienti nella tearoom contemporaneamente</li>
 <li>Verifichiamo che se un cliente ha temperatura > 37,5° non venga accettato nella <em>tearoom</em></li>
 <li>Simuliamo un cliente che esaurisca il <em>maxstaytime</em> e di conseguenza verifichiamo che il waiter
 richieda il pagamento e lo accompagni fuori.</li>
-</ul>
-<ul>
-Dato il rilassamento delle assunzioni rispetto agli sprint precedenti, sorte nuove situazioni 
-	<li>Situazione 1: gestione di più clienti contemporaneamente</li>
-    <li>Situazione 3: un cliente non viene ammesso perchè la sua temperatura è superiore a 37,5°</li>
-    <li>Situazione 4: un cliente esaurisce il <em>maxstaytime</em> e quindi viene richiesto 
-    il pagamento dal waiter e viene accompagnato all'uscita</li><br>
 </ul>
 </div>	
 
 <h2>Sprint review</h2> 
 <div class="remark">
-
+Problema:<br>
+- Non gestione del secondo cliente.<br>
+- Non gestione degli ordini/pagamenti ecc del tavolo 2. <br>
+- Attori in contesti separati. <br>
 </div>
 
 <h2>Sprint retrospective</h2> 
 <div class="remark">
-
+Generalizzare la gestione dei tavoli.<br>
+Attori in un unico contesto (concettuale).<br>
+Rifinitura dell'entità Timer.<br>
 </div>
 
 </div>

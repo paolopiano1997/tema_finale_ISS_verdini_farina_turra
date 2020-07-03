@@ -143,9 +143,9 @@ table, th, td {
   -->
 </style>
     
-<!--<base href="https://raw.githubusercontent.com/anatali/iss2020LabBo/master/it.unibo.issLabStart/userDocs/template2020.html">--><base href=".">
+<base href=".">
    
-<title>Sprint 3</title></head>
+<title>Sprint 1</title></head>
     
 <body>
 <h2>Introduction</h2>
@@ -226,20 +226,9 @@ including some significant <bc>TestPlan</bc>. </li>
 </div>
 <h2>Requirement Analysis</h2>
 <div class="remark">
-<em>Maxstaytime</em>: Viene inteso come tempo che il cliente ha a disposizione per effettuare la sua consumazione nella <em>tearoom</em>.
+<em>COSA1</em>: Viene inteso come tempo che il cliente ha a disposizione per effettuare la sua consumazione nella <em>tearoom</em>.
 Il suo funzionamente viene spiegato nelle <a href="./ConsiderazioniIniziali.html"><b>considerazioni iniziali</b></a><br><br>
-<em>Smartbell</em>: Entità esterna alla tearoom atta a notificare l'intenzione di un cliente ad entrare nella sala da the.
-	I suoi compiti sono di misurare la temperatura del cliente e nel caso sia inferiore a 37.5 gradi assegnargli un identificativo univoc e notificare il waiter.<br><br>
-<em>Clientidentifier</em>: Rappresenta un ID univoco assegnato ai clienti dalla smartbell in caso di almento un tavolo libero e clean<br><br>
-<em>inform</em>: Azione svolta dal waiter atta ad informare il cliente del tempo massimo di attesa prima che un tavolo risulti nuovamente clean<br><br>
-<em>Current state</em>: Rappresenta lo stato della <em>tearoom</em>, viene definito dallo stato dei tavoli (occupied, dirty, clean...), dallo stato del waiter e dallo stato del barman.
-MAXSTAYTIME???<br><br>
-per altri termini, link agli sprint precedenti<br><br>
-<b>VECCHIE ASSUNZIONI</b> 
-<ul>
-<li>Nel sistema esistono solo due clienti, un cliente entra quando il waiter sta facendo il clean.
-Il secondo cliente non interagisce.</li>
-</ul>
+<br><br>
 <b>NUOVE ASSUNZIONI</b>
 <ul>
 <li>il barman prepara un ordine alla volta</li>
@@ -260,15 +249,10 @@ Se riusciamo, COAP request via browser/plugin da fargli vedere
 </br>
 <b>Prolematiche sorte a seguito dell'analisi dei requisiti</b>
 <ul>
-	<!--//se c'è un cliente che suona e non viene fatto entrare, assumiamo che i clienti in coda dietro al primo cliente in coda non suonino e dopo ogni ingresso di un cliente, 
-	il secondo cliente in coda suona e viene informato del tempo di attesa-->
 	<li><b>Problema 1</b>: Gestione delle richieste da tavoli differenti:
             Il waiter ha la necessità di sapere a che tavolo portare l'ordinazione. Necessità di tenere traccia dell'importo
             da pagare per ciascun cliente.
-			<!--//C'è bisogno di tenere traccia di un'associazione cliente-tavolo, di una cliente-ordine-tavolo,
-			ovvero i barman deve sapere di chi è questo ordine e a che tavolo portarlo<br>
-            Tramite prolog memorizziamo idcliente-ordine-tavolo oppure tramite scambio messaggi? 
-			--></li>
+	</li>
 	<br>    
 	<li><b>Problema 2</b>: Interruzione del clean solo se c'è un altro tavolo disponibile: nello sprint precedente abbiamo assunto
     che vi fosse solo un cliente alla volta nella tearoom, quindi questo problema non si presentava.
@@ -284,18 +268,10 @@ Se riusciamo, COAP request via browser/plugin da fargli vedere
 		Per tale motivo sorge la problematica in cui il cliente richiede o di ordinare o il conto mentre il waiter sta gia facendo un'azione , 
 		La richiesta sarà gestita solo quando l'azione corrente si conclude e quindi il tempo viene fermato solo dopo aver ultimato quell'azione.
 		Il tempo che intercorre tra la richiesta del cliente e l'azione del waiter in risposta alla richiesta viene considerato trascurabile, 
-		<!--<u>aggiungere il maxstaytime nello stato che vede il manager nella sua gui</u>-->
 	</li>
 	<br>
-	<li><b>Problema 6</b>: <!--<u>Come gestire il timer per ciascun cliente? Quali scenari possono esserci?</u>-->
+	<li><b>Problema 6</b>: 
 		Se i due clienti sono entrati e non ordinano, i timer sono entrambi attivi, questo scenario introduce la necessità di gestire più "entità" timer contemporaneamente.
-		<!--<u>Se hanno ordinato entrambi e non è ancora pronto l'ordine, entrambi i timer sono "spenti".</u>
-		<u>Problema -> situazione in cui i timer sono entrambi attivi. Come risolvere?</u>
-		<u>1. Tante entità quanti tavoli -> <b>molto poco scalabile</b>, ma funzionante.</u>
-		Basandoci sul qak, l'introduzione di "molti" attori non è troppo pesante sull'utilizzo di ram/cpu etc..
-		COMMENTO: If you are using Akka, you can create an actor per request. Akka is extremely slim on resources and you can 
-		create literarily millions of actors on an pretty ordinary JVM heap. Also, they will only consume cpu/stack/threads when they actually do something.
-		</br>-->
 		Diventa opportuno introdurre un'entità intermedia, la quale spartisce le interazioni tra waitermind e i vari timer di ciascun cliente. Così facendo,
 		introduciamo un livello a metà che gestisce le richiesta dal waitermind alle varie entità timer, ciò risulta in maggiore scalabilità e riusabilità di waitermind
 	</li>
@@ -332,13 +308,12 @@ Ad ogni cambiamento, messaggio a questo attore. Questo attore fa "updateResource
 (Letto nella documentazione di QAK). <br><br>
 <b>SVILUPPI FUTURI</b>
 <ol>
-    <li>Il barman potrebbe preparare due ordini insieme, presumibilmente uguali, quindi
-    il waiter potrebbe portare direttamente gli ordini ad entrambi i tavoli.</li>
-    <li>Opzionale: Nella hall ci può essere al più una persona</li>
-    <li>Problema 1: Se il cliente suona ma poi se ne va?</li>
-    <li>Problema 2: Se il cliente suona 400 volte?</li>
-    <li>Tenere una cassa: dove i pagamenti dei clienti si sommano e si mostra il guadagno giornaliero.</li>
-    <li>Tenere un menù con la lista dei prezzi e in base all'ordine variare la somma da pagare</li>
+    <li>.</li>
+    <li></li>
+    <li></li>
+    <li></li>
+    <li></li>
+    <li></li>
 </ol>
 <b>TEST PLAN</b><br>
 Testiamo la corretta funzione delle situazioni 1,2,3 e 4. Vedi analisi requisiti.
@@ -350,23 +325,69 @@ svuotato.</li>
 <li>Simuliamo un cliente che esaurisca il <em>maxstaytime</em> e di conseguenza verifichiamo che il waiter
 richieda il pagamento e lo accompagni fuori.</li>
 </ul>
-<ul>
-Dato il rilassamento delle assunzioni rispetto agli sprint precedenti, sorte nuove situazioni 
-	<li>Situazione 1: gestione di più clienti contemporaneamente</li>
-    <li>Situazione 3: un cliente non viene ammesso perchè la sua temperatura è superiore a 37,5°</li>
-    <li>Situazione 4: un cliente esaurisce il <em>maxstaytime</em> e quindi viene richiesto 
-    il pagamento dal waiter e viene accompagnato all'uscita</li><br>
-</ul>
 </div>	
 
 <h2>Sprint review</h2> 
 <div class="remark">
+<b>Modello</b></br>
+E' necessario motivare accuratamente l'utilizzo del meta-modello QAK: questo modello
+considera le entità in gioco come "Attori", entità autonome e indipendenti che interagiscono
+tra loro tramite messaggi. Il QAK rende più efficiente e veloce
+la modellazione di questa tipologia di problemi, i quali, se si partisse da zero con un
+qualunque altro linguaggio di modellazione, sarebbero difficili da rappresentare.
+</br>
+Inoltre, le entità nel sistema in analisi interagiscono tramite "messaggi", come si evince dai
+requisiti. Questi "messaggi" possono quindi essere opportunamente modellati, con la giusta
+semantica, nei vari tipi di messaggi presenti nel modello QAK (Dispatch, Request/Reply, Event).
+Questi messaggi sono stati inizialmente modellati con uno specifico tipo (per esempio, il 
+messaggio che identifica il drink pronto, mandato dal barman al waiter, è stato modellato come dispatch). Questa modellazione 
+deve però in realtà venire <b>dopo</b> un'accurata analisi del contesto di utilizzo e di scambio
+di tali messaggi. Per esempio, in un contesto reale, l'informazione di drink/ordine pronto
+potrebbe essere anche un evento. Quindi, tale modellazione <b>NON</b> è una scelta o un vincolo
+dei requisiti, ma una <b>possibile</b> rappresentazione, la quale dovrà poi essere valutata
+nell'analisi del problema. Nel prossimo Sprint sarà specificata questa analisi e l'eventuale
+migliore modellazione presa in considerazione. Infine, da qui in avanti, <b>viene dato per "fatto"
+tutto ciò che riguarda il modello QAK, quindi parleremo NON più di messaggi, ma di Dispatch, Request, Reply
+e Event.</b>
 
+</br></br>
+
+<b>Tests</b></br>
+I test dal prossimo Sprint saranno maggiormente dettagliati preventivamente,
+in modo da far capire ad un potenziale lettore il funzionamento, i casi presi 
+in considerazione e la correttezza del modello. Inoltre, i vari test case è opportuno
+che vengano incapsulati in un'entità astratta o addirittura esterna, in modo tale da 
+rendere riutilizzabile il test in sè. Infatti, nel momento in cui, per esempio,
+i risultati attesi venissero messi in un file JSON o XML a parte, se dovesse essere necessario
+un cambiamento di essi, i test non verrebbero toccati ma solo aggiornati i valori
+nel file esterno. Potremmo anche pensare ad un'entità (magari Singleton) che contenga
+tutte le proprietà dei risultati attesi in formato Stringa (Stringa perchè
+è universale tra molti paradigmi e tecnologie).
+</br></br>
+
+<b>Mappa</b></br>
+Dal prossimo Sprint, deve essere chiaro il funzionamento di eventuali strumenti o entità
+sia presenti che esterni al sistema. Per esempio, è stato introdotta l'entità esterna
+planner, la quale però NECESSITA che la mappa sia conosciuta a priori per funzionare.
+Questo deve essere specificato, in quanto influisce sull'utilizzo e il funzionamento
+sia del modello che dei test. Un altro fattore importante riguarda la non mobilità
+delle pareti e ostacoli nella mappa. Nel sistema in esame, gli ostacoli sono fissi,
+ma se non lo fossero, ogni volta che c'è una modifica, la mappa dovrebbe essere riconfigurata
+e reimmessa nell'entità planner. Tutto questo potrebbe far parte di un'<b>ASSUNZIONE</b>.
+</br></br>
 </div>
 
 <h2>Sprint retrospective</h2> 
 <div class="remark">
-
+Nel prossimo sprint dovranno essere rifiniti gli aspetti descritti nello sprint review.
+Gli incrementi considerati nello sprint successivo saranno quelli di aggiungere 
+un cliente al sistema e di simulare almeno un task significativo interrompibile.
+E' opportuno anche iniziare a ragionare considerando le varie "situazioni" che possono
+accadere. Un esempio potrebbe essere quello di analizzare un particolare scenario,
+del tipo "il waiter sta facendo clean e un cliente è pronto ad ordinare". Questa può
+essere classificata come "situazione" da analizzare nel prossimo Sprint. Teniamo a mente
+che una volta modellata una "situazione", può essere riutilizzato il pattern per anche
+altre "situazioni" da analizzare.
 </div>
 
 </div>
