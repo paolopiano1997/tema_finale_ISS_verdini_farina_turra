@@ -226,16 +226,15 @@ including some significant <bc>TestPlan</bc>. </li>
 </div>
 <h2>Requirement Analysis</h2>
 <div class="remark">
+<em>Maxstaytime</em>: Viene inteso come tempo che il cliente ha a disposizione per effettuare la sua consumazione nella <em>tearoom</em>.
+Il suo funzionamente viene spiegato nelle <a href="./ConsiderazioniIniziali.html"><b>considerazioni iniziali</b></a><br><br>
 <em>Smartbell</em>: Entità esterna alla tearoom atta a notificare l'intenzione di un cliente ad entrare nella sala da the.
-	I suoi compiti sono di misurare la temperatura del cliente e nel caso sia inferiore a 37.5 gradi assegnargli un identificativo univoc e notificare il waiter.
-	<br>
-<br><em>Maxstaytime</em>: Viene inteso come tempo che il cliente ha a disposizione per effettuare la sua consumazione nella <em>tearoom</em>.
-Il suo funzionamente viene spiegato nelle <a href="./ConsiderazioniIniziali.html"><b>considerazioni iniziali</b></a><br>
-<br><em>Clientidentifier</em>: Rappresenta un ID univoco assegnato ai clienti dalla smartbell.<br>
-<br><em>Current state</em>: Rappresenta lo stato della <em>tearoom</em>, viene definito dallo stato dei tavoli (occupied, dirty, clean...), dallo stato del waiter e dallo stato del barman.
-MAXSTAYTIME???<br>
-per altri termini, link agli sprint precedenti
-<br><br>
+	I suoi compiti sono di misurare la temperatura del cliente e nel caso sia inferiore a 37.5 gradi assegnargli un identificativo univoc e notificare il waiter.<br><br>
+<em>Clientidentifier</em>: Rappresenta un ID univoco assegnato ai clienti dalla smartbell in caso di almento un tavolo libero e clean<br><br>
+<em>inform</em>: Azione svolta dal waiter atta ad informare il cliente del tempo massimo di attesa prima che un tavolo risulti nuovamente clean<br><br>
+<em>Current state</em>: Rappresenta lo stato della <em>tearoom</em>, viene definito dallo stato dei tavoli (occupied, dirty, clean...), dallo stato del waiter e dallo stato del barman.
+MAXSTAYTIME???<br><br>
+per altri termini, link agli sprint precedenti<br><br>
 <b>VECCHIE ASSUNZIONI</b> 
 <ul>
 <li>Nel sistema esistono solo due clienti, un cliente entra quando il waiter sta facendo il clean.
@@ -259,11 +258,7 @@ Se riusciamo, COAP request via browser/plugin da fargli vedere
 <h2>Problem analysis</h2> 
 <div class="remark">
 </br>
-Reminder: problema gestione stato room. E' necessaria un'entità che gestisca lo stato sulla base di conoscenza.
-Quindi, poichè abbiamo modellato i teatables che gestisse lo stato dei tavoli, è opportuno rimodellare tale entità, inglobando la gestione degli stati
-anche del waiter e del barman, per avere un quadro completo di tutta la situazione.
-</br></br>
-Entità smartbell: viene modellata come un attore qak, vedi scelta modelli in <a href="./../SprintIniziale/SprintIniziale.html"><b>considerazioni iniziali</b></a> che invia un messaggio di request-reply al 
+<b>Prolematiche sorte a seguito dell'analisi dei requisiti</b>
 <ul>
 	<!--//se c'è un cliente che suona e non viene fatto entrare, assumiamo che i clienti in coda dietro al primo cliente in coda non suonino e dopo ogni ingresso di un cliente, 
 	il secondo cliente in coda suona e viene informato del tempo di attesa-->
@@ -280,10 +275,10 @@ Entità smartbell: viene modellata come un attore qak, vedi scelta modelli in <a
     Task clean -> diventa interrompibile se sto pulendo il tavolo e l'altro è occupato.</li>
 	<br>
 	<li><b>Problema 3</b>: gestire lo stato della tearoom per il manager: quali dati mostrare al manager e come immagazzinarli.
-    </li>
+    <b><u>NON LO METTEREI</u></b></li>
 	<br>
     <li><b>Problema 4</b>: il cliente non ha ancora fatto l'ordinazione ma esaurisce il <em>maxstaytime</em>.
-    Il cliente viene accompagnato all'uscita</li>
+    Il cliente viene accompagnato all'uscita <b><u>NON MI SEMBRA UNA PROBLEMATICA QUANTO UNA SITUAZIONE</u></b></li>
 	<br>
 	<li><b>Problema 5</b>: il tempo trascorre solo quando è responsabilità del cliente ovvero nel suo turno.
 		Per tale motivo sorge la problematica in cui il cliente richiede o di ordinare o il conto mentre il waiter sta gia facendo un'azione , 
@@ -312,9 +307,25 @@ Entità smartbell: viene modellata come un attore qak, vedi scelta modelli in <a
 		   &ensp;&ensp;- Due clienti dentro la tearoom : min{remainingClientTime1,remainingClientTime2} <br>
 		   cleaningTimeTable definito come il tempo residuo per la pulizia del tavolo, <br>
 		   remainingClientTime definito come il tempo residuo del cliente per il suo staytime.
-	</li>
-	
-</ul>
+	</li><br>
+	<li><b>Problema 8</b>: Gestione del current state:
+		Dalla gestione dello stato globale della stanza è nata la necessità di introdurre un'entità che gestisca lo stato sulla base di conoscenza per questioni di modularità, un unico observer per lo stato della stanza.
+		Quindi, sono stati modellati i teatables in modo da gestire lo stato dei tavoli, è opportuno rimodellare tale entità, inglobando la gestione degli stati
+		anche del waiter e del barman, per avere un unico punto di accesso per le informazioni.
+	</li><br><br></ul>
+	<b> Descrizione formale delle entità a seguito della descrizione delle problematiche</b><br><br>
+		Valore maxstaytime: valore utilizzato per rappresentare la quantità massima di tmpo a cui un cliente è permesso soggiornare nella tearoom. 
+		Questo valore è incrementale nel tempo ed è rappresentato simil contatore il cui valore massimo che potrà raggiungere sarà maxstaytime. 
+		Durante il turno di decisione del cliente, il contatore verrà attivato e contestualmente verrà bloccato una volta fatta la richiesta da ciente a waiter.<br><br>
+		Entità smartbell: viene modellata come un attore qak, vedi scelta modelli in <a href="./../SprintIniziale/SprintIniziale.html"><b>considerazioni iniziali</b></a> che 
+		invia un messaggio di request-reply al waiter per l'ingresso di un cliente, il waiter risponderà in caso di accettazione di richiesta di entrata mediante un 
+		identificativo univoco rappresentante il cliente o in caso contrario (rifiuto per mancanza di tavoli liberi) con un inform rappresentante il tempo di attesa prima 
+		di un ingresso.<br><br>
+		Identificativo clientidentifier: valore numerico univoco per cliente, generato da waiter a seguito di una richiesta di ingresso mediante smartbell del cliente, 
+		identificativo iviato come reply alla richiesta di ingresso.<br><br>
+		Inform: task che consiste in una reply fatta a seguito di una richiesta di ingresso da parte di un cliente in caso di tearoom sprovvista di tavoli cleaned.
+		La reply contiene al suo interno un valore numerico corrispondente ai numeri di secondi di attesa massimi per l'ingresso del cliente. (Problema 7) <br> <br>
+		Currenti state: stato della tearoom ricavato dall'attore tearoom state. (Problema 8)  <br>
 </br>
 </br> Per ottenere lo stato della stanza completo, potrebbe essere necessario introdurre un attore che lo inglobi.
 Ad ogni cambiamento, messaggio a questo attore. Questo attore fa "updateResource" dello stato. Poi è accessibile tramite COAP.
