@@ -352,7 +352,7 @@ sollevare il waitermind da questo compito.
 Per la gestione degli stati intermedi del task <em>clean</em> relativi al tavolo,
 una problematica è se sia opportuno far interagire teatables con waitercleaner al fine di modificare lo stato dei tavoli. 
 Si chiedono al teatables gli stati e non li facciamo memorizzare al waitercleaner, ognuno fa il proprio compito.
-</br></br>
+</br></br>METTI IL NOME DEGLI STATI INTERMEDI
 <h3> Timer </h3> </br>
 In accordo con il committente è stato stabilito che nell'ultima fase del clean il task non è interrompibile, ovvero negli ultimi 15 secondi dell'esecuzione del task. 
 <br>È necessario dunque introdurre una gestione relativa al tempo passato e rimanente di ciascuna fase del task clean.
@@ -365,12 +365,6 @@ viene memorizzato il tempo trascorso, cosicchè quando il task verrà ripristina
 solo con il tempo rimanente e non solo da un particolare stato, altrimenti si dovrebbe ripartire dal solito stato che precedentemente
 avrebbe potuto essere quasi ultimato.
 </br></br>
-<!-- Un'ulteriore casistica sorge nel momento in cui il cliente che si siede al tavolo sappia già che cosa ordinare, e che quindi
-faccia immediatamente l'ordine, come un cliente abituale farebbe nella realtà, senza dare tempo al <em>waiter</em> di finire di pulire il tavolo.
-In questo caso, supponendo che il tavolo da pulire non abbia ancora raggiunto lo stato "sanitized", il task dovrà nuovamente essere interrotto. 
-Questo scenario fa sì che il waiter interrompa più volte di fila il task <em>clean</em> nello stesso stato. Tutto questo però viene gestito 
-dal fatto che utilizziamo un timer per memorizzare il tempo rimasto per ogni stato di <em>clean</em>, evitando dunque di rimanere bloccati in uno stato,
-e dando la possibilità di interrompere il task <em>clean</em> tutte le volte che si vuole. -->
 Di seguito è riportato il modello. waiterengine non è stato riportato, in quanto invariato.
 </br></br>
  <a href="https://github.com/paolopiano1997/tema_finale_ISS_verdini_farina_turra/blob/master/Sprint/Sprint2/SecondoSprintAnalProb/src/waitermind.qak">waitermind.qak</a>

@@ -245,13 +245,11 @@ per altri termini, link agli sprint precedenti<br><br>
 <li>i tempi di preparazione sono sempre gli stessi</li>
 <li>il cliente suona una volta sola e aspetta il suo turno.</li>
 </ul>
-//Analizzare le nuove casistiche in cui ci troviamo, non descrizione delle situazioni<br>
-Reminder: ricordiamoci di effettuare <b>l'analisi dei termini dei requisiti.</b></br>
-Introduciamo una piccola analisi su come le entità dovrebbero essere.</br>
-Link ai QAK di nuovo anche se già lo abbiamo fatto.</br>
-Spiegare il perchè attori.</br>
-Se riusciamo, COAP request via browser/plugin da fargli vedere
-</br></br>
+Simuliamo l'ingresso di due clienti alla volta, gestendo le richieste in accordo con le priorità stabilite negli sprint precedenti, ampliamo il funzionamento di smartbell con le azioni di controllo temperatura e 
+inform sui tempi di attesa. Introdotta la webapp per visualizzare il currentstate della tearoom.
+Gestito il maxstaytime per simulare l'assenza di richieste provenienti dal cliente e gestire la sua uscita dalla tearoom.
+<br><br>
+<a href="https://github.com/paolopiano1997/tema_finale_ISS_verdini_farina_turra/tree/master/Sprint/Sprint3/TerzoSprintAnalReq">Link al modello dell'analisi dei requisiti</a>
 </div>
 
 <h2>Problem analysis</h2> 
@@ -261,24 +259,20 @@ Se riusciamo, COAP request via browser/plugin da fargli vedere
 <ul>
 	<li><b>Problema 1</b>: Gestione delle richieste da tavoli differenti:<br>
             Il waiter ha la necessità di sapere a che tavolo portare l'ordinazione.
-			</li>
-	<br>    
+	</li><br>    
 	<li><b>Problema 2</b>: Interruzione del clean solo se c'è un altro tavolo disponibile: nello sprint precedente abbiamo assunto
     che vi fosse solo un cliente alla volta nella tearoom, quindi questo problema non si presentava.
-    </li>
-	<br>
+    </li><br>
 	<li><b>Problema 3</b>: il tempo trascorre solo quando è responsabilità del cliente ovvero nel suo turno.
 		Per tale motivo sorge la problematica in cui il cliente richiede o di ordinare o il conto mentre il waiter sta gia facendo un'azione. 
 		La richiesta sarà gestita solo quando l'azione corrente si conclude e quindi il timer viene fermato solo dopo aver ultimato quell'azione.
 		Il tempo che intercorre tra la richiesta del cliente e l'azione del waiter in risposta alla richiesta viene considerato trascurabile. 
-	</li>
-	<br>
+	</li><br>
 	<li><b>Problema 4</b>: 
 		Se i due clienti sono entrati e non ordinano, i timer sono entrambi attivi, questo scenario introduce la necessità di gestire più "entità" timer contemporaneamente.
 		Diventa opportuno introdurre un'entità intermedia, la quale spartisce le interazioni tra waitermind e i vari timer di ciascun cliente. Così facendo,
 		introduciamo un livello a metà che gestisce le richiesta dal waitermind alle varie entità timer, ciò risulta in maggiore scalabilità e riusabilità di waitermind
-	</li>
-	<br>
+	</li><br>
 	<li><b>Problema 5</b>: Gestione dei tempi di attesa per l'azione di <em>inform</em> a seguito del rilassamento sui vincoli sul numero di clienti presenti nel sistema (interni ed esterni alla tearoom). 
 		Esistono 3 situazioni in cui si può trovare la tearoom,<br>
 		   &ensp;&ensp;- Due tavoli non cleaned : tempo di attesa equivale a min{cleaningTimeTable1,cleaningTimeTable2}<br>
@@ -287,16 +281,17 @@ Se riusciamo, COAP request via browser/plugin da fargli vedere
 		   cleaningTimeTable definito come il tempo residuo per la pulizia del tavolo, <br>
 		   remainingClientTime definito come il tempo residuo del cliente per il suo staytime.
 	</li><br>
-	<li><b>Problema 6</b>: Gestione del current state:<br>
+	<li><b>Problema 6</b>: Gestione del currentstate:<br>
 		Dalla gestione dello stato globale della stanza è nata la necessità di introdurre un'entità che gestisca lo stato sulla base di conoscenza per questioni di modularità, un unico observer per lo stato della stanza.
 		Quindi, è stato rimodellato l'attore <i>teatables</i> in modo da gestire anche gli stati
 		del waiter e del barman, per avere un unico punto di accesso per le informazioni.
-	</li><br></ul>
+	</li><br>
+	</ul>
 	<b> Descrizione formale delle entità a seguito della descrizione delle problematiche</b><br><br>
 		<ul>
 		<u>Valore maxstaytime</u>: valore utilizzato per rappresentare la quantità massima di tmpo a cui un cliente è permesso soggiornare nella tearoom. 
 		Questo valore è incrementale nel tempo ed è rappresentato simil contatore il cui valore massimo che potrà raggiungere sarà maxstaytime. 
-		Durante il turno di decisione del cliente, il contatore verrà attivato e contestualmente verrà bloccato una volta fatta la richiesta da ciente a waiter.
+		Durante il turno di decisione del cliente, il contatore verrà attivato e contestualmente verrà bloccato una volta fatta la richiesta da cliente a waiter.
 		Per semplificare l'accesso al valore maxstaytime di ogni cliente è stato introdotto un attore (broker) chiamato <i>maxstaytimer</i> il quale gestirà la 
 		terminazione del tempo concesso ad ogni cliente inviando al waitermind un dispatch di transizione verso lo stato di <em>collect</em>.
 		L'attore <i>maxstaytimer</i> si avvale di due attori, ciascuno dei quali gestisce a sua volta il tempo trascorso per ogni cliente nella tearoom. (Problema 3 e Problema 4)<br><br>
@@ -305,7 +300,7 @@ Se riusciamo, COAP request via browser/plugin da fargli vedere
 		invia una request al waiter per l'ingresso di un cliente, il waiter risponderà con una reply in caso di accettazione di richiesta o in caso contrario 
 		(rifiuto per mancanza di tavoli liberi e puliti) con un inform rappresentante il tempo di attesa prima di un ingresso.<br><br>
 		
-		<u>Identificativo clientidentifier</u>: valore numerico univoco per cliente, generato da smartbell a seguito di una richiesta di ingresso di un cliente.<br><br>
+		<u>Identificativo clientidentifier</u>: valore numerico univoco per cliente, generato da <em>smartbell</em> a seguito di una richiesta di ingresso di un cliente. (Problema 1)<br><br>
 		
 		<u>Task inform</u>: task che consiste in una reply fatta a seguito di una richiesta di ingresso da parte di un cliente in caso di tearoom sprovvista di tavoli cleaned.
 		La reply del waiter contiene al suo interno un valore numerico corrispondente ai secondi di attesa massima per l'ingresso del cliente. (Problema 5) <br> <br>
@@ -321,11 +316,8 @@ Se riusciamo, COAP request via browser/plugin da fargli vedere
     <li>Situazione 3: un cliente esaurisce il <em>maxstaytime</em> e quindi viene richiesto 
     il pagamento dal waiter e viene accompagnato all'uscita.</li><br>
 </ul>
-
-<!--</br>
-</br> Per ottenere lo stato della stanza completo, potrebbe essere necessario introdurre un attore che lo inglobi.
-Ad ogni cambiamento, messaggio a questo attore. Questo attore fa "updateResource" dello stato. Poi è accessibile tramite COAP.
-(Letto nella documentazione di QAK).<br><br>--> 
+<a href="https://github.com/paolopiano1997/tema_finale_ISS_verdini_farina_turra/tree/master/Sprint/Sprint3/TerzoSprintAnalProb">Link al modello dell'analisi deproblema</a>
+<br><br>
 <b>SVILUPPI FUTURI</b>
 <ol>
     <li>Il barman potrebbe preparare due ordini insieme, presumibilmente uguali, quindi
@@ -337,15 +329,17 @@ Ad ogni cambiamento, messaggio a questo attore. Questo attore fa "updateResource
     <li>Tenere un menù con la lista dei prezzi e in base all'ordine variare la somma da pagare</li>
 </ol>
 <b>TEST PLAN</b><br>
-Testiamo la corretta funzione delle situazioni 1,2,3 e 4. Vedi analisi requisiti.
+<br>
+Testiamo la corretta funzione delle situazioni 1, 2 e 3.
 <ul>
 <li>Simuliamo più clienti che richiedono l'accesso alla <em>tearoom</em> e alla fine dell'esecuzione l'ingresso si deve essere
 svuotato.</li>
 <li>Verifichiamo che venga portata a termine la catena completa degli eventi per due clienti nella tearoom contemporaneamente</li>
 <li>Verifichiamo che se un cliente ha temperatura > 37,5° non venga accettato nella <em>tearoom</em></li>
-<li>Simuliamo un cliente che esaurisca il <em>maxstaytime</em> e di conseguenza verifichiamo che il waiter
-richieda il pagamento e lo accompagni fuori.</li>
+<li>Simuliamo un cliente che esaurisca il <em>maxstaytime</em> e di conseguenza verifichiamo che il <em>waiter</em>
+richieda il pagamento e lo accompagni fuori.</li><br>
 </ul>
+<a href="https://github.com/paolopiano1997/tema_finale_ISS_verdini_farina_turra/tree/master/Sprint/Sprint3/TerzoSprintAnalProb/test">Test plan</a>
 </div>	
 
 <h2>Sprint review</h2> 
