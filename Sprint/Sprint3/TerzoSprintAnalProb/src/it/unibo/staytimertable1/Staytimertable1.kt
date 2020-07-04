@@ -38,8 +38,8 @@ class Staytimertable1 ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( 
 						}
 						println("staytimertable1   |||   wait")
 					}
-					 transition(edgeName="t088",targetState="start",cond=whenDispatch("starttimer"))
-					transition(edgeName="t089",targetState="wait",cond=whenRequest("getRemainingTime"))
+					 transition(edgeName="t089",targetState="start",cond=whenDispatch("starttimer"))
+					transition(edgeName="t090",targetState="wait",cond=whenRequest("getRemainingTime"))
 				}	 
 				state("start") { //this:State
 					action { //it:State
@@ -54,11 +54,11 @@ class Staytimertable1 ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( 
 						stateTimer = TimerActor("timer_start", 
 							scope, context!!, "local_tout_staytimertable1_start", 1000.toLong() )
 					}
-					 transition(edgeName="t090",targetState="start",cond=whenTimeout("local_tout_staytimertable1_start"))   
-					transition(edgeName="t091",targetState="replyTimeStart",cond=whenRequest("getRemainingTime"))
-					transition(edgeName="t092",targetState="wait",cond=whenDispatch("stopstaytimer"))
-					transition(edgeName="t093",targetState="timeFinish",cond=whenDispatch("endtime"))
-					transition(edgeName="t094",targetState="end",cond=whenDispatch("timeroff"))
+					 transition(edgeName="t091",targetState="start",cond=whenTimeout("local_tout_staytimertable1_start"))   
+					transition(edgeName="t092",targetState="replyTimeStart",cond=whenRequest("getRemainingTime"))
+					transition(edgeName="t093",targetState="wait",cond=whenDispatch("stopstaytimer"))
+					transition(edgeName="t094",targetState="timeFinish",cond=whenDispatch("endtime"))
+					transition(edgeName="t095",targetState="end",cond=whenDispatch("timeroff"))
 				}	 
 				state("replyTimeStart") { //this:State
 					action { //it:State

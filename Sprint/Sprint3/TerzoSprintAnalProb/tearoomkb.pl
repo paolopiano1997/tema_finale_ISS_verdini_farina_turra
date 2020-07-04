@@ -16,11 +16,11 @@ pos( exitdoor,     6, 4 ).
 %% ------------------------------------------ 
 %% Teatables
 %% ------------------------------------------ 
-%% busy
-%% free		(not busy and not clean)
-%% dirty	(not clean)
-%% clean	(not dirty)
-%% available (free and clean)	
+%% clean  pulito e libero
+%% occupy(ID)	occupato da un cliente con id ID
+%% dirty	sporco
+%% undirty	non dirty, da sanitizzare
+%% sanitized sanitizzato, da apparecchiare	
 
 %%teatable con due parametri, il secondo identifica lo stato.
 %%invece di mettere un terzo parametro per il cliente, utilizziamo il secondo per inglobare
@@ -72,10 +72,21 @@ cleanTable(N).
 %% Waiter
 %% ------------------------------------------ 
 
-%%  athome
-%%	serving( CLIENTID )
-%%	movingto( CELL )
-%%	cleaning( table(N) )
+%%  home
+%%	reachEntranceDoor
+%%  convoyToTable_TABLENUM_
+%%  reachTableCleanStopped_TABLENUM_
+%%  reachTableTake_TABLENUM_
+%%  waitOrderTable_TABLENUM_
+%%  transmitOrder_ORDER_Client_IDCLIENT_
+%%  reachbarman
+%%  reachTableServe_TABLENUM_
+%%  reachTableCollect_TABLENUM_
+%%  reachTableClean_TABLENUM_
+%%	collect
+%%	convoyToExitDoor
+%%  cleanTable_TABLENUM_
+
 
 waiter( athome ).
 
@@ -88,8 +99,8 @@ setWaiter(S) :-
 %% barman
 %% ------------------------------------------ 
 %% idle
-%% preparing( CLIENTID )
-%% ready( CLIENTID )
+%% preparing( CLIENTID, ORDER )
+%% drinkready
 
 barman( idle ).
 
@@ -99,7 +110,7 @@ setBarman(S) :-
 	assert(barman(S)).
 
 %% ------------------------------------------ 
-%% Room as a whole
+%% TEAROOM STATE
 %% ------------------------------------------ 
 roomstate(  waiter(S), stateOfTeatables(V), barman(D) ):-
 	 waiter(S), stateOfTeatables(V), barman(D).

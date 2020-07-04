@@ -32,9 +32,9 @@ class Maxstaytimer ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( nam
 					action { //it:State
 						println("maxstaytimer   |||   wait")
 					}
-					 transition(edgeName="t083",targetState="doTimerAction",cond=whenDispatch("doTimerAction"))
-					transition(edgeName="t084",targetState="remTime1",cond=whenRequest("getRemainingTime"))
-					transition(edgeName="t085",targetState="timePassed",cond=whenDispatch("timePassed"))
+					 transition(edgeName="t084",targetState="doTimerAction",cond=whenDispatch("doTimerAction"))
+					transition(edgeName="t085",targetState="remTime1",cond=whenRequest("getRemainingTime"))
+					transition(edgeName="t086",targetState="timePassed",cond=whenDispatch("timePassed"))
 				}	 
 				state("doTimerAction") { //this:State
 					action { //it:State
@@ -78,7 +78,7 @@ class Maxstaytimer ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( nam
 					action { //it:State
 						request("getRemainingTime", "getRemainingTime(time)" ,"staytimertable1" )  
 					}
-					 transition(edgeName="t086",targetState="remTime2",cond=whenReply("remainingTime"))
+					 transition(edgeName="t087",targetState="remTime2",cond=whenReply("remainingTime"))
 				}	 
 				state("remTime2") { //this:State
 					action { //it:State
@@ -88,7 +88,7 @@ class Maxstaytimer ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( nam
 						}
 						request("getRemainingTime", "getRemainingTime(time)" ,"staytimertable2" )  
 					}
-					 transition(edgeName="t087",targetState="forwardRemainingTime",cond=whenReply("remainingTime"))
+					 transition(edgeName="t088",targetState="forwardRemainingTime",cond=whenReply("remainingTime"))
 				}	 
 				state("forwardRemainingTime") { //this:State
 					action { //it:State

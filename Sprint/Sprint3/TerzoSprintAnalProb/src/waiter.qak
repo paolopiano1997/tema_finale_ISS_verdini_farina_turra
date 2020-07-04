@@ -101,6 +101,9 @@ Reply state : state(N,S)
 
 Dispatch timeroff : timeroff(T) 
 
+//Take the order to the barman
+Dispatch take : take(T)
+
 //SMARTBELL
 Dispatch reject : reject(R)
 
@@ -384,6 +387,7 @@ QActor waitermind context ctxtearoom{
 	
 	State serve{
 //		[# readLine() #]
+		forward barman -m take : take(take)
 		println("waitermind   |||   serve")
 		request tearoomstate -m getTable : getTable($CurCID)
 	}
@@ -472,11 +476,12 @@ QActor waitermind context ctxtearoom{
 		delayVar CollectTime
 	}
 	Goto convoyToExitDoor
-	
+
 	State convoyToExitDoor{
 		println("waitermind   |||   convoyToExitDoor")
 		updateResource[# "convoyToExitDoor" #]
 		forward tearoomstate -m setWaiterState : setWaiterState(convoyToExitDoor)
+		forward tearoomstate -m setTableState : setTableState($CurTable,dirty)
 		[# CurCID = 0 #]
 		solve(pos(exitdoor, X, Y))
 		ifSolved{
@@ -492,7 +497,7 @@ QActor waitermind context ctxtearoom{
 	
 	State cleanTable{
 		updateResource[# "cleanTable$CurTableClean" #]
-		[# WState = "claenTable$CurTableClean" #]
+		[# WState = "cleanTable$CurTableClean" #]
 		forward tearoomstate -m setWaiterState : setWaiterState($WState)
 		println("waitermind   |||   cleanTable$CurTableClean")
 		forward waitercleaner -m startcleaner : startcleaner($CurTableClean)
@@ -991,7 +996,7 @@ QActor barman context ctxtearoom {
 		updateResource[# "waiting" #]
 	}
 	Transition t0 whenMsg order -> prepare
-	
+
 	State prepare{
 		println("barman   |||   prepare")
 		updateResource[# "preparing" #]
@@ -1011,9 +1016,8 @@ QActor barman context ctxtearoom {
 		forward tearoomstate -m setBarmanState : setBarmanState(drinkready)
 		updateResource[# "drinkready" #]
 		forward waitermind -m drinkready : drinkready($CurCID,$CurOrder)
-		delay 5000
 	}
-	Goto wait
+	Transition t0 whenMsg take -> wait
 }
 
 QActor smartbell context ctxtearoom{

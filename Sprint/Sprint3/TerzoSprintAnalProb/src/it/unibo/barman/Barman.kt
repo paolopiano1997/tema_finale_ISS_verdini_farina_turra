@@ -61,9 +61,8 @@ class Barman ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, sco
 						updateResourceRep( "drinkready"  
 						)
 						forward("drinkready", "drinkready($CurCID,$CurOrder)" ,"waitermind" ) 
-						delay(5000) 
 					}
-					 transition( edgeName="goto",targetState="wait", cond=doswitch() )
+					 transition(edgeName="t080",targetState="wait",cond=whenDispatch("take"))
 				}	 
 			}
 		}
