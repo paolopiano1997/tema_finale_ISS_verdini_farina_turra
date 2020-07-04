@@ -332,12 +332,14 @@ Gestito il maxstaytime per simulare l'assenza di richieste provenienti dal clien
 <br>
 Testiamo la corretta funzione delle situazioni 1, 2 e 3.
 <ul>
-<li>Simuliamo più clienti che richiedono l'accesso alla <em>tearoom</em> e alla fine dell'esecuzione l'ingresso si deve essere
-svuotato.</li>
-<li>Verifichiamo che venga portata a termine la catena completa degli eventi per due clienti nella tearoom contemporaneamente</li>
+<li>Situazione in cui ci sono due clienti, uno dei quali chiede un ordine. Il waiter deve andare al tavolo giusto.</li>
+<li>Situazione in cui è in atto un clean e viene simulata una richiesta di ingresso. Il clean non deve essere fermato, in quanto non è possibile accogliere, in quel momento, il nuovo cliente.</li>
 <li>Verifichiamo che se un cliente ha temperatura > 37,5° non venga accettato nella <em>tearoom</em></li>
 <li>Simuliamo un cliente che esaurisca il <em>maxstaytime</em> e di conseguenza verifichiamo che il <em>waiter</em>
-richieda il pagamento e lo accompagni fuori.</li><br>
+richieda il pagamento e lo accompagni fuori.</li>
+<li>Nel caso in cui un cliente chieda di entrare e non ci sono tavoli liberi, esso deve essere informato del massimo tempo di attesa con <em>inform</em></li>
+<li>Verificare la corretta gestione del Current State</li>
+<br>
 </ul>
 <a href="https://github.com/paolopiano1997/tema_finale_ISS_verdini_farina_turra/tree/master/Sprint/Sprint3/TerzoSprintAnalProb/test">Test plan</a>
 </div>	
