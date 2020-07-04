@@ -39,6 +39,9 @@ class Waitermind ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name,
 			//Tempo rimanente minimo clienti
 			var RemCTime = 15 //Secondi
 			
+			//State
+			var WState = ""
+			
 		return { //this:ActionBasciFsm
 				state("s0") { //this:State
 					action { //it:State
@@ -162,7 +165,8 @@ class Waitermind ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name,
 					action { //it:State
 						updateResourceRep( "convoyToTable$CurTable"  
 						)
-						forward("setWaiterState", "setWaiterState(convoyToTable,$CurTable)" ,"tearoomstate" ) 
+						 WState = "convoyToTable$CurTable"  
+						forward("setWaiterState", "setWaiterState($WState)" ,"tearoomstate" ) 
 						println("waitermind   |||   convoyToTable$CurTable")
 						solve("pos('teatable$CurTable',X,Y)","") //set resVar	
 						if( currentSolution.isSuccess() ) { 
@@ -181,7 +185,6 @@ class Waitermind ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name,
 				state("checkCleanHome") { //this:State
 					action { //it:State
 						println("$name in ${currentState.stateName} | $currentMsg")
-						 readLine()  
 						println("waitermind   |||   checkClean")
 						request("isTableStopped", "isTableStopped(isStopped)" ,"waitercleaner" )  
 					}
@@ -215,7 +218,8 @@ class Waitermind ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name,
 					action { //it:State
 						println("waitermind   |||   reachTableCleanStopped")
 						solve("pos('teatable$CurTableClean',X,Y)","") //set resVar	
-						forward("setWaiterState", "setWaiterState(reachTableCleanStopped,$CurTableClean)" ,"tearoomstate" ) 
+						 WState = "reachTableCleanStopped$CurTableClean"  
+						forward("setWaiterState", "setWaiterState($WState)" ,"tearoomstate" ) 
 						if( currentSolution.isSuccess() ) {
 									   CurMoveX = getCurSol("X").toString().toInt()
 						 			   CurMoveY = getCurSol("Y").toString().toInt()
@@ -248,7 +252,8 @@ class Waitermind ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name,
 						if( checkMsgContent( Term.createTerm("tableId(N)"), Term.createTerm("tableId(N)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
 								 CurTable = payloadArg(0).toString().toInt()  
-								forward("setWaiterState", "setWaiterState(reachTableTake,$CurTable)" ,"tearoomstate" ) 
+								 WState = "reachTableTake$CurTable"  
+								forward("setWaiterState", "setWaiterState($WState)" ,"tearoomstate" ) 
 								forward("doTimerAction", "doTimerAction($CurTable,stop)" ,"maxstaytimer" ) 
 								solve("pos('teatable$CurTable',X,Y)","") //set resVar	
 								if( currentSolution.isSuccess() ) { 
@@ -264,20 +269,22 @@ class Waitermind ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name,
 				}	 
 				state("waitOrder") { //this:State
 					action { //it:State
+						 WState = "waitOrderTable$CurTable"  
+						forward("setWaiterState", "setWaiterState($WState)" ,"tearoomstate" ) 
 						println("waitermind   |||   waitOrder")
 					}
 					 transition(edgeName="t023",targetState="transmit",cond=whenDispatch("order"))
 				}	 
 				state("transmit") { //this:State
 					action { //it:State
-						forward("setWaiterState", "setWaiterState(transmit)" ,"tearoomstate" ) 
-						 readLine()  
 						println("waitermind   |||   transmit")
 						updateResourceRep( "transmit"  
 						)
 						if( checkMsgContent( Term.createTerm("order(ID,O)"), Term.createTerm("order(ID,O)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
-								forward("order", "order($CurCID,payloadArg(0))" ,"barman" ) 
+								 WState = "transmitOrder${payloadArg(1)}Client$CurCID"  
+								forward("setWaiterState", "setWaiterState($WState)" ,"tearoomstate" ) 
+								forward("order", "order($CurCID,${payloadArg(1)})" ,"barman" ) 
 						}
 					}
 					 transition( edgeName="goto",targetState="checkCleanHome", cond=doswitch() )
@@ -308,7 +315,6 @@ class Waitermind ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name,
 				}	 
 				state("serve") { //this:State
 					action { //it:State
-						 readLine()  
 						println("waitermind   |||   serve")
 						request("getTable", "getTable($CurCID)" ,"tearoomstate" )  
 					}
@@ -319,7 +325,8 @@ class Waitermind ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name,
 						if( checkMsgContent( Term.createTerm("tableId(N)"), Term.createTerm("tableId(N)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
 								 CurTable = payloadArg(0).toString().toInt()  
-								forward("setWaiterState", "setWaiterState(reachTableServe,$CurTable)" ,"tearoomstate" ) 
+								 WState = "reachTableServe$CurTable"  
+								forward("setWaiterState", "setWaiterState($WState)" ,"tearoomstate" ) 
 								forward("doTimerAction", "doTimerAction($CurTable,start)" ,"maxstaytimer" ) 
 								solve("pos('teatable$CurTable',X,Y)","") //set resVar	
 								if( currentSolution.isSuccess() ) { 
@@ -361,7 +368,8 @@ class Waitermind ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name,
 						if( checkMsgContent( Term.createTerm("tableId(N)"), Term.createTerm("tableId(N)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
 								if( currentSolution.isSuccess() ) { CurTable = payloadArg(0).toString().toInt()  
-								forward("setWaiterState", "setWaiterState(reachTableCollect,$CurTable)" ,"tearoomstate" ) 
+								 WState = "reachTableCollect$CurTable"  
+								forward("setWaiterState", "setWaiterState($WState)" ,"tearoomstate" ) 
 								}
 								else
 								{}
@@ -382,11 +390,12 @@ class Waitermind ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name,
 				}	 
 				state("reachTableClean") { //this:State
 					action { //it:State
-						 readLine()  
 						println("waitermind   |||   reachTable")
 						updateResourceRep( "reachTableClean"  
 						)
 						 CurTableClean = CurTable  
+						 WState = "reachTableClean$CurTableClean"  
+						forward("setWaiterState", "setWaiterState($WState)" ,"tearoomstate" ) 
 						solve("pos('teatable$CurTable',X,Y)","") //set resVar	
 						if( currentSolution.isSuccess() ) { 
 									   CurMoveX = getCurSol("X").toString().toInt()  
@@ -431,7 +440,8 @@ class Waitermind ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name,
 					action { //it:State
 						updateResourceRep( "cleanTable$CurTableClean"  
 						)
-						forward("setWaiterState", "setWaiterState(cleanTable,$CurTableClean)" ,"tearoomstate" ) 
+						 WState = "claenTable$CurTableClean"  
+						forward("setWaiterState", "setWaiterState($WState)" ,"tearoomstate" ) 
 						println("waitermind   |||   cleanTable$CurTableClean")
 						forward("startcleaner", "startcleaner($CurTableClean)" ,"waitercleaner" ) 
 					}

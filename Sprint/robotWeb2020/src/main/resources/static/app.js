@@ -1,6 +1,10 @@
 var stompClient = null;
 var hostAddr = "http://localhost:7001/move";
 
+$("form").submit(function(e) {
+    e.preventDefault();
+});
+
 //SIMULA UNA FORM che invia comandi POST
 function sendRequestData( params, method) {
     method = method || "post"; // il metodo POST � usato di default
@@ -101,10 +105,14 @@ function sendUpdateRequest(){
 function showMsg(message) {
 console.log(message );
     $("#applmsgs").html( message);
-    document.getElementById("applmsgs").value = message
+    document.getElementById("applmsgs").value = message;
     //$("#applmsgs").onchange();
     //document.getElementById("applmsgs").onchange();
     document.getElementById("applmsgs").dispatchEvent(new Event('change'));
+    //Aggiungere dispatchEvent pure qua
+    document.getElementById("t1").dispatchEvent(new Event('change'));
+    document.getElementById("t2").dispatchEvent(new Event('change'));
+    document.getElementById("waiterstate").dispatchEvent(new Event('change'));
    // $("#applmsgs").val(message);
    // $("#applmsgs").trigger("change");
     //$("#applmsgintable").append("<tr><td>" + message + "</td></tr>");
@@ -143,7 +151,7 @@ $(function () {
     $( "#pp" ).click(function() { sendRequestData( "p") });
     $( "#hh" ).click(function() { sendRequestData( "h") });
 
-    $( "#bell" ).click(function() { sendRequestData( "enter") });
+    $( "#bell" ).click(function() { sendRequestData( "enter")});
     $( "#cready" ).click(function() { sendRequestData( "clientready") })
     $( "#order" ).click(function() { sendRequestData( "order") })
     $( "#cash" ).click(function() { sendRequestData( "payment") });

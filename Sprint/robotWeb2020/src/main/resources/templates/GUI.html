@@ -194,105 +194,92 @@ body {
 }
 
 	</style>
+	<style>
+table { width: 50px; background-color: #555; color: #A9C1D1; border-color: #CCCCCC; border-collapse: collapse; }
+th, td { width: 25px; }
+</style>
 </head>
 
 
 <body onLoad="load();">
+	
+<h1><b>TEAROOM STATE</b></h1> </br></br>
 
-	<div style="
-	display: block; white-space: nowrap;
-    overflow-x: auto;
-    overflow-y: hidden;
-	">
-	<audio controls id="audio" style="display: none;" >
-	  <source src="bell.mp3" type="audio/mpeg">
-	Your browser does not support the audio element.
-	</audio>
-	<audio controls id="cashaudio" style="display: none;" >
-	  <source src="cash.mp3" type="audio/mpeg">
-	Your browser does not support the audio element.
-	</audio>
-	<h2> CLIENTE 1</h2>
-		<form style="display: inline-block; width: 20%;"><button style="display: inline-block;
-    " class='btn btn-yellow'  id="bell" onClick="loadbell();">
-		<image src="./bell90.png" width=25%  />
-		<span>ENTER</span>
-	  </button></form>
+<table border="2" cellspacing="2" cellpadding="2" align="center">
+<tbody>
+<tr>
+<td>
 
-	  <form style="display: inline-block; width: 20%;"><button style="display: inline-block;
-    "  class='btn btn-blue' id="cready">
-	  <image src="./tea90.png" width=25% />
-		<span>READY</span>
-	  </button></form>
-	  
-	   <form style="display: inline-block; width: 20%;"><button style="display: inline-block;
-    "  class='btn btn-blue' id="order">
-	  <image src="./tea90.png" width=25% />
-		<span>ORDER</span>
-	  </button></form>
-  
-	  <form style="display: inline-block; width: 20%;"><button  onClick="loadcash();" style="display: inline-block;" id="cash" class='btn btn-green' >
-	  <image src="./cash90.png" width=25% />
-		<span>PAY</span>
-	  </button></form>
-	  
-	 </br></br>
-	 <h2> CLIENTE 2</h2>
-		<form style="display: inline-block; width: 20%;"><button style="display: inline-block;
-    " class='btn btn-yellow'  id="bell2" onclick="loadbell();">
-		<image src="./bell90.png" width=25%  />
-		<span>ENTER</span>
-	  </button></form>
-
-	  <form style="display: inline-block; width: 20%;"><button style="display: inline-block;
-    "  class='btn btn-blue' id="cready2">
-	  <image src="./tea90.png" width=25% />
-		<span>READY</span>
-	  </button></form>
-	  
-	   <form style="display: inline-block; width: 20%;"><button style="display: inline-block;
-    "  class='btn btn-blue' id="order2">
-	  <image src="./tea90.png" width=25% />
-		<span>ORDER</span>
-	  </button></form>
-  
-	  <form style="display: inline-block; width: 20%;"><button onClick="loadcash();" style="display: inline-block;" id="cash2" class='btn btn-green' >
-	  <image src="./cash90.png" width=25% />
-		<span> PAY </span>
-	  </button></form>
-    </div>
-    </br>
-	
-	<div style="
-	display: block; white-space: nowrap;
-    overflow-x: auto;
-    overflow-y: hidden;
-	">
+	<h2>WAITER STATE</h2>
+	 </br>
+	   <img id="waiter-f" src="waiter-floating.gif" width=25%>
+	   <img id="waiter-m" src="waiter-new.gif" width=25% style="display: none;">
+	 
+    <textarea readonly id="waiterstate" name="w3review" 
+	style="font-size: 22px; resize: none; background: #555;" 
+	onChange="showGif()">
+	</textarea>
+</td>
+<td>
+<h2>BARMAN STATE</h2>
+</br>
+<img id="barmanimg" src="barman.png" width=18%>
+   <textarea readonly id="barman" name="w3review" style="font-size: 22px; resize: none; background: #555;"
+            >
+		working
+    </textarea>
+</td>
+</tr>
+<tr>
+<td><h2>TABLE 1</h2>
+   </br>
+	<img id="t1img" src="table1.png" width=33%> 
+  <textarea readonly id="t1" name="w3review" style="font-size: 22px; resize: none; background: #555;"
+            onChange="changeTable1State()">
+		clean
+    </textarea></td>
+<td> <h2>TABLE 2</h2>
+   </br>
+   <img id="t2img" src="table1.png" width=33%>
+   <textarea readonly id="t2" name="w3review" style="font-size: 22px; resize: none; background: #555;"
+            onChange="changeTable2State()">
+		clean
+    </textarea></td>
+</tr>
+</tbody>
+</table>
 	
 	
-	
+	<!--  <h1>Tearoom State</h1> </br></br>
 	<div class="dueColonne">
-  <h2>Stato della tearoom:</h2> </br></br>
+	 <h2>Waiter State</h2>
+	   </br>
+	   <img id="waiter-f" src="waiter-floating.gif" width=20%>
+	   <img id="waiter-m" src="waiter-new.gif" width=20% style="display: none;">
+	 
     <textarea readonly id="waiterstate" name="w3review" 
 	style="font-size: 30px; resize: none; background: #555;" 
 	onChange="showGif()">
 	</textarea>
-   <h2>Stato del waiter</h2>
-   </br>
-   <img id="waiter-f" src="waiter-floating.gif" width=20%>
-   <img id="waiter-m" src="waiter-new.gif" width=20% style="display: none;">
-</div>
+	</br>
+    <img id="t2img" src="barman.png" width=15%>
+   <textarea readonly id="barman" name="w3review" style="font-size: 20px; resize: none; background: #555;"
+            >
+		working
+    </textarea>
+</br>
+   </div>
 	
 	<br><br>
 	<div class="dueColonne">
-   <h2>Tavolo 1</h2>
+   <h2>Table 1</h2>
    </br>
 	<img id="t1img" src="table1.png" width=33%> 
   <textarea readonly id="t1" name="w3review" style="font-size: 20px; resize: none; background: #555;"
             onChange="changeTable1State()">
 		clean
     </textarea>
-   <h2>Tavolo2</h2>
+   <h2>Table 2</h2>
    </br>
    <img id="t2img" src="table1.png" width=33%>
    <textarea readonly id="t2" name="w3review" style="font-size: 20px; resize: none; background: #555;"
@@ -300,22 +287,16 @@ body {
 		clean
     </textarea>
 </div>
-</br>
-    <img id="t2img" src="barman.png" width=15%>
-   <textarea readonly id="barman" name="w3review" style="font-size: 20px; resize: none; background: #555;"
-            onChange="changeTable2State()">
-		working
-    </textarea>
-</br>
+-->
 <!-- dueColonne-->
 
 </div>
-    <textarea id="applmsgs" name="w3review" rows="6" cols="70" style="font-size: 20px; resize: none;" onChange="loadstate();" onInput="loadstate();"
+    <textarea id="applmsgs" name="w3review" rows="6" cols="70" style="font-size: 20px; resize: none; visibility: hidden;" onChange="loadstate();" onInput="loadstate();"
     th:text="${state}">
     
     </textarea>
     </br></br>
-	
+    
 	<footer>
   By Turra,Verdini,Farina
   </footer>

@@ -88,8 +88,8 @@ sourceSets {
     main.java.srcDirs += 'resources'
     test.java.srcDirs += 'test'		//test is specific
 }
-/*
-mainClassName = 'it.unibo.TODOKt'
+
+mainClassName = 'it.unibo.ctxtearoom.MainCtxtearoomKt'
 
 jar {
     println("executing jar")
@@ -98,4 +98,4 @@ jar {
         attributes 'Main-Class': "$mainClassName"
     }
 }
-*/
+

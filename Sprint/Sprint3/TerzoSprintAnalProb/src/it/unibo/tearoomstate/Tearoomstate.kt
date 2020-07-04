@@ -65,6 +65,7 @@ class Tearoomstate ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( nam
 						if( checkMsgContent( Term.createTerm("setWaiterState(S)"), Term.createTerm("setWaiterState(S)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
 								 E = payloadArg(0).toString()  
+								println("setWaiterState: $E")
 								solve("setWaiter($E)","") //set resVar	
 						}
 					}

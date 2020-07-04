@@ -46,6 +46,7 @@ class Barman ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, sco
 								
 												CurCID = payloadArg(0).toString().toInt()
 												CurOrder = payloadArg(1).toString()	
+								println("Waiter preparing($CurCID,$CurOrder)")
 								forward("setBarmanState", "setBarmanState(preparing($CurCID,$CurOrder))" ,"tearoomstate" ) 
 						}
 						stateTimer = TimerActor("timer_prepare", 
@@ -56,10 +57,11 @@ class Barman ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, sco
 				state("done") { //this:State
 					action { //it:State
 						println("barman   |||   drinkReady")
-						forward("setBarmanState", "setBarmanState(driknready)" ,"tearoomstate" ) 
+						forward("setBarmanState", "setBarmanState(drinkready)" ,"tearoomstate" ) 
 						updateResourceRep( "drinkready"  
 						)
 						forward("drinkready", "drinkready($CurCID,$CurOrder)" ,"waitermind" ) 
+						delay(5000) 
 					}
 					 transition( edgeName="goto",targetState="wait", cond=doswitch() )
 				}	 

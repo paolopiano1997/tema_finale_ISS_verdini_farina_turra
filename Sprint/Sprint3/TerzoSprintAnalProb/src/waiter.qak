@@ -134,6 +134,9 @@ QActor waitermind context ctxtearoom{
 	//Tempo rimanente minimo clienti
 	var RemCTime = 15 //Secondi
 	
+	//State
+	var WState = ""
+	
 #]
 	State s0 initial {
 		discardMsg Off
@@ -151,7 +154,7 @@ QActor waitermind context ctxtearoom{
 			[# 
 			   CurMoveX = getCurSol("X").toString().toInt()  
  			   CurMoveY = getCurSol("Y").toString().toInt()  
- 			#] 
+ 			#]
  			forward waiterengine -m moveto : moveto($CurMoveX,$CurMoveY)
 		}
 	}
@@ -242,7 +245,8 @@ QActor waitermind context ctxtearoom{
 	
 	State convoyToTable{
 		updateResource[# "convoyToTable$CurTable" #]
-		forward tearoomstate -m setWaiterState : setWaiterState(convoyToTable,$CurTable)
+		[# WState = "convoyToTable$CurTable" #]
+		forward tearoomstate -m setWaiterState : setWaiterState($WState)
 		println("waitermind   |||   convoyToTable$CurTable")
 		solve(pos("teatable$CurTable",X,Y))
 		ifSolved{
@@ -261,7 +265,7 @@ QActor waitermind context ctxtearoom{
 	
 	State checkCleanHome{
 		printCurrentMessage
-		[# readLine() #]
+//		[# readLine() #]
 		println("waitermind   |||   checkClean")
 		request waitercleaner -m isTableStopped : isTableStopped(isStopped)
 	}
@@ -291,7 +295,8 @@ QActor waitermind context ctxtearoom{
 	State reachTableCleanStopped{
 		println("waitermind   |||   reachTableCleanStopped")
 		solve(pos("teatable$CurTableClean",X,Y))
-		forward tearoomstate -m setWaiterState : setWaiterState(reachTableCleanStopped,$CurTableClean)
+		[# WState = "reachTableCleanStopped$CurTableClean" #]
+		forward tearoomstate -m setWaiterState : setWaiterState($WState)
 		ifSolved{
 			[#
 			   CurMoveX = getCurSol("X").toString().toInt()
@@ -321,7 +326,8 @@ QActor waitermind context ctxtearoom{
 	State checkTake{
 		onMsg(tableId : tableId(N)){
 			[# CurTable = payloadArg(0).toString().toInt() #]
-			forward tearoomstate -m setWaiterState : setWaiterState(reachTableTake,$CurTable)
+			[# WState = "reachTableTake$CurTable" #]
+			forward tearoomstate -m setWaiterState : setWaiterState($WState)
 			forward maxstaytimer -m doTimerAction : doTimerAction($CurTable,stop)
 			solve(pos("teatable$CurTable",X,Y))
 			ifSolved{
@@ -337,17 +343,20 @@ QActor waitermind context ctxtearoom{
 	
 	
 	State waitOrder{
+		[# WState = "waitOrderTable$CurTable" #]
+		forward tearoomstate -m setWaiterState : setWaiterState($WState)
 		println("waitermind   |||   waitOrder")
 	}
 	Transition t0 whenMsg order -> transmit
 	
 	State transmit{
-		forward tearoomstate -m setWaiterState : setWaiterState(transmit)
-		[# readLine() #]
+//		[# readLine() #]
 		println("waitermind   |||   transmit")
 		updateResource [# "transmit" #]
 		onMsg(order : order(ID,O)){
-			forward barman -m order : order($CurCID,payloadArg(0))
+			[# WState = "transmitOrder${payloadArg(1)}Client$CurCID" #]
+			forward tearoomstate -m setWaiterState : setWaiterState($WState)
+			forward barman -m order : order($CurCID,$payloadArg(1))
 		}
 	}
 	Goto checkCleanHome
@@ -374,7 +383,7 @@ QActor waitermind context ctxtearoom{
 	Transition t0 whenMsg done -> serve
 	
 	State serve{
-		[# readLine() #]
+//		[# readLine() #]
 		println("waitermind   |||   serve")
 		request tearoomstate -m getTable : getTable($CurCID)
 	}
@@ -383,7 +392,8 @@ QActor waitermind context ctxtearoom{
 	State checkTableId{
 		onMsg(tableId : tableId(N)){
 			[# CurTable = payloadArg(0).toString().toInt() #]
-			forward tearoomstate -m setWaiterState : setWaiterState(reachTableServe,$CurTable)
+			[# WState = "reachTableServe$CurTable" #]
+			forward tearoomstate -m setWaiterState : setWaiterState($WState)
 			forward maxstaytimer -m doTimerAction : doTimerAction($CurTable,start)
 			solve(pos("teatable$CurTable",X,Y))
 			ifSolved{
@@ -420,7 +430,8 @@ QActor waitermind context ctxtearoom{
 		onMsg(tableId : tableId(N)){
 			ifSolved {
 				[# CurTable = payloadArg(0).toString().toInt() #]
-				forward tearoomstate -m setWaiterState : setWaiterState(reachTableCollect,$CurTable)
+				[# WState = "reachTableCollect$CurTable" #]
+				forward tearoomstate -m setWaiterState : setWaiterState($WState)
 			}
  		}
  		forward maxstaytimer -m doTimerAction : doTimerAction($CurTable,end)
@@ -437,10 +448,12 @@ QActor waitermind context ctxtearoom{
 	Transition t0 whenMsg done -> collect
 	
 	State reachTableClean {
-		[# readLine() #]
+//		[# readLine() #]
 		println("waitermind   |||   reachTable")
 		updateResource[# "reachTableClean" #]
 		[# CurTableClean = CurTable #]
+		[# WState = "reachTableClean$CurTableClean" #]
+		forward tearoomstate -m setWaiterState : setWaiterState($WState)
 		solve(pos("teatable$CurTable",X,Y))
 		ifSolved{
 			[# 
@@ -479,7 +492,8 @@ QActor waitermind context ctxtearoom{
 	
 	State cleanTable{
 		updateResource[# "cleanTable$CurTableClean" #]
-		forward tearoomstate -m setWaiterState : setWaiterState(cleanTable,$CurTableClean)
+		[# WState = "claenTable$CurTableClean" #]
+		forward tearoomstate -m setWaiterState : setWaiterState($WState)
 		println("waitermind   |||   cleanTable$CurTableClean")
 		forward waitercleaner -m startcleaner : startcleaner($CurTableClean)
 	}
@@ -565,7 +579,7 @@ QActor waitercleaner context ctxtearoom {
 		println("waitercleaner   |||   init")
 	}
 	Goto wait
-	
+
 	State wait {
 		onMsg(isTableStopped : isTableStopped(T)){
 			replyTo isTableStopped with isTableStoppedDone : isTableStoppedDone(0)
@@ -746,6 +760,7 @@ QActor tearoomstate context ctxtearoom{
 	State waiterState{
 		onMsg(setWaiterState : setWaiterState(S)){
 			[# E = payloadArg(0).toString() #]
+			println("setWaiterState: $E")
 			solve(setWaiter($E))
 		}
 	}
@@ -985,6 +1000,7 @@ QActor barman context ctxtearoom {
 				CurCID = payloadArg(0).toString().toInt()
 				CurOrder = payloadArg(1).toString()	
 			#]
+			println("Waiter preparing($CurCID,$CurOrder)")
 			forward tearoomstate -m setBarmanState : setBarmanState(preparing($CurCID,$CurOrder))
 		}
 	}
@@ -992,9 +1008,10 @@ QActor barman context ctxtearoom {
 	
 	State done{
 		println("barman   |||   drinkReady")
-		forward tearoomstate -m setBarmanState : setBarmanState(driknready)
+		forward tearoomstate -m setBarmanState : setBarmanState(drinkready)
 		updateResource[# "drinkready" #]
 		forward waitermind -m drinkready : drinkready($CurCID,$CurOrder)
+		delay 5000
 	}
 	Goto wait
 }
