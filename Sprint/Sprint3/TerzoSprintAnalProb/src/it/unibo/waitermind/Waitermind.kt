@@ -315,6 +315,7 @@ class Waitermind ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name,
 				}	 
 				state("serve") { //this:State
 					action { //it:State
+						forward("take", "take(take)" ,"barman" ) 
 						println("waitermind   |||   serve")
 						request("getTable", "getTable($CurCID)" ,"tearoomstate" )  
 					}
@@ -423,6 +424,7 @@ class Waitermind ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name,
 						updateResourceRep( "convoyToExitDoor"  
 						)
 						forward("setWaiterState", "setWaiterState(convoyToExitDoor)" ,"tearoomstate" ) 
+						forward("setTableState", "setTableState($CurTable,dirty)" ,"tearoomstate" ) 
 						 CurCID = 0  
 						solve("pos(exitdoor,X,Y)","") //set resVar	
 						if( currentSolution.isSuccess() ) { 
@@ -440,7 +442,7 @@ class Waitermind ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name,
 					action { //it:State
 						updateResourceRep( "cleanTable$CurTableClean"  
 						)
-						 WState = "claenTable$CurTableClean"  
+						 WState = "cleanTable$CurTableClean"  
 						forward("setWaiterState", "setWaiterState($WState)" ,"tearoomstate" ) 
 						println("waitermind   |||   cleanTable$CurTableClean")
 						forward("startcleaner", "startcleaner($CurTableClean)" ,"waitercleaner" ) 
