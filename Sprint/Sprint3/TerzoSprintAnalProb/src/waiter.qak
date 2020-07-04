@@ -508,7 +508,7 @@ QActor waitermind context ctxtearoom{
 				whenMsg timePassed -> reachTableCollect
 				whenMsg drinkready -> reachBarman
 				whenMsg paymentready -> reachTableCollect
-	
+
 	State checkQueue{
 		println("waitermind   |||   checkQueue")
 		if[# CurEnterCID != 0 #]{
