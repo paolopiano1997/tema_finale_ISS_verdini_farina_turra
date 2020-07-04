@@ -309,7 +309,7 @@ QActor waitermind context ctxtearoom{
  		}
 	}
 	Transition t0 whenMsg done -> cleanTable
-	
+
 	State take{
 		forward waiterengine -m stopengine : stopengine(stop)
 		forward waitercleaner -m stopcleaner : stopcleaner(stop)
@@ -324,8 +324,8 @@ QActor waitermind context ctxtearoom{
 		request tearoomstate -m getTable : getTable($CurCID)
 	}
 	Transition t0 whenReply tableId -> checkTake
-		
-	
+
+
 	State checkTake{
 		onMsg(tableId : tableId(N)){
 			[# CurTable = payloadArg(0).toString().toInt() #]
@@ -343,8 +343,8 @@ QActor waitermind context ctxtearoom{
 		}
 	}
 	Transition t0 whenMsg done -> waitOrder
-	
-	
+
+
 	State waitOrder{
 		[# WState = "waitOrderTable$CurTable" #]
 		forward tearoomstate -m setWaiterState : setWaiterState($WState)
@@ -379,7 +379,7 @@ QActor waitermind context ctxtearoom{
 			[# 
 			   CurMoveX = getCurSol("X").toString().toInt()  
  			   CurMoveY = getCurSol("Y").toString().toInt()  
- 			#] 
+ 			#]
  			forward waiterengine -m moveto : moveto ($CurMoveX,$CurMoveY)
 		}
 	}
@@ -485,10 +485,10 @@ QActor waitermind context ctxtearoom{
 		[# CurCID = 0 #]
 		solve(pos(exitdoor, X, Y))
 		ifSolved{
-			[# 
+			[#
 			   CurMoveX = getCurSol("X").toString().toInt()  
  			   CurMoveY = getCurSol("Y").toString().toInt()  
- 			#] 
+ 			#]
  			forward waiterengine -m moveto : moveto ($CurMoveX,$CurMoveY)
  		}
 		forward tearoomstate -m release : release($CurTable)
