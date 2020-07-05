@@ -87,11 +87,11 @@ class Waitercleaner ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( na
 						println("waitercleaner   |||   checkState")
 						if( checkMsgContent( Term.createTerm("state(N,S)"), Term.createTerm("state(N,S)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
-								if(  payloadArg(0) == "dirty"  
+								if(  payloadArg(1) == "dirty"  
 								 ){forward("gotodirty", "gotodirty(go)" ,"waitercleaner" ) 
 								}
 								else
-								 {if(  payloadArg(0)=="undirty"  
+								 {if(  payloadArg(1)=="undirty"  
 								  ){forward("gotoundirty", "gotoundirty(go)" ,"waitercleaner" ) 
 								 }
 								 else

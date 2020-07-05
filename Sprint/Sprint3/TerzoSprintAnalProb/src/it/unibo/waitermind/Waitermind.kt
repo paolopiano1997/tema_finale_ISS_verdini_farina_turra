@@ -346,6 +346,9 @@ class Waitermind ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name,
 						if( checkMsgContent( Term.createTerm("timePassed(N)"), Term.createTerm("timePassed(N)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
 								 CurTable = payloadArg(0).toString().toInt()  
+								 WState = "endMaxStayTimeTable$CurTable"  
+								forward("setWaiterState", "setWaiterState($WState)" ,"tearoomstate" ) 
+								delay(3000) 
 						}
 					}
 					 transition( edgeName="goto",targetState="checkCollect", cond=doswitch() )
@@ -427,7 +430,7 @@ class Waitermind ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name,
 						forward("setTableState", "setTableState($CurTable,dirty)" ,"tearoomstate" ) 
 						 CurCID = 0  
 						solve("pos(exitdoor,X,Y)","") //set resVar	
-						if( currentSolution.isSuccess() ) { 
+						if( currentSolution.isSuccess() ) {
 									   CurMoveX = getCurSol("X").toString().toInt()  
 						 			   CurMoveY = getCurSol("Y").toString().toInt()  
 						forward("moveto", "moveto($CurMoveX,$CurMoveY)" ,"waiterengine" ) 

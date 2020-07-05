@@ -414,6 +414,9 @@ QActor waitermind context ctxtearoom{
 	State timeEndTable{
 		onMsg(timePassed : timePassed(N)){
 			[# CurTable = payloadArg(0).toString().toInt() #]
+			[# WState = "endMaxStayTimeTable$CurTable" #]
+			forward tearoomstate -m setWaiterState : setWaiterState($WState)
+			delay 3000
 		}
 	}
 	Goto checkCollect
@@ -632,11 +635,11 @@ QActor waitercleaner context ctxtearoom {
 	State checkState {
 		println("waitercleaner   |||   checkState")
 		onMsg(state : state(N,S)){
-			if[# payloadArg(0) == "dirty" #]{
+			if[# payloadArg(1) == "dirty" #]{
 				forward waitercleaner -m gotodirty : gotodirty(go)
 			}
 			else{
-				if[# payloadArg(0)=="undirty" #]
+				if[# payloadArg(1)=="undirty" #]
 				{
 					forward waitercleaner -m gotoundirty : gotoundirty(go)
 				}
