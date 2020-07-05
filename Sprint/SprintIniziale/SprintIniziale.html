@@ -236,6 +236,14 @@ il sistema considerando questa assunzione:
 A seguito di questa assunzione, le considerazioni fatte precedentemente rimangono invariate.
 Poichè il <em>barman</em> deve interagire con il <em>waiter</em>, ricevere e preparare gli ordini, è opportuno
 modellarlo in un primo momento come un attore esterno. Il cliente è per ora simulato mediante la ricezione della request per entrare nella <em>tearoom</em>
+</br></br>
+<h3> Significato verbi e nomi relativi a questa assunzione: </h3> </hr>
+<ul>
+<li><em>barman</em>: entità che fa parte del sistema da modellare, il quale riceve degli ordini da elaborare e notifica il loro completamento.</li>
+<li><em>waiter</em>: DDR robot che effettua operazioni da cameriere; deve accompagnare i clienti ad un tavolo (se ce ne è almeno uno libero e pulito), prendere gli ordini dal cliente, ritirarli nella <em>servicedesk</em>, servirli, chiedere il conto, accompagnare i clienti alla porta di uscita.</li>
+<li><em>servicearea</em>: area della <em>tearoom</em> nella quale risiede la <em>home</em> del <em>waiter</em> e il <em>barman</em></li>
+<li><em>servicedesk</em>: area in cui risiede il <em>barman</em>.</li>
+</ul>
 </br>
 Di seguito è stato modellato un primo sistema seguendo i requisiti e l'assunzione.
 E' opportuno considerare che il task <em>inform</em> non è da modellare, in quanto per l'assunzione fatta non potrà

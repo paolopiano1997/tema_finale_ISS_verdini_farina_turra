@@ -227,17 +227,21 @@ including some significant <bc>TestPlan</bc>. </li>
 <h2>Requirement Analysis</h2>
 <div class="remark">
 <em>Maxstaytime</em>: Viene inteso come tempo che il cliente ha a disposizione per effettuare la sua consumazione nella <em>tearoom</em>.
-Il suo funzionamente viene spiegato nelle <a href="./ConsiderazioniIniziali.html"><b>considerazioni iniziali</b></a><br><br>
-<em>Smartbell</em>: Entità esterna alla tearoom atta a notificare l'intenzione di un cliente ad entrare nella sala da the.
-	I suoi compiti sono di misurare la temperatura del cliente e nel caso sia inferiore a 37.5 gradi assegnargli un identificativo univoco e notificare il waiter.<br><br>
-<em>Clientidentifier</em>: Rappresenta un ID univoco assegnato ai clienti dalla smartbell in caso di almento un tavolo libero e clean<br><br>
-<em>inform</em>: Azione svolta dal waiter atta ad informare il cliente del tempo massimo di attesa prima che un tavolo risulti nuovamente clean<br><br>
-<em>Current state</em>: Rappresenta lo stato della <em>tearoom</em>, viene definito dallo stato dei tavoli (occupied, dirty, clean...), dallo stato del waiter e dallo stato del barman.<br><br>
-per altri termini, link agli sprint precedenti<br><br>
+Il suo funzionamento viene spiegato nelle <a href="./ConsiderazioniIniziali.html"><b>considerazioni iniziali</b></a></br></br>
+<em>Smartbell</em>: Entità esterna al waiter atta a notificare l'intenzione di un cliente ad entrare nella tearoom.
+	I suoi compiti sono di misurare la temperatura del cliente e, nel caso sia inferiore a 37.5 gradi, assegnargli un identificativo univoco e notificare il waiter.</br></br>
+<em>Clientidentifier</em>: Rappresenta un ID univoco assegnato ai clienti dallo smartbell in caso di almeno un tavolo libero e clean</br></br>
+<em>inform</em>: Azione svolta dal waiter atta ad informare il cliente del tempo massimo di attesa prima che un tavolo risulti nuovamente libero e clean</br></br>
+<em>Current state</em>: Rappresenta lo stato della <em>tearoom</em>, viene definito dallo stato dei tavoli (occupied, dirty, clean...), dallo stato del waiter e dallo stato del barman.</br></br>
+per altri termini, link agli sprint precedenti</br></br>
+<a href="https://github.com/paolopiano1997/tema_finale_ISS_verdini_farina_turra/tree/master/Sprint/SprintIniziale">Sprint 1</a>
+</br></br>
+<a href="https://github.com/paolopiano1997/tema_finale_ISS_verdini_farina_turra/tree/master/Sprint/Sprint2">Sprint 2</a>
+</br></br>
+
 <b>VECCHIE ASSUNZIONI</b> 
 <ul>
-<li>Nel sistema esistono solo due clienti, un cliente entra quando il waiter sta facendo il clean.
-<br>Il secondo cliente non interagisce.</li>
+<li>Nel sistema esistono solo due clienti, un cliente entra quando il waiter sta facendo il clean. Il secondo cliente non interagisce.</li>
 </ul>
 <b>NUOVE ASSUNZIONI</b>
 <ul>
@@ -245,13 +249,16 @@ per altri termini, link agli sprint precedenti<br><br>
 <li>i tempi di preparazione sono sempre gli stessi</li>
 <li>il cliente suona una volta sola e aspetta il suo turno.</li>
 </ul>
-Simuliamo l'ingresso di due clienti alla volta, gestendo le richieste in accordo con le priorità stabilite negli sprint precedenti, ampliamo il funzionamento di smartbell con le azioni di controllo temperatura e 
-inform sui tempi di attesa. Introdotta la webapp per visualizzare il currentstate della tearoom.
-Gestito il maxstaytime per simulare l'assenza di richieste provenienti dal cliente e gestire la sua uscita dalla tearoom.
-<br><br>
+Al fine di modellare i requisiti imposti con il rilassamento della maggior parte delle assunzioni, è necessario gestire
+l'ingresso di due clienti alla volta, oltre a modellare il task <em>inform</em> nel caso in cui 
+un terzo cliente chieda di entrare; è necessario modellare il funzionamento dello <em>smartbell</em> con le
+azioni di controllo temperatura. E' inoltre necessario modellare la webapp per la visualizzazione del <em>currentstate</em> della tearoom.
+Infone, è necessario gestire il maxstaytime, in modo tale da modellare situazioni in cui il tempo concesso ad un cliente scade e quest'ultimo deve
+essere accompagnato all'uscita, dopo l'eventuale pagamento.
+</br></br>
 <a href="https://github.com/paolopiano1997/tema_finale_ISS_verdini_farina_turra/tree/master/Sprint/Sprint3/TerzoSprintAnalReq">Link al modello dell'analisi dei requisiti</a>
 </br></br>
-<b>TEST PLAN</b><br>
+<b>TEST PLAN</b></br>
 <ul>
 <li>Verifichiamo che se un cliente ha temperatura > 37,5° non venga accettato nella <em>tearoom</em></li>
 <li>Simuliamo un cliente che esaurisca il <em>maxstaytime</em> e di conseguenza verifichiamo che il <em>waiter</em>
@@ -262,85 +269,84 @@ richieda il pagamento e lo accompagni fuori.</li>
 
 </div>
 
-
 <h2>Problem analysis</h2> 
 <div class="remark">
 </br>
 <b>Prolematiche sorte a seguito dell'analisi dei requisiti</b>
 <ul>
-	<li><b>Problema 1</b>: Gestione delle richieste da tavoli differenti:<br>
+	<li><b>Problema 1</b>: Gestione delle richieste da tavoli differenti:</br>
             Il waiter ha la necessità di sapere a che tavolo portare l'ordinazione.
-	</li><br>    
+	</li></br>    
 	<li><b>Problema 2</b>: Interruzione del clean solo se c'è un altro tavolo disponibile: nello sprint precedente abbiamo assunto
     che vi fosse solo un cliente alla volta nella tearoom, quindi questo problema non si presentava.
-    </li><br>
+    </li></br>
 	<li><b>Problema 3</b>: il tempo trascorre solo quando è responsabilità del cliente ovvero nel suo turno.
 		Per tale motivo sorge la problematica in cui il cliente richiede o di ordinare o il conto mentre il waiter sta gia facendo un'azione. 
 		La richiesta sarà gestita solo quando l'azione corrente si conclude e quindi il timer viene fermato solo dopo aver ultimato quell'azione.
 		Il tempo che intercorre tra la richiesta del cliente e l'azione del waiter in risposta alla richiesta viene considerato trascurabile. 
-	</li><br>
+	</li></br>
 	<li><b>Problema 4</b>: 
 		Se i due clienti sono entrati e non ordinano, i timer sono entrambi attivi, questo scenario introduce la necessità di gestire più "entità" timer contemporaneamente.
 		Diventa opportuno introdurre un'entità intermedia, la quale spartisce le interazioni tra waitermind e i vari timer di ciascun cliente. Così facendo,
 		introduciamo un livello a metà che gestisce le richiesta dal waitermind alle varie entità timer, ciò risulta in maggiore scalabilità e riusabilità di waitermind
-	</li><br>
+	</li></br>
 	<li><b>Problema 5</b>: Gestione dei tempi di attesa per l'azione di <em>inform</em> a seguito del rilassamento sui vincoli sul numero di clienti presenti nel sistema (interni ed esterni alla tearoom). 
-		Esistono 3 situazioni in cui si può trovare la tearoom,<br>
-		   &ensp;&ensp;- Due tavoli non cleaned : tempo di attesa equivale a min{cleaningTimeTable1,cleaningTimeTable2}<br>
-		   &ensp;&ensp;- Un tavolo non cleaned e un cliente dentro : azione del waiter rivolte ai clienti più prioritari, remainingClientTime<br>
-		   &ensp;&ensp;- Due clienti dentro la tearoom : tempo di attesa equivale a min{remainingClientTime1,remainingClientTime2} <br>
-		   cleaningTimeTable definito come il tempo residuo per la pulizia del tavolo, <br>
+		Esistono 3 situazioni in cui si può trovare la tearoom,</br>
+		   &ensp;&ensp;- Due tavoli non cleaned : tempo di attesa equivale a min{cleaningTimeTable1,cleaningTimeTable2}</br>
+		   &ensp;&ensp;- Un tavolo non cleaned e un cliente dentro : azione del waiter rivolte ai clienti più prioritari, remainingClientTime</br>
+		   &ensp;&ensp;- Due clienti dentro la tearoom : tempo di attesa equivale a min{remainingClientTime1,remainingClientTime2} </br>
+		   cleaningTimeTable definito come il tempo residuo per la pulizia del tavolo, </br>
 		   remainingClientTime definito come il tempo residuo del cliente per il suo staytime.
-	</li><br>
-	<li><b>Problema 6</b>: Gestione del currentstate:<br>
+	</li></br>
+	<li><b>Problema 6</b>: Gestione del currentstate:</br>
 		Dalla gestione dello stato globale della stanza è nata la necessità di introdurre un'entità che gestisca lo stato sulla base di conoscenza per questioni di modularità, un unico observer per lo stato della stanza.
 		Quindi, è stato rimodellato l'attore <i>teatables</i> in modo da gestire anche gli stati
 		del waiter e del barman, per avere un unico punto di accesso per le informazioni.
-	</li><br>
+	</li></br>
 	</ul>
-	<b> Descrizione formale delle entità a seguito della descrizione delle problematiche</b><br><br>
+	<b> Descrizione formale delle entità a seguito della descrizione delle problematiche</b></br></br>
 		<ul>
 		<u>Valore maxstaytime</u>: valore utilizzato per rappresentare la quantità massima di tmpo a cui un cliente è permesso soggiornare nella tearoom. 
 		Questo valore è incrementale nel tempo ed è rappresentato simil contatore il cui valore massimo che potrà raggiungere sarà maxstaytime. 
 		Durante il turno di decisione del cliente, il contatore verrà attivato e contestualmente verrà bloccato una volta fatta la richiesta da cliente a waiter.
 		Per semplificare l'accesso al valore maxstaytime di ogni cliente è stato introdotto un attore (broker) chiamato <i>maxstaytimer</i> il quale gestirà la 
 		terminazione del tempo concesso ad ogni cliente inviando al waitermind un dispatch di transizione verso lo stato di <em>collect</em>.
-		L'attore <i>maxstaytimer</i> si avvale di due attori, ciascuno dei quali gestisce a sua volta il tempo trascorso per ogni cliente nella tearoom. (Problema 3 e Problema 4)<br><br>
+		L'attore <i>maxstaytimer</i> si avvale di due attori, ciascuno dei quali gestisce a sua volta il tempo trascorso per ogni cliente nella tearoom. (Problema 3 e Problema 4)</br></br>
 		
 		<u>Entità smartbell</u>: viene modellata come un attore qak, vedi scelta modelli in <a href="./../SprintIniziale/SprintIniziale.html"><b>considerazioni iniziali</b></a> che 
 		invia una request al waiter per l'ingresso di un cliente, il waiter risponderà con una reply in caso di accettazione di richiesta o in caso contrario 
-		(rifiuto per mancanza di tavoli liberi e puliti) con un inform rappresentante il tempo di attesa prima di un ingresso.<br><br>
+		(rifiuto per mancanza di tavoli liberi e puliti) con un inform rappresentante il tempo di attesa prima di un ingresso.</br></br>
 		
-		<u>Identificativo clientidentifier</u>: valore numerico univoco per cliente, generato da <em>smartbell</em> a seguito di una richiesta di ingresso di un cliente. (Problema 1)<br><br>
+		<u>Identificativo clientidentifier</u>: valore numerico univoco per cliente, generato da <em>smartbell</em> a seguito di una richiesta di ingresso di un cliente. (Problema 1)</br></br>
 		
 		<u>Task inform</u>: task che consiste in una reply fatta a seguito di una richiesta di ingresso da parte di un cliente in caso di tearoom sprovvista di tavoli cleaned.
-		La reply del waiter contiene al suo interno un valore numerico corrispondente ai secondi di attesa massima per l'ingresso del cliente. (Problema 5) <br> <br>
+		La reply del waiter contiene al suo interno un valore numerico corrispondente ai secondi di attesa massima per l'ingresso del cliente. (Problema 5) </br> </br>
 		
 		<u>Current state</u>: stato della tearoom ricavato dall'attore <i>tearoomstate</i>, il quale interagisce tra le varie entità del sistema e la base di conoscenza.
-		I dispatch in ingresso a <i>tearoomstate</i> sono provenenti dal <em>waiter</em> e dal <em>barman</em> e contengono le informazioni relative allo stato dei tavoli, del waiter e del barman. <br>
-		L'attore <i>tearoomstate</i> interagisce mediante updateresource per comunicare alla webapp lo stato della tearoom.<!--Accesso alle risorse mediante COAP request via browser/plugin <u>perchè</u>--> (Problema 6)  <br><br>
+		I dispatch in ingresso a <i>tearoomstate</i> sono provenenti dal <em>waiter</em> e dal <em>barman</em> e contengono le informazioni relative allo stato dei tavoli, del waiter e del barman. </br>
+		L'attore <i>tearoomstate</i> interagisce mediante updateresource per comunicare alla webapp lo stato della tearoom.<!--Accesso alle risorse mediante COAP request via browser/plugin <u>perchè</u>--> (Problema 6)  </br></br>
 		</ul>
 <b>Dato il rilassamento delle assunzioni rispetto agli sprint precedenti, sorte nuove situazioni</b>
 <ul>
 	<li>Situazione 1: gestione di più clienti contemporaneamente e delle loro rispettive richieste.</li>
     <li>Situazione 2: un cliente non viene ammesso perchè la sua temperatura è superiore a 37,5°.</li>
     <li>Situazione 3: un cliente esaurisce il <em>maxstaytime</em> e quindi viene richiesto 
-    il pagamento dal waiter e viene accompagnato all'uscita.</li><br>
+    il pagamento dal waiter e viene accompagnato all'uscita.</li></br>
 </ul>
 <a href="https://github.com/paolopiano1997/tema_finale_ISS_verdini_farina_turra/tree/master/Sprint/Sprint3/TerzoSprintAnalProb">Link al modello dell'analisi deproblema</a>
-<br><br>
+</br></br>
 <b>SVILUPPI FUTURI</b>
 <ol>
     <li>Il barman potrebbe preparare due ordini insieme, presumibilmente uguali, quindi
     il waiter potrebbe portare direttamente gli ordini ad entrambi i tavoli.</li>
     <li>Opzionale: Nella hall ci può essere al più una persona</li>
     <li>Problema 1: Se il cliente suona ma poi se ne va?</li>
-    <li>Problema 2: Se il cliente suona 400 volte?</li>
+    <li>Problema 2: Se il cliente suona molte volte?</li>
     <li>Tenere una cassa: dove i pagamenti dei clienti si sommano e si mostra il guadagno giornaliero.</li>
     <li>Tenere un menù con la lista dei prezzi e in base all'ordine variare la somma da pagare</li>
 </ol>
-<b>TEST PLAN</b><br>
-<br>
+<b>TEST PLAN</b></br>
+</br>
 Testiamo la corretta funzione delle situazioni 1, 2 e 3.
 <ul>
 <li>Situazione in cui ci sono due clienti, uno dei quali chiede un ordine. Il waiter deve andare al tavolo giusto.</li>
@@ -350,7 +356,7 @@ Testiamo la corretta funzione delle situazioni 1, 2 e 3.
 richieda il pagamento e lo accompagni fuori.</li>
 <li>Nel caso in cui un cliente chieda di entrare e non ci sono tavoli liberi, esso deve essere informato del massimo tempo di attesa con <em>inform</em></li>
 <li>Verificare la corretta gestione del Current State</li>
-<br>
+</br>
 </ul>
 <a href="https://github.com/paolopiano1997/tema_finale_ISS_verdini_farina_turra/tree/master/Sprint/Sprint3/TerzoSprintAnalProb/test">Test plan</a>
 </div>	
