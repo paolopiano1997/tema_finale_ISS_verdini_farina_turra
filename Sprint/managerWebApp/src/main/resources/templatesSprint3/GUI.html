@@ -1,0 +1,306 @@
+<html>
+<head>
+<script src="/webjars/jquery/jquery.min.js"></script>
+    <script src="/webjars/sockjs-client/sockjs.min.js"></script>
+    <script src="/webjars/stomp-websocket/stomp.min.js"></script>
+    <script src="/app.js"></script>
+	<script>connect()</script>
+	<script>
+	function showGif(){
+	console.log(document.getElementById("applmsgs").value)
+		if(document.getElementById("applmsgs").value.includes("reach")
+			|| document.getElementById("applmsgs").value.includes("convoy")){
+			document.getElementById("waiter-f").style.display = "none";
+			document.getElementById("waiter-m").style.display = "block";
+		}else{
+			document.getElementById("waiter-f").style.display = "block";
+			document.getElementById("waiter-m").style.display = "none";
+		}
+	}
+  var table1State = 0
+  var table2State = 0
+  function changeTable1State(){
+    if(document.getElementById("t1").value.includes("occup")){
+      document.getElementById('t1img').src='table1-red.png';
+    }
+    else if(document.getElementById("t1").value.includes("dirty")){
+      document.getElementById('t1img').src='table1-yellow.png';
+    }
+    else if(document.getElementById("t1").value.includes("clean")){
+      document.getElementById('t1img').src='table1.png';
+    }
+      
+  }
+  function changeTable2State(){
+    if(document.getElementById("t2").value.includes("occup")){
+      document.getElementById('t2img').src='table1-red.png';
+    }
+    else if(document.getElementById("t2").value.includes("dirty")){
+      document.getElementById('t2img').src='table1-yellow.png';
+    }
+    else if(document.getElementById("t2").value.includes("clean")){
+      document.getElementById('t2img').src='table1.png';
+    }
+  }
+	</script>
+    
+    
+
+	<style>
+	.dueColonne {
+    /*Numero di colonne*/
+    column-count: 2;
+    /* Distanza tra le colonne*/
+    column-gap: 30px;
+    /*Stile per il bordo delle colonne*/
+    column-rule: 1px solid #666;
+
+    /*Amplifica il supporto alle vecchie versioni di Firefox e Chrome/Safari */
+    -moz-column-count: 2;
+    -moz-column-gap: 30px;
+    -moz-column-rule: 1px solid #666;
+
+    -webkit-column-count: 2;
+    -webkit-column-gap: 30px;
+    -webkit-column-rule: 1px solid #666;
+    }
+		@import url(https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,500);
+* {
+  padding: 0;
+  margin: 0;
+  border: 0;
+  color: #888;
+  font-family: "Source Sans Pro", sans-serif;
+  font-size: 16px;
+  font-weight: 300;
+  outline: none;
+  -webkit-text-size-adjust: none;
+  -ms-text-size-adjust: none;
+  -moz-text-size-adjust: none;
+  -o-text-size-adjust: none;
+  text-size-adjust: none;
+  -webkit-box-sizing: border-box;
+  -ms-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  -o-box-sizing: border-box;
+  box-sizing: border-box;
+}
+
+html, body {
+  background-color: #555;
+}
+
+body {
+  padding: 40px;
+}
+
+.btn {
+  border: 3px solid;
+  font-weight: 600;
+  margin: 0 20px 20px 0;
+  -webkit-transition: 0.2s;
+  -ms-transition: 0.2s;
+  -moz-transition: 0.2s;
+  -o-transition: 0.2s;
+  transition: 0.2s;
+  display: table;
+  border-color: #ddd;
+  -webkit-border-radius: 50px;
+  -ms-border-radius: 50px;
+  -moz-border-radius: 50px;
+  -o-border-radius: 50px;
+  border-radius: 50px;
+  overflow: hidden;
+}
+.btn:before, .btn:after {
+  content: " ";
+  display: table;
+}
+.btn:after {
+  clear: both;
+}
+.btn span {
+  color: #ddd;
+}
+.btn:hover {
+  background-color: #ddd;
+  border-color: #b5b5b5;
+}
+.btn:hover i {
+  background-color: #b5b5b5;
+}
+.btn i {
+  background-color: #ddd;
+}
+.btn span {
+  font-size: 14px;
+  float: left;
+  text-transform: uppercase;
+  font-weight: bold;
+  padding: 10px 30px;
+  letter-spacing: 1px;
+  -webkit-transition: 0.2s;
+  -ms-transition: 0.2s;
+  -moz-transition: 0.2s;
+  -o-transition: 0.2s;
+  transition: 0.2s;
+}
+.btn:hover {
+  cursor: pointer;
+}
+.btn:hover span {
+  color: #fff;
+  padding: 10px 40px;
+}
+.btn i {
+  width: 50px;
+  height: 40px;
+  float: left;
+  -webkit-transition: 0.2s;
+  -ms-transition: 0.2s;
+  -moz-transition: 0.2s;
+  -o-transition: 0.2s;
+  transition: 0.2s;
+}
+
+.btn-green {
+  border-color: #1FC488;
+}
+.btn-green span {
+  color: #1FC488;
+}
+.btn-green:hover {
+  background-color: #1FC488;
+  border-color: #009c60;
+}
+.btn-green:hover i {
+  background-color: #009c60;
+}
+.btn-green i {
+  background-color: #1FC488;
+}
+
+
+.btn-red {
+  border-color: #C41F1F;
+}
+.btn-red span {
+  color: #C41F1F;
+}
+.btn-red:hover {
+  background-color: #C41F1F;
+  border-color: #9c0000;
+}
+.btn-red:hover i {
+  background-color: #9c0000;
+}
+.btn-red i {
+  background-color: #C41F1F;
+}
+
+.btn-blue {
+  border-color: #1F94C4;
+}
+.btn-blue span {
+  color: #1F94C4;
+}
+.btn-blue:hover {
+  background-color: #1F94C4;
+  border-color: #006c9c;
+}
+.btn-blue:hover i {
+  background-color: #006c9c;
+}
+.btn-blue i {
+  background-color: #1F94C4;
+}
+
+.btn-yellow {
+  border-color: #E7BA25;
+}
+.btn-yellow span {
+  color: #E7BA25;
+}
+.btn-yellow:hover {
+  background-color: #E7BA25;
+  border-color: #bf9200;
+}
+.btn-yellow:hover i {
+  background-color: #bf9200;
+}
+.btn-yellow i {
+  background-color: #E7BA25;
+}
+
+	</style>
+</head>
+
+
+<body>
+
+	<div style="
+	display: block; white-space: nowrap;
+    overflow-x: auto;
+    overflow-y: hidden;
+	">
+	
+	
+	<!--<h2>Stato della tearoom:</h2> <br>
+    <textarea id="applmsgs" name="w3review" style="font-size: 30px; resize: none; background: #555;">
+		home
+    </textarea>
+    </br></br></br></br>-->
+	
+	
+	<div class="dueColonne">
+  <h2>Stato della tearoom:</h2> <br>
+    <textarea id="applmsgs" name="w3review" 
+	style="font-size: 30px; resize: none; background: #555;" 
+	onChange="showGif()">
+		home
+	</textarea>
+   <h2>Stato del waiter</h2>
+   <br>
+   <img id="waiter-f" src="waiter-floating.gif" width=20%>
+   <img id="waiter-m" src="waiter-new.gif" width=20% style="display: none;">
+</div>
+	
+	<br><br>
+	<div class="dueColonne">
+   <h2>Tavolo 1</h2>
+   <br>
+	<img id="t1img" src="table1.png" width=33%> 
+  <textarea id="t1" name="w3review" style="font-size: 20px; resize: none; background: #555;"
+            onChange="changeTable1State()">
+		clean
+    </textarea>
+   <h2>Tavolo2</h2>
+   <br>
+   <img id="t2img" src="table1.png" width=33%>
+   <textarea id="t2" name="w3review" style="font-size: 20px; resize: none; background: #555;"
+            onChange="changeTable2State()">
+		clean
+    </textarea>
+</div>
+<br><br>
+    <img id="t2img" src="barman.png" width=15%>
+   <textarea id="t2" name="w3review" style="font-size: 20px; resize: none; background: #555;"
+            onChange="changeTable2State()">
+		working
+    </textarea>
+<br>
+<!-- dueColonne-->
+
+
+
+</div>
+
+ <!--  <img src="waiter-new.gif" width=20%><br><br> 
+   <img src="waiter-floating.gif" width=20%>-->
+
+<br>
+  By Turra,Verdini,Farina
+
+</body>
+
+</html>
