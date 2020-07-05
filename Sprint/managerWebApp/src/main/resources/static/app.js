@@ -108,8 +108,11 @@ function showMsg(message) {
 		return;
 	console.log(message );
 //    $("#applmsgs").html( message);
-    if(message.toString().includes("welcome") || message.toString().includes("home") || message.toString().includes("wait")){
+    if(message.toString().includes("welcome") || message.toString().includes("wait")){
     	window.alert(message);
+    }
+    else if (message.toString().includes("home")){
+    	window.alert("INFORM: " + message)
     }
     curMsg = message;
     // document.getElementById("applmsgs").value = message;
