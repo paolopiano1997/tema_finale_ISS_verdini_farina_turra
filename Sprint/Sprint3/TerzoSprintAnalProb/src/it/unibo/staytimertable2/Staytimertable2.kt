@@ -16,7 +16,7 @@ class Staytimertable2 ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( 
 	@kotlinx.coroutines.ObsoleteCoroutinesApi
 	@kotlinx.coroutines.ExperimentalCoroutinesApi			
 	override fun getBody() : (ActorBasicFsm.() -> Unit){
-		 
+		
 				val MaxStayTime = 60*10L //In secondi
 				var TimePassed = 0L
 				var RemTime = 0L
@@ -33,7 +33,7 @@ class Staytimertable2 ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( 
 						println("$name in ${currentState.stateName} | $currentMsg")
 						println("staytimertable2   |||   wait")
 					}
-					 transition(edgeName="t096",targetState="start",cond=whenDispatch("starttimer"))
+					 transition(edgeName="t097",targetState="start",cond=whenDispatch("starttimer"))
 				}	 
 				state("start") { //this:State
 					action { //it:State
@@ -48,11 +48,11 @@ class Staytimertable2 ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( 
 						stateTimer = TimerActor("timer_start", 
 							scope, context!!, "local_tout_staytimertable2_start", 1000.toLong() )
 					}
-					 transition(edgeName="t097",targetState="start",cond=whenTimeout("local_tout_staytimertable2_start"))   
-					transition(edgeName="t098",targetState="replyTimeStart",cond=whenRequest("getRemainingTime"))
-					transition(edgeName="t099",targetState="wait",cond=whenDispatch("stopstaytimer"))
-					transition(edgeName="t0100",targetState="timeFinish",cond=whenDispatch("endtime"))
-					transition(edgeName="t0101",targetState="end",cond=whenDispatch("timeroff"))
+					 transition(edgeName="t098",targetState="start",cond=whenTimeout("local_tout_staytimertable2_start"))   
+					transition(edgeName="t099",targetState="replyTimeStart",cond=whenRequest("getRemainingTime"))
+					transition(edgeName="t0100",targetState="wait",cond=whenDispatch("stopstaytimer"))
+					transition(edgeName="t0101",targetState="timeFinish",cond=whenDispatch("endtime"))
+					transition(edgeName="t0102",targetState="end",cond=whenDispatch("timeroff"))
 				}	 
 				state("replyTimeStart") { //this:State
 					action { //it:State

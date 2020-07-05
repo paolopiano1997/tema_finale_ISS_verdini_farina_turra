@@ -32,6 +32,15 @@ class connQakCoap( )  {
         System.out.println("connQakCoap | RESPONSE CODE=  ${respPut.code}")		
 	}
 	
+	fun forwardEnter(msg: ApplMessage){
+		val url = "coap://${configurator.hostAddr}:${configurator.port}/${configurator.ctxqadest}/smartbell"
+		val enterClient = CoapClient()
+		enterClient.uri = url.toString()
+		enterClient.setTimeout( 1000L )		
+      val respPut = enterClient.put(msg.toString(), MediaTypeRegistry.TEXT_PLAIN)
+  		if( respPut != null ) System.out.println("connQakCoap | answer= ${respPut.getResponseText()}")			
+	}
+	
 	 fun request( msg: ApplMessage ){
  		val respPut = client.put(msg.toString(), MediaTypeRegistry.TEXT_PLAIN)
   		if( respPut != null ) System.out.println("connQakCoap | answer= ${respPut.getResponseText()}")		

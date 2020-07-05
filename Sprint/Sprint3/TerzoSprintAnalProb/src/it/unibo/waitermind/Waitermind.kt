@@ -135,11 +135,14 @@ class Waitermind ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name,
 				state("inform") { //this:State
 					action { //it:State
 						println("waitermind   |||   inform")
+						updateResourceRep( "inform"  
+						)
 						if( checkMsgContent( Term.createTerm("remainingTime(T)"), Term.createTerm("remainingTime(T)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
 								 RemCTime = payloadArg(0).toString().toInt()  
 								answer("enter", "inform", "inform($RemCTime)"   )  
 						}
+						delay(5000) 
 					}
 					 transition( edgeName="goto",targetState="checkCleanHome", cond=doswitch() )
 				}	 
@@ -270,6 +273,8 @@ class Waitermind ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name,
 				state("waitOrder") { //this:State
 					action { //it:State
 						 WState = "waitOrderTable$CurTable"  
+						updateResourceRep( "waitOrderTable$CurTable"  
+						)
 						forward("setWaiterState", "setWaiterState($WState)" ,"tearoomstate" ) 
 						println("waitermind   |||   waitOrder")
 					}

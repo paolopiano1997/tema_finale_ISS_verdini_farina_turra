@@ -58,6 +58,7 @@ Request enter : enter(ID)
 Reply accept : accept(C)
 //Inform
 Reply inform : inform(T)
+
 Dispatch drinkready : drinkready(ID,O)
 Dispatch clientready : clientready(ID)
 Dispatch paymentready : paymentready(ID)
@@ -213,18 +214,21 @@ QActor waitermind context ctxtearoom{
  		}
 	}
 	Goto reachEntranceDoor if [# CurCID != 0 #] else checkInform
-	
+
 	State checkInform{
 		println("waitermind   |||   checkInform")
 	}
 	Transition t0 whenReply remainingTime -> inform
-	
+
 	State inform{
 		println("waitermind   |||   inform")
+		updateResource[# "inform" #]
 		onMsg(remainingTime : remainingTime(T)){
 			[# RemCTime = payloadArg(0).toString().toInt() #]
 			replyTo enter with inform : inform( $RemCTime ) 
 		}
+//		[# readLine() #]
+		delay 5000
 	}
 	Goto checkCleanHome
 	
@@ -347,6 +351,8 @@ QActor waitermind context ctxtearoom{
 
 	State waitOrder{
 		[# WState = "waitOrderTable$CurTable" #]
+		updateResource[# "waitOrderTable$CurTable" #]
+//		[# readLine() #]
 		forward tearoomstate -m setWaiterState : setWaiterState($WState)
 		println("waitermind   |||   waitOrder")
 	}
@@ -476,6 +482,7 @@ QActor waitermind context ctxtearoom{
 		println("waitermind   |||   collect")
 		forward tearoomstate -m setWaiterState : setWaiterState(collect)
 		updateResource[# "collect" #]
+//		[# readLine() #]
 		delayVar CollectTime
 	}
 	Goto convoyToExitDoor
@@ -1040,7 +1047,7 @@ QActor smartbell context ctxtearoom{
 	Transition t0 whenRequest enter -> checkTemperature
 	
 	State checkTemperature{
-		[# CTemp = kotlin.random.Random.nextDouble(35.0,40.0) #]
+		[# CTemp = kotlin.math.round(kotlin.random.Random.nextDouble(35.0,40.0)) #]
 		if[# CTemp < tmax #]{
 			println("smartbell   |||   temp = $CTemp, client accepted")
 			request waitermind -m enter : enter($IDRange)
@@ -1052,22 +1059,27 @@ QActor smartbell context ctxtearoom{
 	}
 	Transition t0 whenMsg reject -> rejected
 			      whenReply accept -> done
+			      whenReply inform -> inform
 	
 	State done{
 		onMsg(accept : accept(C)){
-			if[# payloadArg(0) == "0" #]{
-				println("smartbell   |||   tearoom is full, please wait...")
-				replyTo enter with accept : accept(0)
-			} else {
-				println("smartbell   |||   welcome!")
-				replyTo enter with accept : accept($payloadArg(0))
-			}
+			println("smartbell   |||   welcome!")
+			updateResource[# "welcome, your ID is ${payloadArg(0)}" #]
+			replyTo enter with accept : accept($payloadArg(0))
+		}
+	}
+	Goto wait
+	
+	State inform{
+		onMsg(inform : inform(T)){
+			updateResource[# "Tearoom full, please wait... ${payloadArg(0)} seconds" #]
 		}
 	}
 	Goto wait
 
 	State rejected{
-		println("smartbell   |||   client temperatur is >= 37.5, go home!")
+		updateResource[# "client temperature is $CTemp, go home!" #]
+		println("smartbell   |||   client temperature is >= 37.5, go home!")
 		[# CTemp = -1.0 #]
 		replyTo enter with accept : accept($CTemp)
 	}
@@ -1232,7 +1244,7 @@ QActor staytimertable1 context ctxtearoom{
 }
 
 QActor staytimertable2 context ctxtearoom{
-	[# 
+	[#
 		val MaxStayTime = 60*10L //In secondi
 		var TimePassed = 0L
 		var RemTime = 0L

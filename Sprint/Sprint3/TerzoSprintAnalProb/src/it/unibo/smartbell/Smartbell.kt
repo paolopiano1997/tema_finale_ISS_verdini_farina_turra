@@ -35,7 +35,7 @@ class Smartbell ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, 
 				}	 
 				state("checkTemperature") { //this:State
 					action { //it:State
-						 CTemp = kotlin.random.Random.nextDouble(35.0,40.0)  
+						 CTemp = kotlin.math.round(kotlin.random.Random.nextDouble(35.0,40.0))  
 						if(  CTemp < tmax  
 						 ){println("smartbell   |||   temp = $CTemp, client accepted")
 						request("enter", "enter($IDRange)" ,"waitermind" )  
@@ -48,26 +48,35 @@ class Smartbell ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, 
 					}
 					 transition(edgeName="t082",targetState="rejected",cond=whenDispatch("reject"))
 					transition(edgeName="t083",targetState="done",cond=whenReply("accept"))
+					transition(edgeName="t084",targetState="inform",cond=whenReply("inform"))
 				}	 
 				state("done") { //this:State
 					action { //it:State
 						if( checkMsgContent( Term.createTerm("accept(C)"), Term.createTerm("accept(C)"), 
 						                        currentMsg.msgContent()) ) { //set msgArgList
-								if(  payloadArg(0) == "0"  
-								 ){println("smartbell   |||   tearoom is full, please wait...")
-								answer("enter", "accept", "accept(0)"   )  
-								}
-								else
-								 {println("smartbell   |||   welcome!")
-								 answer("enter", "accept", "accept(${payloadArg(0)})"   )  
-								 }
+								println("smartbell   |||   welcome!")
+								updateResourceRep( "welcome, your ID is ${payloadArg(0)}"  
+								)
+								answer("enter", "accept", "accept(${payloadArg(0)})"   )  
+						}
+					}
+					 transition( edgeName="goto",targetState="wait", cond=doswitch() )
+				}	 
+				state("inform") { //this:State
+					action { //it:State
+						if( checkMsgContent( Term.createTerm("inform(T)"), Term.createTerm("inform(T)"), 
+						                        currentMsg.msgContent()) ) { //set msgArgList
+								updateResourceRep( "Tearoom full, please wait... ${payloadArg(0)} seconds"  
+								)
 						}
 					}
 					 transition( edgeName="goto",targetState="wait", cond=doswitch() )
 				}	 
 				state("rejected") { //this:State
 					action { //it:State
-						println("smartbell   |||   client temperatur is >= 37.5, go home!")
+						updateResourceRep( "client temperature is $CTemp, go home!"  
+						)
+						println("smartbell   |||   client temperature is >= 37.5, go home!")
 						 CTemp = -1.0  
 						answer("enter", "accept", "accept($CTemp)"   )  
 					}

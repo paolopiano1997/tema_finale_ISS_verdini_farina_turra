@@ -140,7 +140,7 @@ public class RobotController {
 		try {
 			if( moveName.equalsIgnoreCase("enter")) {
 				ApplMessage msg = MsgUtil.buildRequest("web", "enter", "enter(1)", "smartbell" );
-				connQakSupport.request( msg );				
+				connQakSupport.forwardEnter(msg);	
 			}
 			else if (moveName.equalsIgnoreCase("order")) {
 				ApplMessage msg = MsgUtil.buildDispatch("web", "order", "order(1,greentea)", configurator.getQakdest() );
@@ -156,7 +156,7 @@ public class RobotController {
 			}
 			else if( moveName.equalsIgnoreCase("enter2")) {
 				ApplMessage msg = MsgUtil.buildRequest("web", "enter", "enter(2)", "smartbell" );
-				connQakSupport.request( msg );				
+				connQakSupport.forwardEnter(msg);				
 			}
 			else if (moveName.equalsIgnoreCase("order2")) {
 				ApplMessage msg = MsgUtil.buildDispatch("web", "order", "order(2,greentea)", configurator.getQakdest() );

@@ -15,13 +15,13 @@ import it.unibo.kactor.ApplMessage
 import it.unibo.kactor.ApplMessageType
 import it.unibo.waiterengine.Waiterengine
 import Expected
-class TestMaxStayTime {
+class TestClientInform {
 	var waitermind            : ActorBasic? = null
-	var waitercleaner         : ActorBasic? = null
-	var teatables         	  : ActorBasic? = null
 	val initDelayTime     = 1000L
 
-	val enter = MsgUtil.buildRequest("waitermind","enter","enter(1)","waitermind")
+	val enter1 = MsgUtil.buildRequest("waitermind","enter","enter(1)","waitermind")
+	val enter2 = MsgUtil.buildRequest("waitermind","enter","enter(2)","waitermind")
+	val enter3 = MsgUtil.buildRequest("waitermind","enter","enter(3)","waitermind")
 	
 	@kotlinx.coroutines.ObsoleteCoroutinesApi
 	@kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -37,10 +37,10 @@ class TestMaxStayTime {
 		println("%%%  TestWaiter terminate ")
 	}
 	
-	/*Controllo che waitermind sia nello stato collect*/
-	fun checkTimeFinished(){
+	//Controllo di aver mandato inform
+	fun checkInform(){
 		if(waitermind!=null)
-			assert(waitermind!!.geResourceRep()==Expected.collect)
+			assert(waitermind!!.geResourceRep()==Expected.inform)
 	}
 	
 	@Test
@@ -52,10 +52,13 @@ class TestMaxStayTime {
 				waitermind = it.unibo.kactor.sysUtil.getActor("waitermind")
  			}
 			
-			MsgUtil.sendMsg(enter,waitermind!!)
+			MsgUtil.sendMsg(enter1,waitermind!!)
+			MsgUtil.sendMsg(enter2,waitermind!!)
+			MsgUtil.sendMsg(enter3,waitermind!!)
+			
  			readLine()
-			checkTimeFinished()
-														
+			checkInform()													
+						
 			MsgUtil.sendMsg("end","end","end",waitermind!!)
  			if( waitermind != null ) waitermind!!.waitTermination()
   		}

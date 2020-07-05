@@ -101,18 +101,25 @@ function sendUpdateRequest(){
 	console.log(" sendUpdateRequest "  );
     stompClient.send("/app/update", {}, JSON.stringify({'name': 'update' }));
 }
+var curMsg = ""
 
 function showMsg(message) {
-console.log(message );
-    $("#applmsgs").html( message);
-    document.getElementById("applmsgs").value = message;
+	if(curMsg === message)
+		return;
+	console.log(message );
+//    $("#applmsgs").html( message);
+    if(message.toString().includes("welcome") || message.toString().includes("home") || message.toString().includes("wait")){
+    	window.alert(message);
+    }
+    curMsg = message;
+    // document.getElementById("applmsgs").value = message;
     //$("#applmsgs").onchange();
     //document.getElementById("applmsgs").onchange();
-    document.getElementById("applmsgs").dispatchEvent(new Event('change'));
+    //document.getElementById("applmsgs").dispatchEvent(new Event('change'));
     //Aggiungere dispatchEvent pure qua
-    document.getElementById("t1").dispatchEvent(new Event('change'));
-    document.getElementById("t2").dispatchEvent(new Event('change'));
-    document.getElementById("waiterstate").dispatchEvent(new Event('change'));
+   // document.getElementById("t1").dispatchEvent(new Event('change'));
+    //document.getElementById("t2").dispatchEvent(new Event('change'));
+   // document.getElementById("waiterstate").dispatchEvent(new Event('change'));
    // $("#applmsgs").val(message);
    // $("#applmsgs").trigger("change");
     //$("#applmsgintable").append("<tr><td>" + message + "</td></tr>");
