@@ -227,7 +227,7 @@ QActor waitermind context ctxtearoom{
 			[# RemCTime = payloadArg(0).toString().toInt() #]
 			replyTo enter with inform : inform( $RemCTime ) 
 		}
-//		[# readLine() #]
+		[# readLine() #] //PER IL TESTING DI "INFORM"
 		delay 5000
 	}
 	Goto checkCleanHome
@@ -352,7 +352,7 @@ QActor waitermind context ctxtearoom{
 	State waitOrder{
 		[# WState = "waitOrderTable$CurTable" #]
 		updateResource[# "waitOrderTable$CurTable" #]
-//		[# readLine() #]
+		[# readLine() #] //PER IL TEST "RightTable"
 		forward tearoomstate -m setWaiterState : setWaiterState($WState)
 		println("waitermind   |||   waitOrder")
 	}
@@ -482,7 +482,7 @@ QActor waitermind context ctxtearoom{
 		println("waitermind   |||   collect")
 		forward tearoomstate -m setWaiterState : setWaiterState(collect)
 		updateResource[# "collect" #]
-//		[# readLine() #]
+		[# readLine() #] //PER IL TEST DI "MAXSTAYTIME"
 		delayVar CollectTime
 	}
 	Goto convoyToExitDoor

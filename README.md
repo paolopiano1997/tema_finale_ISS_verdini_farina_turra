@@ -12,3 +12,14 @@
 > 8. Lanciare entrambe le GUI da ManagerGui.java e ClientSimulationGui.java
 > 9. managerGui risiede in "localhost:7001".
 > 10. clientSimulationGui risiede in "localhost:7002".
+
+## Organizzazione vari Sprint e Progetti.
+
+> Nella directory "Sprint" sono disponibili i vari Sprint (1, 2 e 3) con i relativi modelli dell'analisi dei requisiti e dell'analisi del problema  
+> Nella directory "VideoProgetto" sono presenti i video con cui è stato presentato il tema finale.
+> 
+> 
+> 
+> 
+> 
+> 
