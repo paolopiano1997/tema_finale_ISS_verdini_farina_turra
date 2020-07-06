@@ -12,6 +12,7 @@
 > 8. Lanciare entrambe le GUI da ManagerGui.java e ClientSimulationGui.java
 > 9. managerGui risiede in "localhost:7001".
 > 10. clientSimulationGui risiede in "localhost:7002".
+> 11. Utilizzare il virtual robot con finestra del browser ad altezza massima e a larghezza minima, in quanto la mappa è stata costruita in questo modo. Se non venisse rispettata questa specifica, il waiter inizierebbe a "sbagliare" qualche step.
 
 ## Organizzazione vari Sprint e Progetti.
 
