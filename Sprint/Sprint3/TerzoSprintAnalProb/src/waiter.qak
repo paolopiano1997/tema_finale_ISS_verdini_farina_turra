@@ -622,7 +622,7 @@ QActor waitercleaner context ctxtearoom {
 	}
 	Transition t0 whenMsg startcleaner -> preStart
 				whenRequest isTableStopped -> replyTableStop
-				
+	
 	State replyTableStop{
 		println("waitercleaner   |||   replyTableStop")
 		replyTo isTableStopped with isTableStoppedDone : isTableStoppedDone($Table)
@@ -1060,7 +1060,7 @@ QActor smartbell context ctxtearoom{
 	Transition t0 whenMsg reject -> rejected
 			      whenReply accept -> done
 			      whenReply inform -> inform
-	
+
 	State done{
 		onMsg(accept : accept(C)){
 			println("smartbell   |||   welcome!")
@@ -1087,7 +1087,7 @@ QActor smartbell context ctxtearoom{
 }
 
 QActor maxstaytimer context ctxtearoom {
-	[# 
+	[#
 		var Table = 0
 		var Action = ""
 		var RemTime1 = 0

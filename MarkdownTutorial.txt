@@ -1,4 +1,4 @@
-MARKDOWN TUTORIAL FOR CHI NON LO CONOSCE MAREMMAAAAA
+MARKDOWN TUTORIAL FOR CHI NON LO CONOSCE
 
 Titoli: 
 	# Titolo1 (il più grande)
@@ -22,12 +22,12 @@ Per creare enfasi è possibile utilizzare caratteri speciali, per esempio:
 
 **bold text**
 
-(è possibile usare __bold text__ ma è sconsigliatissimo, madò)
+(è possibile usare __bold text__ ma è sconsigliatissimo)
 
 Italico:
 
 *italic text* 
-(è possibile usare _italic text_, ma sconsigliatissimo anche questo, stramado)
+(è possibile usare _italic text_, ma sconsigliatissimo anche questo)
 
 sia bold che italico:
 
@@ -82,7 +82,7 @@ COSA MOLTO CARINA CHE AVEVO SCOPERTO:
 Per creare un blocco visivo di codice in modo carino,
 basta "isolarlo" con due tab, per esempio: (ricordate, sempre almeno una riga bianca tra un paragrafo e l'altro)
 
-Il seguente è il codice che ha scritto zakka per la grafica:
+Prova codice:
 
 		codisce mado
 		super codisce mado
