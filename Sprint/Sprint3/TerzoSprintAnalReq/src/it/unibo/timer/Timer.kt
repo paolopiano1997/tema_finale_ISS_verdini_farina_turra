@@ -52,7 +52,7 @@ class Timer ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( name, scop
 				state("stop") { //this:State
 					action { //it:State
 						Duration = getDuration(StartTime)
-						answer("stoptimer", "okStop", "okTop($Duration)"   )  
+						answer("stoptimer", "okStop", "okStop($Duration)"   )  
 					}
 					 transition( edgeName="goto",targetState="wait", cond=doswitch() )
 				}	 

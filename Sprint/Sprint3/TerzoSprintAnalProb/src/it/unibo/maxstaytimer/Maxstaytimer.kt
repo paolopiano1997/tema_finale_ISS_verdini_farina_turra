@@ -16,7 +16,7 @@ class Maxstaytimer ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( nam
 	@kotlinx.coroutines.ObsoleteCoroutinesApi
 	@kotlinx.coroutines.ExperimentalCoroutinesApi			
 	override fun getBody() : (ActorBasicFsm.() -> Unit){
-		 
+		
 				var Table = 0
 				var Action = ""
 				var RemTime1 = 0
@@ -32,9 +32,9 @@ class Maxstaytimer ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( nam
 					action { //it:State
 						println("maxstaytimer   |||   wait")
 					}
-					 transition(edgeName="t085",targetState="doTimerAction",cond=whenDispatch("doTimerAction"))
-					transition(edgeName="t086",targetState="remTime1",cond=whenRequest("getRemainingTime"))
-					transition(edgeName="t087",targetState="timePassed",cond=whenDispatch("timePassed"))
+					 transition(edgeName="t089",targetState="doTimerAction",cond=whenDispatch("doTimerAction"))
+					transition(edgeName="t090",targetState="remTime1",cond=whenRequest("getRemainingTime"))
+					transition(edgeName="t091",targetState="timePassed",cond=whenDispatch("timePassed"))
 				}	 
 				state("doTimerAction") { //this:State
 					action { //it:State
@@ -78,7 +78,7 @@ class Maxstaytimer ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( nam
 					action { //it:State
 						request("getRemainingTime", "getRemainingTime(time)" ,"staytimertable1" )  
 					}
-					 transition(edgeName="t088",targetState="remTime2",cond=whenReply("remainingTime"))
+					 transition(edgeName="t092",targetState="remTime2",cond=whenReply("remainingTime"))
 				}	 
 				state("remTime2") { //this:State
 					action { //it:State
@@ -88,7 +88,7 @@ class Maxstaytimer ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( nam
 						}
 						request("getRemainingTime", "getRemainingTime(time)" ,"staytimertable2" )  
 					}
-					 transition(edgeName="t089",targetState="forwardRemainingTime",cond=whenReply("remainingTime"))
+					 transition(edgeName="t093",targetState="forwardRemainingTime",cond=whenReply("remainingTime"))
 				}	 
 				state("forwardRemainingTime") { //this:State
 					action { //it:State

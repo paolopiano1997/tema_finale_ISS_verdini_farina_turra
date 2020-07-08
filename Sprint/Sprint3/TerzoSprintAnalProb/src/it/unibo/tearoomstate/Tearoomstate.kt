@@ -39,16 +39,29 @@ class Tearoomstate ( name: String, scope: CoroutineScope  ) : ActorBasicFsm( nam
 						updateResourceRep( TearoomState  
 						)
 					}
-					 transition(edgeName="t061",targetState="engageTable",cond=whenDispatch("occupy"))
-					transition(edgeName="t062",targetState="cleanTable",cond=whenDispatch("clean"))
-					transition(edgeName="t063",targetState="getTable",cond=whenRequest("getTable"))
-					transition(edgeName="t064",targetState="tableClean",cond=whenRequest("tableClean"))
-					transition(edgeName="t065",targetState="release",cond=whenDispatch("release"))
-					transition(edgeName="t066",targetState="replyClean",cond=whenRequest("isClean"))
-					transition(edgeName="t067",targetState="setState",cond=whenDispatch("setTableState"))
-					transition(edgeName="t068",targetState="tableState",cond=whenRequest("tableState"))
-					transition(edgeName="t069",targetState="barmanState",cond=whenDispatch("setBarmanState"))
-					transition(edgeName="t070",targetState="waiterState",cond=whenDispatch("setWaiterState"))
+					 transition(edgeName="t064",targetState="engageTable",cond=whenDispatch("occupy"))
+					transition(edgeName="t065",targetState="cleanTable",cond=whenDispatch("clean"))
+					transition(edgeName="t066",targetState="getTable",cond=whenRequest("getTable"))
+					transition(edgeName="t067",targetState="tableClean",cond=whenRequest("tableClean"))
+					transition(edgeName="t068",targetState="release",cond=whenDispatch("release"))
+					transition(edgeName="t069",targetState="replyClean",cond=whenRequest("isClean"))
+					transition(edgeName="t070",targetState="setState",cond=whenDispatch("setTableState"))
+					transition(edgeName="t071",targetState="tableState",cond=whenRequest("tableState"))
+					transition(edgeName="t072",targetState="barmanState",cond=whenDispatch("setBarmanState"))
+					transition(edgeName="t073",targetState="waiterState",cond=whenDispatch("setWaiterState"))
+					transition(edgeName="t074",targetState="dirty",cond=whenRequest("isDirty"))
+				}	 
+				state("dirty") { //this:State
+					action { //it:State
+						solve("isDirty(N)","") //set resVar	
+						if( currentSolution.isSuccess() ) { E = getCurSol("N").toString()  
+						answer("isDirty", "dirty", "dirty($E)"   )  
+						}
+						else
+						{answer("isDirty", "dirty", "dirty(0)"   )  
+						}
+					}
+					 transition( edgeName="goto",targetState="work", cond=doswitch() )
 				}	 
 				state("barmanState") { //this:State
 					action { //it:State

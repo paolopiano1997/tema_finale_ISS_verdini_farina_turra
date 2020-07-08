@@ -27,3 +27,9 @@ gradlew.bat
 docker/
 /.metadata/
 /src-gen/
+/.gitignore
+/build_ctxbasicrobot.gradle
+/build_ctxtearoom.gradle
+/settings.gradle
+/sysRules.pl
+/tearoom.pl

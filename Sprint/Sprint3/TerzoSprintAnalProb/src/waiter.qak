@@ -40,6 +40,9 @@ Dispatch endtime : endtime(T)
 
 Dispatch setTableState : setTableState(N,S)
 
+Request isDirty : isDirty(N)
+Reply dirty : dirty(N)
+
 Request tableState : tableState(N)
 Reply state : state(N,S)
 
@@ -227,7 +230,7 @@ QActor waitermind context ctxtearoom{
 			[# RemCTime = payloadArg(0).toString().toInt() #]
 			replyTo enter with inform : inform( $RemCTime ) 
 		}
-		[# readLine() #] //PER IL TESTING DI "INFORM"
+//		[# readLine() #] //PER IL TESTING DI "INFORM"
 		delay 5000
 	}
 	Goto checkCleanHome
@@ -296,7 +299,26 @@ QActor waitermind context ctxtearoom{
 		}
 	}
 	Transition t0 whenTime 200 -> reachTableCleanStopped
-			whenMsg gotohome -> reachhome
+			whenMsg gotohome -> checkDirty 
+			
+	State checkDirty {
+		request tearoomstate -m isDirty : isDirty(dirty)
+	}
+	Transition t0 whenReply dirty -> finalCleanCheck
+	
+	State finalCleanCheck{
+		onMsg(dirty : dirty(N)){
+			if [# payloadArg(0) != "0" #]{
+				[# CurTable = payloadArg(0).toString().toInt() #]
+				forward waitermind -m gotoclean : gotoclean(go)
+			}
+			else{
+				forward waitermind -m gotohome : gotohome(go)
+			}
+		}
+	}
+	Transition t0 whenMsg gotohome -> reachhome
+				whenMsg gotoclean -> reachTableClean
 				
 	
 	State reachTableCleanStopped{
@@ -352,7 +374,7 @@ QActor waitermind context ctxtearoom{
 	State waitOrder{
 		[# WState = "waitOrderTable$CurTable" #]
 		updateResource[# "waitOrderTable$CurTable" #]
-		[# readLine() #] //PER IL TEST "RightTable"
+//		[# readLine() #] //PER IL TEST "RightTable"
 		forward tearoomstate -m setWaiterState : setWaiterState($WState)
 		println("waitermind   |||   waitOrder")
 	}
@@ -482,7 +504,7 @@ QActor waitermind context ctxtearoom{
 		println("waitermind   |||   collect")
 		forward tearoomstate -m setWaiterState : setWaiterState(collect)
 		updateResource[# "collect" #]
-		[# readLine() #] //PER IL TEST DI "MAXSTAYTIME"
+//		[# readLine() #] //PER IL TEST DI "MAXSTAYTIME"
 		delayVar CollectTime
 	}
 	Goto convoyToExitDoor
@@ -503,7 +525,7 @@ QActor waitermind context ctxtearoom{
  		}
 		forward tearoomstate -m release : release($CurTable)
 	}
-	Transition t0 whenMsg done -> reachTableClean
+	Transition t0 whenMsg done -> checkCleanHome
 	
 	State cleanTable{
 		updateResource[# "cleanTable$CurTableClean" #]
@@ -533,7 +555,7 @@ QActor waitermind context ctxtearoom{
 		}
 	}
 	Transition t0 whenReply table -> checkTables
-				whenMsg gotohome -> reachhome
+				whenMsg gotohome -> checkCleanHome
 	
 	State endwork{
 		println("waitermind   |||   end")
@@ -762,6 +784,19 @@ QActor tearoomstate context ctxtearoom{
 					whenRequest tableState -> tableState
 					whenMsg setBarmanState -> barmanState
 					whenMsg setWaiterState -> waiterState
+					whenRequest isDirty -> dirty
+					
+	State dirty{
+		solve( isDirty(N) )
+		ifSolved{
+			[# E = getCurSol("N").toString() #]
+			replyTo isDirty with dirty : dirty($E)
+		}
+		else{
+			replyTo isDirty with dirty : dirty(0)
+		}
+	}
+	Goto work
 	
 	
 	State barmanState{

@@ -55,6 +55,9 @@ occupyTable(N,ID) :-
 	assert( teatable( N, occupy(ID) ) ).
 occupyTable(_,_).
 
+isDirty(N) :- 
+		teatable(N, dirty), !.
+
 releaseTable(N) :-
 	retract( teatable( N, occupy ) ),
 	!,
